@@ -2,12 +2,11 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>Login · Ótica Grau Divino</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Gerenciar Atendentes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * {
       margin: 0;
@@ -19,572 +18,676 @@
       font-family: 'Inter', sans-serif;
       background: linear-gradient(135deg, #f5f7fc 0%, #eef2f8 100%);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      padding: 40px 20px;
     }
 
-    .login-container {
-      max-width: 480px;
-      width: 100%;
+    .container {
+      max-width: 1400px;
       margin: 0 auto;
     }
 
-    .login-card {
-      background: #ffffff;
-      border-radius: 48px;
-      padding: 40px 32px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-      border: 1px solid rgba(252, 84, 4, 0.1);
-      transition: transform 0.2s ease;
-    }
-
-    .login-card:hover {
-      transform: translateY(-2px);
-    }
-
-    .logo-area {
-      text-align: center;
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 32px;
-    }
-
-    .logo-image {
-      width: 100px;
-      height: 100px;
-      object-fit: contain;
-      margin-bottom: 20px;
-      border-radius: 28px;
-      background: transparent;
-      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
-      transition: transform 0.3s ease;
-    }
-
-    .logo-image:hover {
-      transform: scale(1.02);
+      flex-wrap: wrap;
+      gap: 16px;
     }
 
     h1 {
       font-size: 1.8rem;
-      font-weight: 800;
       color: #1e1f2a;
-      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .subtitle {
-      color: #6b7280;
-      font-size: 0.9rem;
+    .btn {
+      padding: 10px 20px;
+      border-radius: 40px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-primary {
+      background: #fc5404;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #e04a02;
+      transform: scale(1.02);
+    }
+
+    .btn-secondary {
+      background: #6b7280;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #4b5563;
+    }
+
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
+    }
+
+    .btn-edit {
+      background: #3498db;
+      color: white;
+    }
+
+    .btn-edit:hover {
+      background: #2980b9;
+    }
+
+    .card {
+      background: white;
+      border-radius: 32px;
+      padding: 32px;
       margin-bottom: 32px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
-    .input-group {
-      margin-bottom: 24px;
+    .form-group {
+      margin-bottom: 20px;
     }
 
     label {
       display: block;
-      font-size: 0.85rem;
       font-weight: 600;
       margin-bottom: 8px;
       color: #2f3547;
     }
 
-    .input-with-icon {
-      position: relative;
-    }
-
-    .input-with-icon i {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #9ca3af;
-      font-size: 1.1rem;
-    }
-
-    input {
+    input, select {
       width: 100%;
-      padding: 14px 16px 14px 48px;
-      font-size: 1rem;
-      font-family: 'Inter', sans-serif;
+      padding: 12px 16px;
       border: 1.5px solid #e2e6ee;
       border-radius: 24px;
-      background: #fafbfc;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
       transition: all 0.2s;
-      outline: none;
-      color: #1e1f2a;
-      font-weight: 500;
     }
 
-    input:focus {
+    input:focus, select:focus {
+      outline: none;
       border-color: #fc5404;
-      background: white;
       box-shadow: 0 0 0 3px rgba(252, 84, 4, 0.1);
     }
 
-    .btn-login {
-      width: 100%;
-      padding: 14px 24px;
-      border-radius: 40px;
-      font-weight: 700;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      background: #fc5404;
-      color: white;
-      display: inline-flex;
+    .checkbox-group {
+      display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: all 0.2s;
-      margin-top: 8px;
+      gap: 12px;
     }
 
-    .btn-login:hover {
-      background: #e04a02;
-      transform: scale(1.02);
-      box-shadow: 0 8px 20px rgba(252, 84, 4, 0.3);
+    .checkbox-group input {
+      width: auto;
+      margin: 0;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #edeef3;
+    }
+
+    th {
+      background: #f8f9fc;
+      font-weight: 700;
+      color: #1e1f2a;
+    }
+
+    tr:hover {
+      background: #fafbfc;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-active {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-inactive {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-buttons button {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 32px;
+      padding: 32px;
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #6b7280;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .alert-success {
+      background: #d1fae5;
+      color: #065f46;
+      border-left: 4px solid #10b981;
     }
 
     .alert-error {
       background: #fee2e2;
-      border-left: 4px solid #e74c3c;
-      padding: 12px 16px;
-      border-radius: 20px;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 0.85rem;
-      color: #c0392b;
-      font-weight: 500;
+      color: #991b1b;
+      border-left: 4px solid #ef4444;
     }
 
-    .alert-error i {
-      font-size: 1.2rem;
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
     }
 
-    .info-users {
-      margin-top: 28px;
-      padding-top: 20px;
-      border-top: 1px solid #edeef3;
-      font-size: 0.75rem;
-      color: #8f95b0;
+    .stat-card {
+      background: white;
+      border-radius: 24px;
+      padding: 20px;
       text-align: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
-    .info-users p {
-      margin-bottom: 8px;
-    }
-
-    .info-users strong {
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 800;
       color: #fc5404;
     }
 
-    .demo-badge {
-      display: inline-block;
-      background: #fef3e8;
-      padding: 4px 12px;
-      border-radius: 30px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: #fc5404;
+    .stat-label {
+      color: #6b7280;
       margin-top: 8px;
     }
 
-    .logout-area {
-      margin-top: 20px;
-      text-align: center;
-      border-top: 1px solid #edeef3;
-      padding-top: 20px;
-    }
-
-    .btn-logout {
-      background: transparent;
-      border: 1.5px solid #e2e6ee;
-      padding: 10px 20px;
-      border-radius: 40px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      color: #5f647e;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-
-    .btn-logout:hover {
-      background: #fee2e2;
-      border-color: #e74c3c;
-      color: #e74c3c;
-    }
-
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      75% { transform: translateX(5px); }
-    }
-
-    .shake-animation {
-      animation: shake 0.3s ease-in-out;
-    }
-
-    .user-session {
-      background: #f0fdf4;
-      border-radius: 20px;
-      padding: 12px 16px;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border: 1px solid #bbf7d0;
-    }
-
-    .user-session-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .user-session-info i {
-      font-size: 1.5rem;
-      color: #22c55e;
-    }
-
-    .user-session-info span {
-      font-weight: 600;
-      color: #166534;
-    }
-
-    .btn-logout-session {
-      background: none;
-      border: none;
-      color: #e74c3c;
-      cursor: pointer;
-      font-size: 1.2rem;
-      padding: 6px 12px;
-      border-radius: 30px;
-      transition: all 0.2s;
-    }
-
-    .btn-logout-session:hover {
-      background: #fee2e2;
-    }
-
-    .btn-continue {
-      width: 100%;
-      padding: 14px 24px;
-      border-radius: 40px;
-      font-weight: 700;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      background: #22c55e;
-      color: white;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: all 0.2s;
-      margin-top: 12px;
-    }
-
-    .btn-continue:hover {
-      background: #16a34a;
-      transform: scale(1.02);
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .header {
+        flex-direction: column;
+        align-items: stretch;
+      }
     }
   </style>
 </head>
 <body>
-<div class="login-container">
-  <div class="login-card" id="loginCard">
-    <div class="logo-area">
-      <!-- LOGO IMAGEM ADICIONADA AQUI -->
-      <img src="https://raw.githubusercontent.com/AMAILSON-GAWLINSKI/ORCAMENTO/refs/heads/main/LOGO%20SEM%20FUNDO.png" 
-           alt="Ótica Grau Divino Logo" 
-           class="logo-image"
-           onerror="this.onerror=null; this.style.display='none'; document.getElementById('fallbackIcon').style.display='inline-flex';">
-      <div id="fallbackIcon" class="logo-icon" style="display: none;">
-        <i class="fas fa-glasses"></i>
-      </div>
-      <div class="subtitle">Acesse o sistema de orçamentos</div>
-    </div>
-
-    <!-- Sessão ativa (se houver usuário logado) -->
-    <div id="activeSessionDiv" style="display: none;" class="user-session">
-      <div class="user-session-info">
-        <i class="fas fa-user-check"></i>
-        <span id="activeUserName">---</span>
-      </div>
-      <button id="logoutFromSessionBtn" class="btn-logout-session" title="Sair e trocar de atendente">
-        <i class="fas fa-sign-out-alt"></i> Sair
+<div class="container">
+  <div class="header">
+    <h1>
+      <i class="fas fa-users-cog"></i>
+      Gerenciar Atendentes
+    </h1>
+    <div>
+      <button class="btn btn-secondary" id="viewLogsBtn">
+        <i class="fas fa-history"></i> Ver Logs
+      </button>
+      <button class="btn btn-secondary" id="backToLoginBtn" style="margin-left: 10px;">
+        <i class="fas fa-arrow-left"></i> Voltar ao Login
       </button>
     </div>
+  </div>
 
-    <!-- Formulário de login (oculto quando há sessão ativa) -->
-    <div id="loginFormDiv">
-      <div id="errorMessage" style="display: none;" class="alert-error">
-        <i class="fas fa-exclamation-triangle"></i>
-        <span id="errorText">Usuário ou senha incorretos!</span>
-      </div>
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-number" id="totalUsers">0</div>
+      <div class="stat-label">Total de Atendentes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="activeUsers">0</div>
+      <div class="stat-label">Ativos</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="inactiveUsers">0</div>
+      <div class="stat-label">Inativos</div>
+    </div>
+  </div>
 
-      <div class="input-group">
-        <label><i class="fas fa-user"></i> Atendente</label>
-        <div class="input-with-icon">
-          <i class="fas fa-user-circle"></i>
-          <input type="text" id="loginUser" placeholder="Digite seu usuário" autocomplete="off">
+  <div class="card">
+    <h2 style="margin-bottom: 24px;">
+      <i class="fas fa-user-plus"></i> 
+      <span id="formTitle">Adicionar Novo Atendente</span>
+    </h2>
+    <form id="userForm">
+      <input type="hidden" id="editId">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome Completo *</label>
+          <input type="text" id="nome" required placeholder="Ex: Maria Silva">
+        </div>
+        <div class="form-group">
+          <label>Login *</label>
+          <input type="text" id="login" required placeholder="Ex: maria.silva">
         </div>
       </div>
-
-      <div class="input-group">
-        <label><i class="fas fa-lock"></i> Senha</label>
-        <div class="input-with-icon">
-          <i class="fas fa-key"></i>
-          <input type="password" id="loginPassword" placeholder="Digite sua senha">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Senha *</label>
+          <input type="password" id="senha" placeholder="••••••••">
+          <small style="color: #6b7280;">Deixe em branco para manter a senha atual (na edição)</small>
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <div class="checkbox-group">
+            <input type="checkbox" id="isAdmin">
+            <label style="margin: 0;">Administrador</label>
+          </div>
         </div>
       </div>
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="ativo" checked>
+          <label style="margin: 0;">Ativo (pode fazer login)</label>
+        </div>
+      </div>
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <i class="fas fa-save"></i> Salvar
+        </button>
+        <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display: none;">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
 
-      <button class="btn-login" id="loginBtn">
-        <i class="fas fa-arrow-right-to-bracket"></i> Entrar no Sistema
-      </button>
+  <div class="card">
+    <h2 style="margin-bottom: 24px;">
+      <i class="fas fa-list"></i> Lista de Atendentes
+    </h2>
+    <div class="table-wrapper">
+      <table id="usersTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Login</th>
+            <th>Admin</th>
+            <th>Status</th>
+            <th>Criado em</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="usersTableBody">
+          <tr>
+            <td colspan="7" style="text-align: center;">Carregando...</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+  </div>
+</div>
 
-    <!-- Botão de sair (sempre visível quando logado) -->
-    <div class="logout-area" id="logoutArea" style="display: none;">
-      <button id="logoutBtn" class="btn-logout">
-        <i class="fas fa-sign-out-alt"></i> Sair / Trocar de Atendente
-      </button>
+<!-- Modal de Logs -->
+<div id="logsModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3><i class="fas fa-history"></i> Histórico de Acessos</h3>
+      <button class="close-modal">&times;</button>
+    </div>
+    <div class="table-wrapper">
+      <table style="width: 100%;">
+        <thead>
+          <tr>
+            <th>Atendente</th>
+            <th>Ação</th>
+            <th>IP</th>
+            <th>Data/Hora</th>
+          </tr>
+        </thead>
+        <tbody id="logsTableBody">
+          <tr><td colspan="4">Carregando...</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
 
 <script>
-  // ==================== CREDENCIAIS DOS ATENDENTES ====================
-  const USERS = [
-    { login: "Jaúna Constante", password: "jauna123", nomeExibicao: "Jaúna Constante", isAdmin: true },
-    { login: "Luana Paloschi", password: "luana456", nomeExibicao: "Luana Paloschi", isAdmin: false },
-    { login: "Aline", password: "aline789", nomeExibicao: "Aline", isAdmin: false },
-    { login: "Jaciara Constante", password: "jaciara@2026", nomeExibicao: "Jaciara Constante", isAdmin: true }
-  ];
+  const SUPABASE_URL = 'https://ywzjyoqqnweinrwbbnza.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_mqal-4CCZLCNMrjwULwh_A_fm76L3K4';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  let continueButton = null;
+  let currentEditId = null;
 
-  function validarLogin(login, senha) {
-    const userFound = USERS.find(user => 
-      user.login.toLowerCase() === login.toLowerCase() && user.password === senha
-    );
-    return userFound || null;
-  }
-
-  function showError(message) {
-    const errorDiv = document.getElementById('errorMessage');
-    const errorText = document.getElementById('errorText');
-    errorText.textContent = message || 'Usuário ou senha incorretos!';
-    errorDiv.style.display = 'flex';
-    
-    const card = document.querySelector('.login-card');
-    card.classList.add('shake-animation');
-    setTimeout(() => {
-      card.classList.remove('shake-animation');
-    }, 300);
-    
-    setTimeout(() => {
-      errorDiv.style.display = 'none';
-    }, 3000);
-  }
-
-  function clearError() {
-    const errorDiv = document.getElementById('errorMessage');
-    if (errorDiv) errorDiv.style.display = 'none';
-  }
-
-  function removeContinueButton() {
-    if (continueButton && continueButton.parentNode) {
-      continueButton.parentNode.removeChild(continueButton);
-      continueButton = null;
-    }
-  }
-
-  function updateUIBasedOnSession() {
+  async function checkAdminAccess() {
     const usuarioSalvo = localStorage.getItem('usuarioLogado');
-    const activeSessionDiv = document.getElementById('activeSessionDiv');
-    const loginFormDiv = document.getElementById('loginFormDiv');
-    const logoutArea = document.getElementById('logoutArea');
+    if (!usuarioSalvo) {
+      alert('Acesso negado! Faça login como administrador.');
+      window.location.href = 'index.html';
+      return false;
+    }
     
-    removeContinueButton();
+    const user = JSON.parse(usuarioSalvo);
+    if (!user.isAdmin) {
+      alert('Acesso negado! Apenas administradores podem acessar esta página.');
+      window.location.href = 'orcamento.html';
+      return false;
+    }
+    return true;
+  }
+
+  async function loadUsers() {
+    const { data, error } = await supabase
+      .from('atendentes')
+      .select('*')
+      .order('id');
     
-    if (usuarioSalvo) {
-      try {
-        const user = JSON.parse(usuarioSalvo);
-        const timestamp = new Date(user.loginTimestamp);
-        const agora = new Date();
-        const diffHoras = (agora - timestamp) / (1000 * 60 * 60);
-        
-        if (diffHoras > 8) {
-          localStorage.removeItem('usuarioLogado');
-          sessionStorage.removeItem('auth');
-          updateUIBasedOnSession();
-          return;
-        }
-        
-        if (activeSessionDiv) activeSessionDiv.style.display = 'flex';
-        if (loginFormDiv) loginFormDiv.style.display = 'none';
-        if (logoutArea) logoutArea.style.display = 'block';
-        
-        const activeUserName = document.getElementById('activeUserName');
-        if (activeUserName) activeUserName.textContent = user.nome;
-        
-        const loginCard = document.getElementById('loginCard');
-        if (loginCard && !continueButton) {
-          continueButton = document.createElement('button');
-          continueButton.id = 'goToOrcamentoBtn';
-          continueButton.className = 'btn-continue';
-          continueButton.innerHTML = '<i class="fas fa-arrow-right"></i> Continuar no Sistema de Orçamentos';
-          continueButton.onclick = () => {
-            window.location.href = 'orcamento.html';
-          };
-          
-          if (logoutArea && logoutArea.parentNode) {
-            logoutArea.parentNode.insertBefore(continueButton, logoutArea.nextSibling);
-          } else if (loginCard) {
-            loginCard.appendChild(continueButton);
-          }
-        }
-        
-      } catch(e) {
-        console.error('Erro ao ler sessão', e);
-        localStorage.removeItem('usuarioLogado');
-        sessionStorage.removeItem('auth');
-        if (activeSessionDiv) activeSessionDiv.style.display = 'none';
-        if (loginFormDiv) loginFormDiv.style.display = 'block';
-        if (logoutArea) logoutArea.style.display = 'none';
-        removeContinueButton();
+    if (error) {
+      console.error('Erro ao carregar usuários:', error);
+      return;
+    }
+    
+    const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = '';
+    
+    let total = 0, ativos = 0, inativos = 0;
+    
+    data.forEach(user => {
+      total++;
+      if (user.ativo) ativos++;
+      else inativos++;
+      
+      const row = tbody.insertRow();
+      row.innerHTML = `
+        <td>${user.id}</td>
+        <td><strong>${user.nome}</strong></td>
+        <td>${user.login}</td>
+        <td>${user.is_admin ? '<i class="fas fa-check-circle" style="color:#22c55e;"></i> Sim' : '<i class="fas fa-times-circle" style="color:#e74c3c;"></i> Não'}</td>
+        <td><span class="status-badge ${user.ativo ? 'status-active' : 'status-inactive'}">${user.ativo ? 'Ativo' : 'Inativo'}</span></td>
+        <td>${new Date(user.criado_em).toLocaleDateString('pt-BR')}</td>
+        <td class="action-buttons">
+          <button class="btn btn-edit" onclick="editUser(${user.id})"><i class="fas fa-edit"></i> Editar</button>
+          <button class="btn ${user.ativo ? 'btn-secondary' : 'btn-primary'}" onclick="toggleUserStatus(${user.id}, ${!user.ativo})">
+            <i class="fas ${user.ativo ? 'fa-ban' : 'fa-check'}"></i> ${user.ativo ? 'Desativar' : 'Ativar'}
+          </button>
+          <button class="btn btn-danger" onclick="deleteUser(${user.id})"><i class="fas fa-trash"></i> Excluir</button>
+        </td>
+      `;
+    });
+    
+    document.getElementById('totalUsers').textContent = total;
+    document.getElementById('activeUsers').textContent = ativos;
+    document.getElementById('inactiveUsers').textContent = inativos;
+  }
+
+  window.editUser = async function(id) {
+    const { data, error } = await supabase
+      .from('atendentes')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      alert('Erro ao carregar usuário!');
+      return;
+    }
+    
+    currentEditId = id;
+    document.getElementById('editId').value = id;
+    document.getElementById('nome').value = data.nome;
+    document.getElementById('login').value = data.login;
+    document.getElementById('isAdmin').checked = data.is_admin;
+    document.getElementById('ativo').checked = data.ativo;
+    document.getElementById('senha').placeholder = '•••••••• (deixe em branco para manter)';
+    document.getElementById('senha').required = false;
+    document.getElementById('formTitle').textContent = 'Editar Atendente';
+    document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Atualizar';
+    document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+    
+    document.getElementById('userForm').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  window.toggleUserStatus = async function(id, novoStatus) {
+    const { error } = await supabase
+      .from('atendentes')
+      .update({ ativo: novoStatus, atualizado_em: new Date() })
+      .eq('id', id);
+    
+    if (error) {
+      alert('Erro ao alterar status!');
+    } else {
+      await loadUsers();
+      showMessage(`Status alterado com sucesso!`, 'success');
+    }
+  };
+
+  window.deleteUser = async function(id) {
+    if (confirm('Tem certeza que deseja excluir este atendente permanentemente?')) {
+      const { error } = await supabase
+        .from('atendentes')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        alert('Erro ao excluir usuário!');
+      } else {
+        await loadUsers();
+        showMessage('Atendente excluído com sucesso!', 'success');
+      }
+    }
+  };
+
+  async function saveUser(event) {
+    event.preventDefault();
+    
+    const id = document.getElementById('editId').value;
+    const nome = document.getElementById('nome').value;
+    const login = document.getElementById('login').value;
+    const senha = document.getElementById('senha').value;
+    const is_admin = document.getElementById('isAdmin').checked;
+    const ativo = document.getElementById('ativo').checked;
+    
+    if (!nome || !login) {
+      alert('Preencha todos os campos obrigatórios!');
+      return;
+    }
+    
+    if (id) {
+      // Update
+      const updateData = {
+        nome, login, is_admin, ativo,
+        atualizado_em: new Date()
+      };
+      
+      if (senha) {
+        updateData.senha = senha;
+      }
+      
+      const { error } = await supabase
+        .from('atendentes')
+        .update(updateData)
+        .eq('id', id);
+      
+      if (error) {
+        alert('Erro ao atualizar usuário!');
+      } else {
+        await loadUsers();
+        resetForm();
+        showMessage('Atendente atualizado com sucesso!', 'success');
       }
     } else {
-      if (activeSessionDiv) activeSessionDiv.style.display = 'none';
-      if (loginFormDiv) loginFormDiv.style.display = 'block';
-      if (logoutArea) logoutArea.style.display = 'none';
-      removeContinueButton();
+      // Insert
+      if (!senha) {
+        alert('A senha é obrigatória para novos usuários!');
+        return;
+      }
       
-      const userInput = document.getElementById('loginUser');
-      const passInput = document.getElementById('loginPassword');
-      if (userInput) userInput.value = '';
-      if (passInput) passInput.value = '';
+      const { error } = await supabase
+        .from('atendentes')
+        .insert([{
+          nome, login, senha, is_admin, ativo,
+          criado_em: new Date(),
+          atualizado_em: new Date()
+        }]);
+      
+      if (error) {
+        alert('Erro ao criar usuário!');
+      } else {
+        await loadUsers();
+        resetForm();
+        showMessage('Atendente criado com sucesso!', 'success');
+      }
     }
   }
 
-  function logout() {
-    localStorage.removeItem('usuarioLogado');
-    sessionStorage.removeItem('auth');
-    localStorage.removeItem('orcamentosTemp');
-    localStorage.removeItem('nextIdTemp');
-    
-    const userInput = document.getElementById('loginUser');
-    const passInput = document.getElementById('loginPassword');
-    if (userInput) userInput.value = '';
-    if (passInput) passInput.value = '';
-    
-    removeContinueButton();
-    updateUIBasedOnSession();
-    
-    const errorDiv = document.getElementById('errorMessage');
-    if (errorDiv) errorDiv.style.display = 'none';
-    
-    const card = document.querySelector('.login-card');
-    const originalBorder = card.style.border;
-    card.style.border = '2px solid #25d366';
-    setTimeout(() => {
-      card.style.border = originalBorder;
-    }, 500);
+  function resetForm() {
+    document.getElementById('userForm').reset();
+    document.getElementById('editId').value = '';
+    currentEditId = null;
+    document.getElementById('formTitle').textContent = 'Adicionar Novo Atendente';
+    document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Salvar';
+    document.getElementById('cancelEditBtn').style.display = 'none';
+    document.getElementById('senha').required = true;
+    document.getElementById('senha').placeholder = '••••••••';
+    document.getElementById('ativo').checked = true;
   }
 
-  function handleLogin() {
-    const loginInput = document.getElementById('loginUser');
-    const passwordInput = document.getElementById('loginPassword');
+  function showMessage(message, type) {
+    const existingAlert = document.querySelector('.alert');
+    if (existingAlert) existingAlert.remove();
     
-    const login = loginInput.value.trim();
-    const password = passwordInput.value.trim();
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${message}`;
     
-    if (login === '' || password === '') {
-      showError('Por favor, preencha ambos os campos!');
+    const container = document.querySelector('.container');
+    container.insertBefore(alert, container.firstChild);
+    
+    setTimeout(() => alert.remove(), 3000);
+  }
+
+  async function showLogs() {
+    const { data, error } = await supabase
+      .from('logs_sessao')
+      .select(`
+        *,
+        atendentes (nome)
+      `)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    
+    if (error) {
+      alert('Erro ao carregar logs!');
       return;
     }
     
-    const user = validarLogin(login, password);
+    const tbody = document.getElementById('logsTableBody');
+    tbody.innerHTML = '';
     
-    if (!user) {
-      showError('❌ Login ou senha incorretos! Tente novamente.');
-      passwordInput.value = '';
-      passwordInput.focus();
-      return;
-    }
+    data.forEach(log => {
+      const row = tbody.insertRow();
+      row.innerHTML = `
+        <td>${log.atendentes?.nome || 'Desconhecido'}</td>
+        <td><span class="status-badge ${log.acao === 'login' ? 'status-active' : 'status-inactive'}">${log.acao === 'login' ? 'Entrada' : 'Saída'}</span></td>
+        <td>${log.ip || '-'}</td>
+        <td>${new Date(log.created_at).toLocaleString('pt-BR')}</td>
+      `;
+    });
     
-    localStorage.setItem('usuarioLogado', JSON.stringify({
-      nome: user.nomeExibicao,
-      login: user.login,
-      isAdmin: user.isAdmin,
-      loginTimestamp: new Date().toISOString()
-    }));
-    sessionStorage.setItem('auth', 'true');
-    
-    updateUIBasedOnSession();
-    
-    try {
-      window.location.href = 'orcamento.html';
-    } catch (e) {
-      console.warn('Redirecionamento falhou', e);
-      alert('✅ Login realizado com sucesso!\n\nRedirecionando para o sistema de orçamentos...');
-      setTimeout(() => {
-        window.location.href = 'orcamento.html';
-      }, 500);
-    }
+    document.getElementById('logsModal').style.display = 'flex';
   }
 
-  const loginBtn = document.getElementById('loginBtn');
-  const passwordField = document.getElementById('loginPassword');
-  const userField = document.getElementById('loginUser');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const logoutFromSessionBtn = document.getElementById('logoutFromSessionBtn');
+  document.getElementById('userForm').addEventListener('submit', saveUser);
+  document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+  document.getElementById('viewLogsBtn').addEventListener('click', showLogs);
+  document.getElementById('backToLoginBtn').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
   
-  if (loginBtn) loginBtn.addEventListener('click', handleLogin);
-  if (logoutBtn) logoutBtn.addEventListener('click', logout);
-  if (logoutFromSessionBtn) logoutFromSessionBtn.addEventListener('click', logout);
-  
-  if (passwordField) {
-    passwordField.addEventListener('keypress', function(event) {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        handleLogin();
+  document.querySelectorAll('.close-modal, .modal').forEach(el => {
+    el.addEventListener('click', function(e) {
+      if (e.target === this || e.target.classList.contains('close-modal')) {
+        document.getElementById('logsModal').style.display = 'none';
       }
     });
-  }
-  
-  if (userField) {
-    userField.addEventListener('keypress', function(event) {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        if (passwordField) passwordField.focus();
-      }
-    });
-    userField.addEventListener('input', clearError);
-  }
-  
-  if (passwordField) {
-    passwordField.addEventListener('input', clearError);
-  }
-  
-  window.addEventListener('load', function() {
-    updateUIBasedOnSession();
-    
-    // Verificar se a imagem carregou corretamente
-    const logoImg = document.querySelector('.logo-image');
-    if (logoImg) {
-      logoImg.addEventListener('error', function() {
-        this.style.display = 'none';
-        const fallback = document.getElementById('fallbackIcon');
-        if (fallback) fallback.style.display = 'inline-flex';
-      });
+  });
+
+  window.addEventListener('load', async () => {
+    const hasAccess = await checkAdminAccess();
+    if (hasAccess) {
+      await loadUsers();
     }
   });
 </script>
