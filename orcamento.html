@@ -190,7 +190,7 @@
     <div class="step-item" data-step="4"><div class="step-circle">4</div><span class="step-label">Final</span></div>
   </div>
 
-  <div class="module-card active-step" id="step1">
+  <div class="module-card" id="step1">
     <div class="module-header"><i class="fas fa-user-md"></i><h2>Atendente</h2></div>
     <div class="input-group"><label>Selecione o atendente *</label><select id="atendenteSelect"><option value="">-- Escolha --</option><option value="Jaúna Constante">Jaúna Constante</option><option value="Jaciara Constante">Jaciara Constante</option><option value="Luana Paloschi">Luana Paloschi</option><option value="Aline">Aline</option></select></div>
     <div class="nav-buttons"><button class="btn btn-primary" id="nextToStep2" disabled><i class="fas fa-arrow-right"></i> Continuar</button></div>
@@ -312,11 +312,64 @@
     function toggleAdminButton() {
       const adminBtn = document.getElementById('adminAccessBtn');
       const atendente = atendenteSelect.value;
+      // Mostrar apenas para Jaúna Constante ou Jaciara Constante
       if (atendente === 'Jaúna Constante' || atendente === 'Jaciara Constante') {
         adminBtn.classList.add('visible');
       } else {
         adminBtn.classList.remove('visible');
       }
+    }
+    
+    // ========== NOVA FUNÇÃO: Verificar usuário logado e preencher automaticamente ==========
+    function verificarUsuarioLogado() {
+      const usuarioSalvo = localStorage.getItem('usuarioLogado');
+      if (usuarioSalvo) {
+        try {
+          const user = JSON.parse(usuarioSalvo);
+          // Verifica se a sessão expirou (8 horas)
+          const timestamp = new Date(user.loginTimestamp);
+          const agora = new Date();
+          const diffHoras = (agora - timestamp) / (1000 * 60 * 60);
+          
+          if (diffHoras > 8) {
+            localStorage.removeItem('usuarioLogado');
+            return false;
+          }
+          
+          // Nome do atendente logado
+          const nomeAtendente = user.nome;
+          
+          // Verifica se o nome está na lista de opções do select
+          const optionExists = Array.from(atendenteSelect.options).some(opt => opt.value === nomeAtendente);
+          
+          if (optionExists && nomeAtendente) {
+            // Seleciona o atendente automaticamente
+            atendenteSelect.value = nomeAtendente;
+            
+            // Dispara evento change para atualizar validações
+            const changeEvent = new Event('change', { bubbles: true });
+            atendenteSelect.dispatchEvent(changeEvent);
+            
+            // Se o atendente foi selecionado com sucesso, avança para a etapa 2 (Cliente)
+            if (validateStep1()) {
+              // Pequeno delay para garantir que o DOM foi atualizado
+              setTimeout(() => {
+                goToStep(2);
+              }, 50);
+            }
+            
+            return true;
+          } else {
+            console.warn('Atendente logado não encontrado na lista de opções:', nomeAtendente);
+            return false;
+          }
+        } catch(e) {
+          console.error('Erro ao ler usuário logado:', e);
+          localStorage.removeItem('usuarioLogado');
+          return false;
+        }
+      }
+      return false;
     }
     
     document.getElementById('nextToStep2')?.addEventListener('click',()=>{if(validateStep1()) goToStep(2);});
@@ -333,7 +386,7 @@
     clientAge.addEventListener('input',updateNavButtons);
     clientSource.addEventListener('change',updateNavButtons);
     updateNavButtons();
-    toggleAdminButton();
+    toggleAdminButton(); // Verificar estado inicial
     
     function getEmptyOrcamento() { 
       return { 
@@ -668,14 +721,22 @@
       if(descontoGeralInput) descontoGeralInput.value = '';
       updateNavButtons();
       renderOrcamentosForm();
-      goToStep(1);
+      
+      // Após resetar, verificar se há usuário logado para preencher novamente
+      const usuarioLogado = localStorage.getItem('usuarioLogado');
+      if (usuarioLogado) {
+        verificarUsuarioLogado();
+      } else {
+        goToStep(1);
+      }
+      
       localStorage.removeItem('orcamentosTemp');
       localStorage.removeItem('nextIdTemp');
       currentOrcamentoId = generateOrcamentoId();
       updateOrcamentoIdDisplay();
       modoEdicao = false;
       orcamentoEditandoId = null;
-      toggleAdminButton();
+      toggleAdminButton(); // Atualizar visibilidade do botão admin
     }
     
     function carregarOrcamentoParaEdicao(orcamento) {
@@ -966,7 +1027,14 @@ ${dataAtual}
     renderOrcamentosForm();
     currentOrcamentoId = generateOrcamentoId();
     updateOrcamentoIdDisplay();
-    goToStep(1);
+    
+    // ========== VERIFICAR USUÁRIO LOGADO E REDIRECIONAR ==========
+    const usuarioFoiPreenchido = verificarUsuarioLogado();
+    
+    // Se não houver usuário logado, fica na etapa 1 normalmente
+    if (!usuarioFoiPreenchido) {
+      goToStep(1);
+    }
 
     // ========== FUNÇÕES DO DASHBOARD ADMIN ==========
     
@@ -1250,6 +1318,48 @@ ${dataAtual}
           }
         }, 100);
       }
+      
+      // Botão de excluir selecionados
+      const btnExcluirSelecionados = document.getElementById('btnExcluirSelecionados');
+      if (btnExcluirSelecionados) {
+        btnExcluirSelecionados.onclick = () => {
+          const checkboxes = document.querySelectorAll('.checkbox-delete:checked');
+          if (checkboxes.length === 0) {
+            alert('Selecione pelo menos um orçamento para excluir.');
+            return;
+          }
+          
+          const idsSelecionados = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+          const nomesClientes = [];
+          idsSelecionados.forEach(id => {
+            const item = historicoOrcamentosGlobal.find(i => i.id === id);
+            if (item) nomesClientes.push(item.cliente);
+          });
+          
+          const confirmModal = document.createElement('div'); confirmModal.className = 'modal-overlay';
+          confirmModal.innerHTML = `
+            <div class="modal-content" style="max-width:450px;">
+              <h3><i class="fas fa-trash-alt" style="color:#e74c3c;"></i> Confirmar exclusão em massa</h3>
+              <p>Tem certeza que deseja excluir <strong>${checkboxes.length} orçamento(s)</strong>?</p>
+              <p style="font-size:0.8rem; color:#666;">Clientes: ${nomesClientes.join(', ').substring(0, 100)}${nomesClientes.length > 2 ? '...' : ''}</p>
+              <div class="modal-buttons" style="margin-top:20px;">
+                <button id="confirmMassDeleteBtn" class="btn btn-danger" style="flex:1;">Sim, excluir todos</button>
+                <button id="cancelMassDeleteBtn" class="btn btn-outline" style="flex:1;">Cancelar</button>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(confirmModal);
+          
+          confirmModal.querySelector('#confirmMassDeleteBtn').onclick = () => {
+            historicoOrcamentosGlobal = historicoOrcamentosGlobal.filter(item => !idsSelecionados.includes(item.id));
+            localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
+            alert(`✅ ${idsSelecionados.length} orçamento(s) excluído(s) com sucesso!`);
+            confirmModal.remove();
+            window.renderizarDashboardComFiltrosAtual();
+          };
+          confirmModal.querySelector('#cancelMassDeleteBtn').onclick = () => confirmModal.remove();
+        };
+      }
     };
 
     // ========== BOTÃO ADMIN - SEM SENHA ==========
@@ -1364,8 +1474,9 @@ ${dataAtual}
       adminModal.querySelector('#filtroCliente')?.addEventListener('input', () => window.renderizarDashboardComFiltrosAtual());
       adminModal.querySelector('#refreshDashboardBtnAdmin').onclick = () => window.renderizarDashboardComFiltrosAtual();
       
-      // DELEGAÇÃO DE EVENTOS - IMPORTANTE: anexar ao modal que NÃO é recriado
-      adminModal.addEventListener('click', (e) => {
+      // DELEGAÇÃO DE EVENTOS para os botões dinâmicos
+      const dashboardContent = adminModal.querySelector('#dashboardContent');
+      dashboardContent.addEventListener('click', (e) => {
         // Botão excluir
         const deleteBtn = e.target.closest('.btn-delete-single');
         if (deleteBtn) {
@@ -1396,48 +1507,6 @@ ${dataAtual}
           const id = saleBtn.getAttribute('data-id');
           const cliente = saleBtn.getAttribute('data-cliente');
           if (id && cliente) window.marcarComoVendaRealizada(id, cliente);
-          return;
-        }
-        
-        // Botão excluir selecionados (exclusão em massa)
-        const excluirSelecionadosBtn = e.target.closest('#btnExcluirSelecionados');
-        if (excluirSelecionadosBtn) {
-          e.preventDefault();
-          const checkboxes = adminModal.querySelectorAll('.checkbox-delete:checked');
-          if (checkboxes.length === 0) {
-            alert('Selecione pelo menos um orçamento para excluir.');
-            return;
-          }
-          
-          const idsSelecionados = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
-          const nomesClientes = [];
-          idsSelecionados.forEach(id => {
-            const item = historicoOrcamentosGlobal.find(i => i.id === id);
-            if (item) nomesClientes.push(item.cliente);
-          });
-          
-          const confirmModal = document.createElement('div'); confirmModal.className = 'modal-overlay';
-          confirmModal.innerHTML = `
-            <div class="modal-content" style="max-width:450px;">
-              <h3><i class="fas fa-trash-alt" style="color:#e74c3c;"></i> Confirmar exclusão em massa</h3>
-              <p>Tem certeza que deseja excluir <strong>${checkboxes.length} orçamento(s)</strong>?</p>
-              <p style="font-size:0.8rem; color:#666;">Clientes: ${nomesClientes.join(', ').substring(0, 100)}${nomesClientes.length > 2 ? '...' : ''}</p>
-              <div class="modal-buttons" style="margin-top:20px;">
-                <button id="confirmMassDeleteBtn" class="btn btn-danger" style="flex:1;">Sim, excluir todos</button>
-                <button id="cancelMassDeleteBtn" class="btn btn-outline" style="flex:1;">Cancelar</button>
-              </div>
-            </div>
-          `;
-          document.body.appendChild(confirmModal);
-          
-          confirmModal.querySelector('#confirmMassDeleteBtn').onclick = () => {
-            historicoOrcamentosGlobal = historicoOrcamentosGlobal.filter(item => !idsSelecionados.includes(item.id));
-            localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
-            alert(`✅ ${idsSelecionados.length} orçamento(s) excluído(s) com sucesso!`);
-            confirmModal.remove();
-            window.renderizarDashboardComFiltrosAtual();
-          };
-          confirmModal.querySelector('#cancelMassDeleteBtn').onclick = () => confirmModal.remove();
           return;
         }
       });
