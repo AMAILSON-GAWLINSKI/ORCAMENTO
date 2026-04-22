@@ -49,21 +49,19 @@
       margin-bottom: 32px;
     }
 
-    .logo-icon {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(145deg, #fc5404, #e04a02);
-      border-radius: 28px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .logo-image {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
       margin-bottom: 20px;
-      box-shadow: 0 12px 20px -8px rgba(252, 84, 4, 0.3);
+      border-radius: 28px;
+      background: transparent;
+      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
+      transition: transform 0.3s ease;
     }
 
-    .logo-icon i {
-      font-size: 3rem;
-      color: white;
+    .logo-image:hover {
+      transform: scale(1.02);
     }
 
     h1 {
@@ -273,16 +271,43 @@
     .btn-logout-session:hover {
       background: #fee2e2;
     }
+
+    .btn-continue {
+      width: 100%;
+      padding: 14px 24px;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      background: #22c55e;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s;
+      margin-top: 12px;
+    }
+
+    .btn-continue:hover {
+      background: #16a34a;
+      transform: scale(1.02);
+    }
   </style>
 </head>
 <body>
 <div class="login-container">
   <div class="login-card" id="loginCard">
     <div class="logo-area">
-      <div class="logo-icon">
+      <!-- LOGO IMAGEM ADICIONADA AQUI -->
+      <img src="https://raw.githubusercontent.com/AMAILSON-GAWLINSKI/ORCAMENTO/refs/heads/main/LOGO%20SEM%20FUNDO.png" 
+           alt="Ótica Grau Divino Logo" 
+           class="logo-image"
+           onerror="this.onerror=null; this.style.display='none'; document.getElementById('fallbackIcon').style.display='inline-flex';">
+      <div id="fallbackIcon" class="logo-icon" style="display: none;">
         <i class="fas fa-glasses"></i>
       </div>
-      <h1>Ótica Grau Divino</h1>
       <div class="subtitle">Acesse o sistema de orçamentos</div>
     </div>
 
@@ -305,7 +330,7 @@
       </div>
 
       <div class="input-group">
-        <label><i class="fas fa-user"></i> Login / Atendente</label>
+        <label><i class="fas fa-user"></i> Atendente</label>
         <div class="input-with-icon">
           <i class="fas fa-user-circle"></i>
           <input type="text" id="loginUser" placeholder="Digite seu usuário" autocomplete="off">
@@ -325,15 +350,6 @@
       </button>
     </div>
 
-    <div class="info-users">
-      <p><strong>Acessos disponíveis:</strong></p>
-      <p>👤 Jaúna Constante | Senha: <strong>jauna123</strong></p>
-      <p>👤 Luana Paloschi | Senha: <strong>luana456</strong></p>
-      <p>👤 Aline | Senha: <strong>aline789</strong></p>
-      <p>👑 <strong style="color:#fc5404;">Jaciara Constante (Admin)</strong> | Senha: <strong>jaciara@2026</strong> <span class="demo-badge"><i class="fas fa-chart-line"></i> Acesso ao Admin</span></p>
-      <div class="demo-badge" style="margin-top: 12px;"><i class="fas fa-info-circle"></i> Após login, vá para o orçamento</div>
-    </div>
-
     <!-- Botão de sair (sempre visível quando logado) -->
     <div class="logout-area" id="logoutArea" style="display: none;">
       <button id="logoutBtn" class="btn-logout">
@@ -346,13 +362,14 @@
 <script>
   // ==================== CREDENCIAIS DOS ATENDENTES ====================
   const USERS = [
-    { login: "Jaúna Constante", password: "jauna123", nomeExibicao: "Jaúna Constante", isAdmin: false },
+    { login: "Jaúna Constante", password: "jauna123", nomeExibicao: "Jaúna Constante", isAdmin: true },
     { login: "Luana Paloschi", password: "luana456", nomeExibicao: "Luana Paloschi", isAdmin: false },
     { login: "Aline", password: "aline789", nomeExibicao: "Aline", isAdmin: false },
     { login: "Jaciara Constante", password: "jaciara@2026", nomeExibicao: "Jaciara Constante", isAdmin: true }
   ];
 
-  // Função para validar login
+  let continueButton = null;
+
   function validarLogin(login, senha) {
     const userFound = USERS.find(user => 
       user.login.toLowerCase() === login.toLowerCase() && user.password === senha
@@ -360,7 +377,6 @@
     return userFound || null;
   }
 
-  // Função para mostrar mensagem de erro
   function showError(message) {
     const errorDiv = document.getElementById('errorMessage');
     const errorText = document.getElementById('errorText');
@@ -383,12 +399,20 @@
     if (errorDiv) errorDiv.style.display = 'none';
   }
 
-  // Função para atualizar a interface baseado na sessão
+  function removeContinueButton() {
+    if (continueButton && continueButton.parentNode) {
+      continueButton.parentNode.removeChild(continueButton);
+      continueButton = null;
+    }
+  }
+
   function updateUIBasedOnSession() {
     const usuarioSalvo = localStorage.getItem('usuarioLogado');
     const activeSessionDiv = document.getElementById('activeSessionDiv');
     const loginFormDiv = document.getElementById('loginFormDiv');
     const logoutArea = document.getElementById('logoutArea');
+    
+    removeContinueButton();
     
     if (usuarioSalvo) {
       try {
@@ -397,7 +421,6 @@
         const agora = new Date();
         const diffHoras = (agora - timestamp) / (1000 * 60 * 60);
         
-        // Se a sessão expirou (mais de 8 horas), limpar
         if (diffHoras > 8) {
           localStorage.removeItem('usuarioLogado');
           sessionStorage.removeItem('auth');
@@ -405,13 +428,29 @@
           return;
         }
         
-        // Mostrar sessão ativa e esconder formulário de login
         if (activeSessionDiv) activeSessionDiv.style.display = 'flex';
         if (loginFormDiv) loginFormDiv.style.display = 'none';
         if (logoutArea) logoutArea.style.display = 'block';
         
         const activeUserName = document.getElementById('activeUserName');
         if (activeUserName) activeUserName.textContent = user.nome;
+        
+        const loginCard = document.getElementById('loginCard');
+        if (loginCard && !continueButton) {
+          continueButton = document.createElement('button');
+          continueButton.id = 'goToOrcamentoBtn';
+          continueButton.className = 'btn-continue';
+          continueButton.innerHTML = '<i class="fas fa-arrow-right"></i> Continuar no Sistema de Orçamentos';
+          continueButton.onclick = () => {
+            window.location.href = 'orcamento.html';
+          };
+          
+          if (logoutArea && logoutArea.parentNode) {
+            logoutArea.parentNode.insertBefore(continueButton, logoutArea.nextSibling);
+          } else if (loginCard) {
+            loginCard.appendChild(continueButton);
+          }
+        }
         
       } catch(e) {
         console.error('Erro ao ler sessão', e);
@@ -420,39 +459,38 @@
         if (activeSessionDiv) activeSessionDiv.style.display = 'none';
         if (loginFormDiv) loginFormDiv.style.display = 'block';
         if (logoutArea) logoutArea.style.display = 'none';
+        removeContinueButton();
       }
     } else {
-      // Nenhum usuário logado
       if (activeSessionDiv) activeSessionDiv.style.display = 'none';
       if (loginFormDiv) loginFormDiv.style.display = 'block';
       if (logoutArea) logoutArea.style.display = 'none';
+      removeContinueButton();
+      
+      const userInput = document.getElementById('loginUser');
+      const passInput = document.getElementById('loginPassword');
+      if (userInput) userInput.value = '';
+      if (passInput) passInput.value = '';
     }
   }
 
-  // Função de logout (limpar sessão e redirecionar para login)
   function logout() {
-    // Limpar dados do usuário
     localStorage.removeItem('usuarioLogado');
     sessionStorage.removeItem('auth');
     localStorage.removeItem('orcamentosTemp');
     localStorage.removeItem('nextIdTemp');
     
-    // Limpar campos do formulário
     const userInput = document.getElementById('loginUser');
     const passInput = document.getElementById('loginPassword');
     if (userInput) userInput.value = '';
     if (passInput) passInput.value = '';
     
-    // Atualizar interface
+    removeContinueButton();
     updateUIBasedOnSession();
     
-    // Mostrar mensagem de sucesso
     const errorDiv = document.getElementById('errorMessage');
-    if (errorDiv) {
-      errorDiv.style.display = 'none';
-    }
+    if (errorDiv) errorDiv.style.display = 'none';
     
-    // Pequeno feedback visual
     const card = document.querySelector('.login-card');
     const originalBorder = card.style.border;
     card.style.border = '2px solid #25d366';
@@ -461,7 +499,6 @@
     }, 500);
   }
 
-  // Função principal de login
   function handleLogin() {
     const loginInput = document.getElementById('loginUser');
     const passwordInput = document.getElementById('loginPassword');
@@ -483,7 +520,6 @@
       return;
     }
     
-    // Salvar dados do usuário
     localStorage.setItem('usuarioLogado', JSON.stringify({
       nome: user.nomeExibicao,
       login: user.login,
@@ -492,10 +528,8 @@
     }));
     sessionStorage.setItem('auth', 'true');
     
-    // Atualizar interface para mostrar que está logado
     updateUIBasedOnSession();
     
-    // Redirecionar para orcamento.html
     try {
       window.location.href = 'orcamento.html';
     } catch (e) {
@@ -507,7 +541,6 @@
     }
   }
 
-  // Event Listeners
   const loginBtn = document.getElementById('loginBtn');
   const passwordField = document.getElementById('loginPassword');
   const userField = document.getElementById('loginUser');
@@ -541,41 +574,17 @@
     passwordField.addEventListener('input', clearError);
   }
   
-  // Verificar sessão ao carregar a página
   window.addEventListener('load', function() {
     updateUIBasedOnSession();
     
-    // Se houver usuário logado e tentar acessar login, oferecer opção de ir direto ou sair
-    const usuarioSalvo = localStorage.getItem('usuarioLogado');
-    if (usuarioSalvo) {
-      try {
-        const user = JSON.parse(usuarioSalvo);
-        const timestamp = new Date(user.loginTimestamp);
-        const agora = new Date();
-        const diffHoras = (agora - timestamp) / (1000 * 60 * 60);
-        
-        if (diffHoras < 8) {
-          // Se estiver logado, podemos oferecer um botão para ir direto ao orçamento
-          // Mas mantemos o logout disponível
-          const loginCard = document.getElementById('loginCard');
-          if (loginCard && !document.getElementById('goToOrcamentoBtn')) {
-            const goToBtn = document.createElement('button');
-            goToBtn.id = 'goToOrcamentoBtn';
-            goToBtn.className = 'btn-login';
-            goToBtn.style.marginTop = '12px';
-            goToBtn.style.background = '#22c55e';
-            goToBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Continuar no Sistema de Orçamentos';
-            goToBtn.onclick = () => {
-              window.location.href = 'orcamento.html';
-            };
-            
-            const logoutAreaDiv = document.getElementById('logoutArea');
-            if (logoutAreaDiv && !logoutAreaDiv.parentNode.querySelector('#goToOrcamentoBtn')) {
-              logoutAreaDiv.parentNode.insertBefore(goToBtn, logoutAreaDiv.nextSibling);
-            }
-          }
-        }
-      } catch(e) {}
+    // Verificar se a imagem carregou corretamente
+    const logoImg = document.querySelector('.logo-image');
+    if (logoImg) {
+      logoImg.addEventListener('error', function() {
+        this.style.display = 'none';
+        const fallback = document.getElementById('fallbackIcon');
+        if (fallback) fallback.style.display = 'inline-flex';
+      });
     }
   });
 </script>
