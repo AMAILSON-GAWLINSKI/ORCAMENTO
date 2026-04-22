@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Orçamentos · Ótica Grau Divino</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f6fb;
+      padding: 16px 12px 32px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      color: #1e1f2a;
+    }
+    .app-container { max-width: 950px; width: 100%; margin: 0 auto; }
+    .stepper {
+      display: flex; justify-content: space-between; margin-bottom: 24px;
+      background: white; padding: 16px 12px; border-radius: 40px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.02); border: 1px solid #e9ecf3;
+    }
+    .step-item {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      flex: 1; opacity: 0.5; transition: opacity 0.2s;
+      cursor: pointer;
+    }
+    .step-item.active { opacity: 1; }
+    .step-circle {
+      width: 36px; height: 36px; border-radius: 36px; background: #e4e7f0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: #5f647e;
+    }
+    .step-item.active .step-circle { background: #fc5404; color: white; }
+    .step-label { font-size: 0.75rem; font-weight: 600; color: #2f3547; }
+    .module-card {
+      background: #ffffff; border-radius: 28px; padding: 22px 20px;
+      margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+      border: 1px solid #f0f2f7; display: none;
+    }
+    .module-card.active-step { display: block; }
+    .module-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+      border-bottom: 2px solid #edeef3; padding-bottom: 12px;
+    }
+    .module-header i { font-size: 1.6rem; color: #fc5404; background: #fef3e8; padding: 8px; border-radius: 16px; }
+    .module-header h2 { font-size: 1.5rem; font-weight: 600; color: #1e1f2a; }
+    .input-group { margin-bottom: 18px; }
+    label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; color: #2f3547; }
+    input, select, textarea {
+      width: 100%; padding: 14px 16px; font-size: 1rem; font-family: 'Inter', sans-serif;
+      border: 1.5px solid #e2e6ee; border-radius: 20px; background: #fafbfc;
+      transition: all 0.15s; outline: none; color: #1e1f2a; font-weight: 500;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #fc5404; background: white; box-shadow: 0 0 0 3px rgba(252,84,4,0.1); }
+    .double-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .checkbox-row { display: flex; align-items: center; gap: 32px; margin: 18px 0 16px; flex-wrap: wrap; }
+    .checkbox-row label { 
+      display: inline-flex; align-items: center; gap: 12px; cursor: pointer; 
+      font-size: 1rem; font-weight: 500; padding: 8px 16px; background: #fef3e8; border-radius: 40px;
+    }
+    .checkbox-row input { width: 22px; height: 22px; margin: 0; cursor: pointer; transform: scale(1.1); accent-color: #fc5404; }
+    .summary-title {
+      background: #fc5404; color: white; padding: 16px 20px;
+      border-radius: 24px 24px 16px 16px; margin: -22px -20px 20px -20px;
+    }
+    .summary-title h1 { font-size: 1.7rem; font-weight: 700; }
+    .datetime-info { font-size: 0.85rem; color: white; margin-top: 6px; display: flex; align-items: center; gap: 6px; }
+    .client-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px dashed #d9dce6; }
+    .client-name { font-weight: 700; font-size: 1.2rem; }
+    .summary-grid { display: flex; flex-direction: column; gap: 12px; margin: 16px 0 18px; }
+    .summary-item { display: flex; justify-content: space-between; }
+    .summary-label { color: #5f647e; font-weight: 500; }
+    .summary-value { font-weight: 600; text-align: right; }
+    .total-box { background: #fef3e8; border-radius: 18px; padding: 16px 18px; }
+    .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .total-amount { font-weight: 700; font-size: 1.4rem; }
+    .discount-input { width: 100%; padding: 10px 14px; border-radius: 30px; border: 1.5px solid #d0d5e0; text-align: left; font-weight: 600; background: white; font-size: 1rem; }
+    .final-total { border-top: 2px dashed #b9c2d4; padding-top: 12px; margin-top: 8px; }
+    .final-amount { font-size: 1.9rem; font-weight: 800; color: #fc5404; }
+    .nav-buttons { display: flex; gap: 12px; margin-top: 20px; }
+    .btn {
+      padding: 14px 24px; border-radius: 60px; font-weight: 600; border: none;
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px; transition: all 0.15s; flex: 1; background: white; border: 1.5px solid #e2e6ee;
+    }
+    .btn-primary { background: #fc5404; border-color: #fc5404; color: white; }
+    .btn-success { background: #25d366; border-color: #25d366; color: white; }
+    .btn-outline { background: transparent; border-color: #cbd0dc; }
+    .btn-warning { background: #fc5404; border-color: #fc5404; color: white; }
+    .btn-danger { background: #e74c3c; border-color: #e74c3c; color: white; }
+    .btn-delete { background: #e74c3c; border-color: #e74c3c; color: white; padding: 6px 12px; font-size: 0.75rem; flex: none; }
+    .btn-edit { background: #3498db; border-color: #3498db; color: white; padding: 6px 12px; font-size: 0.75rem; flex: none; }
+    .btn-sale { background: #25d366; border-color: #25d366; color: white; padding: 6px 12px; font-size: 0.75rem; flex: none; }
+    .action-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0 8px; }
+    .orcamento-item { background: #f9fafc; border-radius: 24px; padding: 20px; margin-bottom: 20px; border: 1px solid #eef0f5; transition: all 0.2s; }
+    .orcamento-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .orcamento-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-weight: 700; border-left: 4px solid #fc5404; padding-left: 12px; }
+    .btn-remove-orc { background: none; border: none; color: #e74c3c; font-size: 1.2rem; cursor: pointer; padding: 4px 8px; border-radius: 30px; transition: all 0.2s; }
+    .btn-remove-orc:hover { background: #fee2e2; transform: scale(1.05); }
+    .add-orc-btn { margin: 16px 0 8px; width: 100%; background: #fef3e8; border: 1px dashed #fc5404; color: #fc5404; cursor: pointer; transition: all 0.2s; }
+    .add-orc-btn:hover { background: #fde5d4; border-color: #fc5404; }
+    .valor-input-hint { font-size: 0.8rem; color: #1e4620; background: #e8f5e9; padding: 8px 14px; border-radius: 20px; margin-top: 12px; font-weight: 600; }
+    .field-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+    .admin-btn { position: fixed; bottom: 20px; right: 20px; background: #fc5404; color: white; border: none; border-radius: 50px; padding: 12px 20px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 99; transition: transform 0.2s; }
+    .admin-btn:hover { transform: scale(1.05); background: #e04a02; }
+    
+    /* Dashboard Admin Styles */
+    .dashboard-container { max-width: 1400px; margin: 0 auto; }
+    .dashboard-header { margin-bottom: 28px; }
+    .dashboard-header h1 { font-size: 1.8rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 12px; }
+    .dashboard-header h1 i { color: #fc5404; font-size: 2rem; }
+    .dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 32px; }
+    .stat-card { background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); border-radius: 28px; padding: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); border: 1px solid #edf2f7; transition: transform 0.2s; }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-value { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.02em; margin-top: 8px; color: #1e293b; }
+    .stat-label { font-size: 0.85rem; text-transform: uppercase; font-weight: 700; color: #fc5404; letter-spacing: 0.5px; }
+    .stat-sub { font-size: 0.75rem; color: #5b677b; margin-top: 6px; }
+    .charts-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 28px; margin: 30px 0; }
+    .chart-card { background: white; border-radius: 28px; padding: 20px; box-shadow: 0 6px 14px rgba(0,0,0,0.03); border: 1px solid #eef2f8; }
+    .chart-card h4 { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; color: #1e293b; border-left: 5px solid #fc5404; padding-left: 14px; }
+    canvas { max-height: 280px; width: 100%; }
+    .section-title { font-size: 1.3rem; font-weight: 700; margin: 32px 0 20px 0; color: #1e293b; display: flex; align-items: center; gap: 10px; }
+    .performer-table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 20px 0; border-radius: 20px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .performer-table th { background: #fc5404; color: white; padding: 14px 12px; font-size: 0.85rem; font-weight: 700; text-align: left; }
+    .performer-table td { padding: 14px 12px; background: #fefcf9; border-bottom: 1px solid #f0e9e2; font-size: 0.85rem; }
+    .lost-amount { color: #e74c3c; font-weight: 700; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; }
+    .badge-success { background: #25d366; color: white; }
+    .badge-danger { background: #e74c3c; color: white; }
+    .badge-warning { background: #f39c12; color: white; }
+    .justificativa-list { background: #fff6e5; border-left: 4px solid #f39c12; padding: 12px 16px; margin: 12px 0; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
+    .refresh-btn { background: #fc5404; color: white; border: none; border-radius: 40px; padding: 10px 24px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; transition: transform 0.2s; }
+    .refresh-btn:hover { transform: scale(1.02); background: #e04a02; }
+    .empty-state { text-align: center; padding: 60px 20px; background: white; border-radius: 28px; color: #94a3b8; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+    .modal-content { background: white; border-radius: 32px; padding: 24px; max-width: 1300px; width: 95%; max-height: 85vh; overflow-y: auto; }
+    .modal-content h3 { margin-bottom: 16px; font-size: 1.5rem; }
+    .justificativa-input { width: 100%; min-height: 100px; resize: vertical; margin: 12px 0; }
+    .modal-buttons { display: flex; gap: 12px; margin-top: 16px; }
+    #orcamentoIdDisplay { text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px dashed #ccc; font-size: 0.9rem; color: #5f647e; font-weight: 500; }
+    
+    /* Filtros do Dashboard */
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; background: #f8fafc; padding: 16px; border-radius: 32px; align-items: flex-end; }
+    .filter-group { flex: 1; min-width: 140px; }
+    .filter-group label { font-size: 0.7rem; margin-bottom: 4px; display: block; font-weight: 600; color: #475569; }
+    .filter-group input, .filter-group select { padding: 10px 12px; font-size: 0.85rem; }
+    
+    /* Lista de orçamentos no dashboard */
+    .orcamentos-list { margin-top: 20px; }
+    .orcamento-card { background: white; border-radius: 20px; padding: 16px; margin-bottom: 12px; border: 1px solid #eef2f8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; transition: all 0.2s; }
+    .orcamento-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .orcamento-info { flex: 1; }
+    .orcamento-info strong { color: #fc5404; }
+    .orcamento-status { padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
+    .status-fechado { background: #25d36620; color: #1e7e34; }
+    .status-perdido { background: #e74c3c20; color: #c0392b; }
+    .btn-group { display: flex; gap: 8px; }
+    
+    @media print {
+      body { background: white; padding: 0; margin: 0; }
+      .stepper, .nav-buttons, .action-buttons, .admin-btn, .btn, .add-orc-btn, .btn-remove-orc, .module-header, #backToStep3Edit, #finalizarOrcamentoBtn, #adminAccessBtn { display: none !important; }
+      .module-card { display: block !important; box-shadow: none; padding: 0; margin: 0; }
+      .module-card.active-step { display: block !important; }
+      .summary-title { background: #fc5404; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .total-box { background: #fef3e8; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      #orcamentoIdDisplay { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 10pt; border-top: none; background: white; padding: 8px; margin: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <div class="stepper">
+    <div class="step-item" data-step="1"><div class="step-circle">1</div><span class="step-label">Atendente</span></div>
+    <div class="step-item" data-step="2"><div class="step-circle">2</div><span class="step-label">Cliente</span></div>
+    <div class="step-item" data-step="3"><div class="step-circle">3</div><span class="step-label">Orçamento</span></div>
+    <div class="step-item" data-step="4"><div class="step-circle">4</div><span class="step-label">Final</span></div>
+  </div>
+
+  <div class="module-card active-step" id="step1">
+    <div class="module-header"><i class="fas fa-user-md"></i><h2>Atendente</h2></div>
+    <div class="input-group"><label>Selecione o atendente *</label><select id="atendenteSelect"><option value="">-- Escolha --</option><option value="Jaúna Constante">Jaúna Constante</option><option value="Luana Paloschi">Luana Paloschi</option><option value="Aline">Aline</option></select></div>
+    <div class="nav-buttons"><button class="btn btn-primary" id="nextToStep2" disabled><i class="fas fa-arrow-right"></i> Continuar</button></div>
+  </div>
+
+  <div class="module-card" id="step2">
+    <div class="module-header"><i class="fas fa-address-card"></i><h2>Identificação do Cliente</h2></div>
+    <div class="input-group"><label>Nome do Cliente *</label><input type="text" id="clientName" placeholder="Nome completo"></div>
+    <div class="double-col"><div class="input-group"><label>Telefone (WhatsApp)</label><input type="tel" id="clientPhone" placeholder="(11) 91234-5678"></div><div class="input-group"><label>Idade</label><input type="text" id="clientAge" placeholder="anos"></div></div>
+    <div class="double-col"><div class="input-group"><label>De onde veio *</label><select id="clientSource"><option value="">Selecione</option><option value="Teste de visão">Teste de visão</option><option value="Consulta com Oftalmo">Consulta com Oftalmo</option><option value="Indicação">Indicação</option><option value="Loja">Loja</option></select></div>
+    <div class="input-group"><label>Possui receita?</label><select id="hasPrescription"><option value="Não">Não</option><option value="Sim">Sim</option></select></div></div>
+    <div class="nav-buttons"><button class="btn" id="backToStep1"><i class="fas fa-arrow-left"></i> Voltar</button><button class="btn btn-primary" id="nextToStep3" disabled><i class="fas fa-arrow-right"></i> Continuar</button></div>
+  </div>
+
+  <div class="module-card" id="step3">
+    <div class="module-header"><i class="fas fa-glasses"></i><h2>Itens do Orçamento</h2></div>
+    <div id="orcamentosContainer"></div>
+    <button type="button" class="btn add-orc-btn" id="addOrcamentoBtn"><i class="fas fa-plus-circle"></i> + Adicionar outro item</button>
+    <div class="nav-buttons"><button class="btn" id="backToStep2_from3"><i class="fas fa-arrow-left"></i> Voltar</button><button class="btn btn-primary" id="nextToStep4"><i class="fas fa-arrow-right"></i> Ver Resumo</button></div>
+  </div>
+
+  <div class="module-card" id="step4">
+    <div class="summary-title"><h1>Resumo do Pedido</h1><div class="datetime-info"><i class="far fa-calendar-alt"></i> <span id="currentDateTime"></span></div></div>
+    <div class="client-row"><span class="client-name" id="displayClientName">—</span><span id="displayAtendente"></span></div>
+    <div id="resumoItensList" class="summary-grid"></div>
+    <div class="total-box">
+      <div class="total-row"><span>Subtotal itens</span><span class="total-amount" id="subtotalDisplay">R$ 0,00</span></div>
+      <div class="input-group"><label>Desconto Geral (R$)</label><input type="text" id="descontoGeralInput" class="discount-input" placeholder="" value=""></div>
+      <div class="total-row final-total"><span>Total Final</span><span class="final-amount" id="finalTotalDisplay">R$ 0,00</span></div>
+    </div>
+    <div class="action-buttons">
+      <button class="btn btn-primary" id="pdfBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+      <button class="btn btn-outline" id="printBtn"><i class="fas fa-print"></i> Imprimir</button>
+      <button class="btn btn-success" id="whatsBtn"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+      <button class="btn btn-outline" id="backToStep3Edit"><i class="fas fa-edit"></i> Editar</button>
+      <button class="btn btn-warning" id="finalizarOrcamentoBtn" style="background:#fc5404; border-color:#fc5404;"><i class="fas fa-check-circle"></i> Finalizar</button>
+    </div>
+    <div id="orcamentoIdDisplay">ID do Orçamento: <strong id="uniqueOrcamentoId">---</strong></div>
+  </div>
+</div>
+<button class="admin-btn" id="adminAccessBtn"><i class="fas fa-chart-line"></i> Área Admin</button>
+
+<script>
+  // LOGO BASE64 PARA O PDF (Ótica Grau Divino)
+  const LOGO_BASE64 = "data:image/png;base64,iVBORw8";
+
+  // Variável global para o histórico de orçamentos
+  let historicoOrcamentosGlobal = JSON.parse(localStorage.getItem('historicoOrcamentos') || '[]');
+
+  // Variáveis globais para edição
+  let modoEdicao = false;
+  let orcamentoEditandoId = null;
+
+  (function() {
+    let currentStep = 1;
+    const stepCards = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3'), document.getElementById('step4')];
+    const stepItems = document.querySelectorAll('.step-item');
+    const atendenteSelect = document.getElementById('atendenteSelect');
+    const clientName = document.getElementById('clientName');
+    const clientAge = document.getElementById('clientAge');
+    const clientSource = document.getElementById('clientSource');
+    const descontoGeralInput = document.getElementById('descontoGeralInput');
+    let currentOrcamentoId = '';
+    
+    function generateOrcamentoId() {
+      return 'ORC-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+    }
+    
+    function updateOrcamentoIdDisplay() {
+      const span = document.getElementById('uniqueOrcamentoId');
+      if(span) span.textContent = currentOrcamentoId;
+    }
+    
+    function formatMoneyWithThousand(value) {
+      let num = typeof value === 'number' ? value : parseFloat(value);
+      if (isNaN(num)) num = 0;
+      return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    
+    function formatMoneyWithSymbol(value) {
+      return `R$ ${formatMoneyWithThousand(value)}`;
+    }
+    
+    function parseCurrency(str) {
+      if (!str || str === '') return 0;
+      let cleaned = str.toString().replace(/R\$\s*/g, '').replace(/\./g, '').replace(',', '.');
+      let num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
+    }
+    
+    let orcamentos = [];
+    let nextId = 1;
+    
+    function updateDateTime() { 
+      const now = new Date(); 
+      document.getElementById('currentDateTime').textContent = now.toLocaleDateString('pt-BR') + ' às ' + now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}); 
+    }
+    updateDateTime(); 
+    setInterval(updateDateTime, 1000);
+    
+    function goToStep(step) { 
+      if (step<1||step>4) return; 
+      currentStep=step; 
+      stepCards.forEach((c,i)=>c.classList.toggle('active-step',i+1===step)); 
+      stepItems.forEach((item,i)=>item.classList.toggle('active',i+1<=step)); 
+      if(step===4) renderResumoFinal(); 
+      if(step===3) renderOrcamentosForm(); 
+    }
+    
+    function validateStep1() { return atendenteSelect.value !== ''; }
+    function validateStep2() { 
+      return clientName.value.trim() !== '' && clientSource.value !== ''; 
+    }
+    function updateNavButtons() { 
+      document.getElementById('nextToStep2').disabled = !validateStep1(); 
+      document.getElementById('nextToStep3').disabled = !validateStep2(); 
+    }
+    
+    document.getElementById('nextToStep2')?.addEventListener('click',()=>{if(validateStep1()) goToStep(2);});
+    document.getElementById('backToStep1')?.addEventListener('click',()=>goToStep(1));
+    document.getElementById('nextToStep3')?.addEventListener('click',()=>{if(validateStep2()){goToStep(3);renderOrcamentosForm();}});
+    document.getElementById('backToStep2_from3')?.addEventListener('click',()=>goToStep(2));
+    document.getElementById('nextToStep4')?.addEventListener('click',()=>{goToStep(4);renderResumoFinal();});
+    document.getElementById('backToStep3Edit')?.addEventListener('click',()=>goToStep(3));
+    atendenteSelect.addEventListener('change',updateNavButtons);
+    clientName.addEventListener('input',updateNavButtons);
+    clientAge.addEventListener('input',updateNavButtons);
+    clientSource.addEventListener('change',updateNavButtons);
+    updateNavButtons();
+    
+    function getEmptyOrcamento() { 
+      return { 
+        id: nextId++, 
+        tipo: 'lente', 
+        produto: '', 
+        modelo: '', 
+        materialLente: '', 
+        antirreflexo: false, 
+        filtroLuzAzul: false, 
+        valorLente: 0, 
+        valorLenteStr: '', 
+        nomeArmacao: '', 
+        referencia: '', 
+        materialArmacao: '', 
+        valorArmacao: 0, 
+        valorArmacaoStr: '',
+        nomeRelogio: '',
+        marcaRelogio: '',
+        valorRelogio: 0,
+        valorRelogioStr: '',
+        descricaoJoia: '',
+        tipoJoia: '',
+        valorJoia: 0,
+        valorJoiaStr: '',
+        descontoItem: 0, 
+        descontoItemStr: '' 
+      }; 
+    }
+    
+    function addOrcamento() { 
+      orcamentos.push(getEmptyOrcamento()); 
+      renderOrcamentosForm(); 
+    }
+    
+    function removeOrcamento(id) { 
+      orcamentos = orcamentos.filter(o=>o.id!==id); 
+      if(orcamentos.length===0) orcamentos.push(getEmptyOrcamento()); 
+      renderOrcamentosForm(); 
+    }
+    
+    function updateOrcamentoField(id, field, value) {
+      const item = orcamentos.find(o=>o.id===id); 
+      if(!item) return;
+      
+      if(field==='tipo') item.tipo=value;
+      else if(field==='produto') item.produto=value;
+      else if(field==='modelo') item.modelo=value;
+      else if(field==='referencia') item.referencia=value;
+      else if(field==='materialLente') item.materialLente=value;
+      else if(field==='antirreflexo') item.antirreflexo=value;
+      else if(field==='filtroLuzAzul') item.filtroLuzAzul=value;
+      else if(field==='valorLente') { 
+        item.valorLenteStr = value; 
+        item.valorLente = parseCurrency(value); 
+      }
+      else if(field==='nomeArmacao') item.nomeArmacao=value;
+      else if(field==='materialArmacao') item.materialArmacao=value;
+      else if(field==='valorArmacao') { 
+        item.valorArmacaoStr = value; 
+        item.valorArmacao = parseCurrency(value); 
+      }
+      else if(field==='nomeRelogio') item.nomeRelogio=value;
+      else if(field==='marcaRelogio') item.marcaRelogio=value;
+      else if(field==='valorRelogio') { 
+        item.valorRelogioStr = value; 
+        item.valorRelogio = parseCurrency(value); 
+      }
+      else if(field==='descricaoJoia') item.descricaoJoia=value;
+      else if(field==='tipoJoia') item.tipoJoia=value;
+      else if(field==='valorJoia') { 
+        item.valorJoiaStr = value; 
+        item.valorJoia = parseCurrency(value); 
+      }
+      else if(field==='descontoItem') { 
+        item.descontoItemStr = value; 
+        item.descontoItem = parseCurrency(value); 
+      }
+      
+      if(currentStep === 3) updateItemHint(item.id);
+      if(currentStep === 4) renderResumoFinal();
+      salvarOrcamentosTemporarios();
+    }
+    
+    function salvarOrcamentosTemporarios() {
+      localStorage.setItem('orcamentosTemp', JSON.stringify(orcamentos));
+      localStorage.setItem('nextIdTemp', nextId);
+    }
+    
+    function carregarOrcamentosTemporarios() {
+      const saved = localStorage.getItem('orcamentosTemp');
+      if(saved) {
+        orcamentos = JSON.parse(saved);
+        nextId = parseInt(localStorage.getItem('nextIdTemp')) || orcamentos.length + 1;
+      }
+    }
+    
+    function updateItemHint(itemId) {
+      const item = orcamentos.find(o => o.id === itemId);
+      if(!item) return;
+      const hintSpan = document.querySelector(`.orcamento-item[data-item-id="${itemId}"] .valor-input-hint strong`);
+      if(hintSpan) {
+        let valorBase = 0;
+        if(item.tipo === 'lente') valorBase = item.valorLente || 0;
+        else if(item.tipo === 'armacao') valorBase = item.valorArmacao || 0;
+        else if(item.tipo === 'relogio') valorBase = item.valorRelogio || 0;
+        else if(item.tipo === 'joias') valorBase = item.valorJoia || 0;
+        const valorLiq = valorBase - (item.descontoItem||0);
+        hintSpan.textContent = formatMoneyWithSymbol(valorLiq);
+      }
+    }
+    
+    function escapeHtml(str) { 
+      if(!str) return ''; 
+      return String(str).replace(/[&<>]/g,function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); 
+    }
+    
+    function getItemDisplayName(item, idx) {
+      const tipoNome = item.tipo === 'lente' ? 'LENTE' : (item.tipo === 'armacao' ? 'ARMAÇÃO' : (item.tipo === 'relogio' ? 'RELÓGIO' : 'JOIAS'));
+      return `${tipoNome} ${idx+1}`;
+    }
+    
+    function renderOrcamentosForm() {
+      const container = document.getElementById('orcamentosContainer'); 
+      if(!container) return;
+      if(orcamentos.length===0) orcamentos.push(getEmptyOrcamento());
+      container.innerHTML = '';
+      
+      orcamentos.forEach((item, idx)=>{
+        const div = document.createElement('div'); 
+        div.className='orcamento-item';
+        div.setAttribute('data-item-id', item.id);
+        let valorBaseStr = '';
+        if(item.tipo === 'lente') valorBaseStr = item.valorLenteStr || '';
+        else if(item.tipo === 'armacao') valorBaseStr = item.valorArmacaoStr || '';
+        else if(item.tipo === 'relogio') valorBaseStr = item.valorRelogioStr || '';
+        else if(item.tipo === 'joias') valorBaseStr = item.valorJoiaStr || '';
+        
+        const descontoItemStr = item.descontoItemStr || '';
+        const displayName = getItemDisplayName(item, idx);
+        let valorBaseNum = 0;
+        if(item.tipo === 'lente') valorBaseNum = item.valorLente || 0;
+        else if(item.tipo === 'armacao') valorBaseNum = item.valorArmacao || 0;
+        else if(item.tipo === 'relogio') valorBaseNum = item.valorRelogio || 0;
+        else if(item.tipo === 'joias') valorBaseNum = item.valorJoia || 0;
+        const valorLiq = valorBaseNum - (item.descontoItem||0);
+        
+        let fieldsHtml = '';
+        if(item.tipo === 'lente') {
+          fieldsHtml = `
+            <div class="field-row-2col">
+              <div class="input-group"><label>📋 Produto / Tipo de lente *</label><input type="text" class="text-input" value="${escapeHtml(item.produto)}" data-id="${item.id}" data-field="produto" placeholder="Ex: Multifocal, Blue Control"></div>
+              <div class="input-group"><label>💰 Valor da Lente (R$)</label><input type="text" class="discount-input valor-field" style="width:100%" value="${escapeHtml(valorBaseStr)}" data-id="${item.id}" data-field="valorLente" placeholder="0,00"></div>
+            </div>
+            <div class="double-col"><div class="input-group"><label>📐 Modelo</label><input type="text" class="text-input" value="${escapeHtml(item.modelo)}" data-id="${item.id}" data-field="modelo" placeholder="Ex: Exclusive Pro"></div>
+            <div class="input-group"><label>🔬 Material</label><input type="text" class="text-input" value="${escapeHtml(item.materialLente)}" data-id="${item.id}" data-field="materialLente" placeholder="Policarbonato, Resina 1.56"></div></div>
+            <div class="checkbox-row">
+              <label><input type="checkbox" class="checkbox-ar" ${item.antirreflexo?'checked':''} data-id="${item.id}" data-field="antirreflexo"> ✨ Antirreflexo</label>
+              <label><input type="checkbox" class="checkbox-filtro" ${item.filtroLuzAzul?'checked':''} data-id="${item.id}" data-field="filtroLuzAzul"> 🔵 Filtro de Luz Azul</label>
+            </div>
+          `;
+        } else if(item.tipo === 'armacao') {
+          fieldsHtml = `
+            <div class="field-row-2col">
+              <div class="input-group"><label>📋 Modelo da Armação *</label><input type="text" class="text-input" value="${escapeHtml(item.nomeArmacao)}" data-id="${item.id}" data-field="nomeArmacao" placeholder="Ex: Ray-Ban, Ótica VIP"></div>
+              <div class="input-group"><label>💰 Valor da Armação (R$)</label><input type="text" class="discount-input valor-field" style="width:100%" value="${escapeHtml(valorBaseStr)}" data-id="${item.id}" data-field="valorArmacao" placeholder="0,00"></div>
+            </div>
+            <div class="double-col">
+              <div class="input-group"><label>🔖 Referência / Código</label><input type="text" class="text-input" value="${escapeHtml(item.referencia||'')}" data-id="${item.id}" data-field="referencia" placeholder="Ex: RB2140, 5028"></div>
+              <div class="input-group"><label>🧵 Material</label><input type="text" class="text-input" value="${escapeHtml(item.materialArmacao)}" data-id="${item.id}" data-field="materialArmacao" placeholder="Acetato, Metal, TR90"></div>
+            </div>
+          `;
+        } else if(item.tipo === 'relogio') {
+          fieldsHtml = `
+            <div class="field-row-2col">
+              <div class="input-group"><label>⌚ Nome do Relógio *</label><input type="text" class="text-input" value="${escapeHtml(item.nomeRelogio)}" data-id="${item.id}" data-field="nomeRelogio" placeholder="Ex: Chronograph, Sports"></div>
+              <div class="input-group"><label>💰 Valor do Relógio (R$)</label><input type="text" class="discount-input valor-field" style="width:100%" value="${escapeHtml(valorBaseStr)}" data-id="${item.id}" data-field="valorRelogio" placeholder="0,00"></div>
+            </div>
+            <div class="input-group"><label>🏷️ Marca</label><input type="text" class="text-input" value="${escapeHtml(item.marcaRelogio)}" data-id="${item.id}" data-field="marcaRelogio" placeholder="Ex: Technos, Casio, Orient"></div>
+          `;
+        } else if(item.tipo === 'joias') {
+          fieldsHtml = `
+            <div class="field-row-2col">
+              <div class="input-group"><label>💎 Descrição da Joia *</label><input type="text" class="text-input" value="${escapeHtml(item.descricaoJoia)}" data-id="${item.id}" data-field="descricaoJoia" placeholder="Ex: Anel de Ouro, Pulseira de Prata"></div>
+              <div class="input-group"><label>💰 Valor da Joia (R$)</label><input type="text" class="discount-input valor-field" style="width:100%" value="${escapeHtml(valorBaseStr)}" data-id="${item.id}" data-field="valorJoia" placeholder="0,00"></div>
+            </div>
+            <div class="input-group"><label>✨ Tipo / Material</label><input type="text" class="text-input" value="${escapeHtml(item.tipoJoia)}" data-id="${item.id}" data-field="tipoJoia" placeholder="Ex: Ouro 18k, Prata, Aço Inox"></div>
+          `;
+        }
+        
+        div.innerHTML = `
+          <div class="orcamento-header"><span>${displayName}</span><button type="button" class="btn-remove-orc" data-id="${item.id}"><i class="fas fa-trash-alt"></i></button></div>
+          <div class="double-col"><div class="input-group"><label>Tipo *</label><select class="select-tipo" data-id="${item.id}" data-field="tipo"><option value="lente" ${item.tipo==='lente'?'selected':''}>Lentes</option><option value="armacao" ${item.tipo==='armacao'?'selected':''}>Armação</option><option value="relogio" ${item.tipo==='relogio'?'selected':''}>Relógio</option><option value="joias" ${item.tipo==='joias'?'selected':''}>Jóias</option></select></div></div>
+          ${fieldsHtml}
+          <div class="input-group"><label>🏷️ Desconto neste item (R$)</label><input type="text" class="discount-input desconto-field" style="width:100%" value="${escapeHtml(descontoItemStr)}" data-id="${item.id}" data-field="descontoItem" placeholder="0,00"></div>
+          <div class="valor-input-hint">💰 Valor líquido deste item: <strong>${formatMoneyWithSymbol(valorLiq)}</strong></div>
+        `;
+        container.appendChild(div);
+      });
+      
+      document.querySelectorAll('.btn-remove-orc').forEach(btn=>btn.addEventListener('click',()=>removeOrcamento(parseInt(btn.dataset.id))));
+      document.querySelectorAll('.select-tipo').forEach(sel=>sel.addEventListener('change',(e)=>{updateOrcamentoField(parseInt(sel.dataset.id),'tipo',sel.value); renderOrcamentosForm();}));
+      document.querySelectorAll('.text-input').forEach(inp => inp.addEventListener('input', (e) => updateOrcamentoField(parseInt(inp.dataset.id), inp.dataset.field, inp.value)));
+      document.querySelectorAll('.valor-field, .desconto-field').forEach(inp => inp.addEventListener('blur', (e) => {
+        let val = parseCurrency(inp.value);
+        inp.value = formatMoneyWithThousand(val);
+        updateOrcamentoField(parseInt(inp.dataset.id), inp.dataset.field, inp.value);
+      }));
+      document.querySelectorAll('.checkbox-ar, .checkbox-filtro').forEach(chk => chk.addEventListener('change', (e) => updateOrcamentoField(parseInt(chk.dataset.id), chk.dataset.field, chk.checked)));
+    }
+    
+    function calcularSubtotalItens() { 
+      let total=0; 
+      for(let item of orcamentos){ 
+        let base=0;
+        if(item.tipo==='lente') base = item.valorLente||0;
+        else if(item.tipo==='armacao') base = item.valorArmacao||0;
+        else if(item.tipo==='relogio') base = item.valorRelogio||0;
+        else if(item.tipo==='joias') base = item.valorJoia||0;
+        total+=Math.max(0,base-(item.descontoItem||0)); 
+      } 
+      return total; 
+    }
+    
+    function calcularTotalFinal() { 
+      let desconto = parseCurrency(descontoGeralInput?.value || '0');
+      return Math.max(0, calcularSubtotalItens() - desconto); 
+    }
+    
+    function renderResumoFinal() {
+      document.getElementById('displayClientName').textContent = clientName.value.trim() || 'Cliente';
+      document.getElementById('displayAtendente').innerHTML = `<i class="fas fa-user-check"></i> ${atendenteSelect.value}`;
+      const container = document.getElementById('resumoItensList'); 
+      if(!container) return;
+      container.innerHTML = '';
+      let idx=1;
+      for(let item of orcamentos){
+        let descricao='', valorBase=0, descontoItem=item.descontoItem||0;
+        if(item.tipo==='lente'){ 
+          let extras = [];
+          if(item.antirreflexo) extras.push('AR');
+          if(item.filtroLuzAzul) extras.push('Filtro Azul');
+          descricao=`👓 ${item.produto||'Lente'} ${item.modelo?`·${item.modelo}`:''} ${item.materialLente?`(${item.materialLente})`:''} ${extras.length?`[${extras.join(', ')}]`:''}`; 
+          valorBase=item.valorLente||0; 
+        }
+        else if(item.tipo==='armacao') { 
+          descricao=`🕶️ ${item.nomeArmacao||'Armação'} ${item.referencia?`(Ref: ${item.referencia})`:''} ${item.materialArmacao?`${item.materialArmacao}`:''}`; 
+          valorBase=item.valorArmacao||0; 
+        }
+        else if(item.tipo==='relogio') {
+          descricao=`⌚ ${item.nomeRelogio||'Relógio'} ${item.marcaRelogio?`(${item.marcaRelogio})`:''}`;
+          valorBase=item.valorRelogio||0;
+        }
+        else if(item.tipo==='joias') {
+          descricao=`💎 ${item.descricaoJoia||'Joia'} ${item.tipoJoia?`(${item.tipoJoia})`:''}`;
+          valorBase=item.valorJoia||0;
+        }
+        let valorLiq = Math.max(0,valorBase-descontoItem);
+        let div = document.createElement('div'); div.className='summary-item';
+        div.innerHTML = `<span class="summary-label">${idx++}. ${descricao}${descontoItem>0?` <span style="color:#e74c3c;">(desc:R$ ${formatMoneyWithThousand(descontoItem)})</span>`:''}</span><span class="summary-value">${formatMoneyWithSymbol(valorLiq)}</span>`;
+        container.appendChild(div);
+      }
+      document.getElementById('subtotalDisplay').textContent = formatMoneyWithSymbol(calcularSubtotalItens());
+      document.getElementById('finalTotalDisplay').textContent = formatMoneyWithSymbol(calcularTotalFinal());
+      
+      updateOrcamentoIdDisplay();
+    }
+    
+    if(descontoGeralInput) {
+      descontoGeralInput.value = '';
+      descontoGeralInput.addEventListener('input', function(e) {
+        let rawValue = this.value.replace(/[^\d,]/g, '');
+        this.value = rawValue;
+        renderResumoFinal();
+      });
+      descontoGeralInput.addEventListener('blur', function() {
+        let valorNumerico = parseCurrency(this.value);
+        if (valorNumerico > 0) {
+          this.value = formatMoneyWithThousand(valorNumerico);
+        } else {
+          this.value = '';
+        }
+        renderResumoFinal();
+      });
+    }
+    
+    function salvarHistorico(status, justificativa='') {
+      let orcamentoData = {
+        id: currentOrcamentoId,
+        data: new Date().toLocaleString('pt-BR'),
+        dataRaw: new Date().toISOString(),
+        atendente: atendenteSelect.value,
+        cliente: clientName.value.trim(),
+        idade: clientAge.value.trim(),
+        telefone: document.getElementById('clientPhone').value.trim(),
+        itens: JSON.parse(JSON.stringify(orcamentos)),
+        subtotal: calcularSubtotalItens(),
+        descontoGeral: parseCurrency(descontoGeralInput?.value),
+        totalFinal: calcularTotalFinal(),
+        status: status,
+        justificativa: justificativa
+      };
+      
+      if (modoEdicao && orcamentoEditandoId) {
+        const index = historicoOrcamentosGlobal.findIndex(item => item.id === orcamentoEditandoId);
+        if (index !== -1) {
+          historicoOrcamentosGlobal[index] = orcamentoData;
+        } else {
+          historicoOrcamentosGlobal.unshift(orcamentoData);
+        }
+        modoEdicao = false;
+        orcamentoEditandoId = null;
+      } else {
+        historicoOrcamentosGlobal.unshift(orcamentoData);
+      }
+      
+      if(historicoOrcamentosGlobal.length > 200) historicoOrcamentosGlobal.pop();
+      localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
+      localStorage.removeItem('orcamentosTemp');
+      localStorage.removeItem('nextIdTemp');
+    }
+    
+    function resetarFormulario() {
+      orcamentos = [getEmptyOrcamento()];
+      nextId = 2;
+      atendenteSelect.value = '';
+      clientName.value = '';
+      clientAge.value = '';
+      clientSource.value = '';
+      document.getElementById('clientPhone').value = '';
+      document.getElementById('hasPrescription').value = 'Não';
+      if(descontoGeralInput) descontoGeralInput.value = '';
+      updateNavButtons();
+      renderOrcamentosForm();
+      goToStep(1);
+      localStorage.removeItem('orcamentosTemp');
+      localStorage.removeItem('nextIdTemp');
+      currentOrcamentoId = generateOrcamentoId();
+      updateOrcamentoIdDisplay();
+      modoEdicao = false;
+      orcamentoEditandoId = null;
+    }
+    
+    function carregarOrcamentoParaEdicao(orcamento) {
+      modoEdicao = true;
+      orcamentoEditandoId = orcamento.id;
+      currentOrcamentoId = orcamento.id;
+      
+      atendenteSelect.value = orcamento.atendente;
+      clientName.value = orcamento.cliente;
+      clientAge.value = orcamento.idade || '';
+      document.getElementById('clientPhone').value = orcamento.telefone || '';
+      
+      orcamentos = JSON.parse(JSON.stringify(orcamento.itens));
+      nextId = orcamentos.length + 1;
+      
+      if(descontoGeralInput) descontoGeralInput.value = formatMoneyWithThousand(orcamento.descontoGeral || 0);
+      
+      updateNavButtons();
+      renderOrcamentosForm();
+      updateOrcamentoIdDisplay();
+      goToStep(3);
+      
+      alert(`Editando orçamento: ${orcamento.id}\nCliente: ${orcamento.cliente}\nStatus atual: ${orcamento.status === 'fechado' ? 'FECHADO' : 'PERDIDO'}\n\nVocê pode modificar os itens e finalizar novamente.`);
+    }
+    
+    function formatPhoneForWhatsApp(phone) {
+      let cleaned = phone.replace(/\D/g, '');
+      if(cleaned.length === 0) return '';
+      if(cleaned.length === 10) cleaned = '55' + cleaned;
+      else if(cleaned.length === 11) cleaned = '55' + cleaned;
+      else if(cleaned.length === 12 && cleaned.startsWith('55')) cleaned = cleaned;
+      else if(cleaned.length === 13 && cleaned.startsWith('55')) cleaned = cleaned;
+      else cleaned = '55' + cleaned;
+      return cleaned;
+    }
+    
+    function mostrarModalFinalizacao() {
+      let modal = document.createElement('div'); modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width:450px;">
+          <h3><i class="fas fa-question-circle"></i> Finalizar Orçamento</h3>
+          <p>O cliente fechou o orçamento?</p>
+          <div style="display:flex; gap:12px; margin:16px 0;">
+            <button id="simFechouBtn" class="btn btn-success" style="flex:1;"><i class="fas fa-check"></i> Sim, fechou</button>
+            <button id="naoFechouBtn" class="btn btn-danger" style="flex:1; background:#e74c3c; color:white;"><i class="fas fa-times"></i> Não fechou</button>
+          </div>
+          <div id="justificativaArea" style="display:none;">
+            <label>Justificativa para não fechamento:</label>
+            <textarea id="justificativaTexto" class="justificativa-input" placeholder="Ex: Cliente achou caro, vai pensar, etc..."></textarea>
+            <button id="confirmarNaoFechouBtn" class="btn btn-primary">Confirmar</button>
+          </div>
+          <button id="cancelarModalBtn" class="btn btn-outline" style="margin-top:12px;">Cancelar</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      const simBtn = modal.querySelector('#simFechouBtn');
+      const naoBtn = modal.querySelector('#naoFechouBtn');
+      const justArea = modal.querySelector('#justificativaArea');
+      const confirmarNao = modal.querySelector('#confirmarNaoFechouBtn');
+      const cancelar = modal.querySelector('#cancelarModalBtn');
+      simBtn.onclick = () => { salvarHistorico('fechado', ''); alert('✅ Orçamento finalizado com VENDA!'); modal.remove(); resetarFormulario(); };
+      naoBtn.onclick = () => { justArea.style.display = 'block'; naoBtn.disabled = true; simBtn.disabled = true; };
+      confirmarNao.onclick = () => { let just = modal.querySelector('#justificativaTexto').value.trim(); if(!just) { alert('Por favor, informe uma justificativa'); return; } salvarHistorico('nao_fechado', just); alert('📋 Orçamento arquivado sem venda.'); modal.remove(); resetarFormulario(); };
+      cancelar.onclick = () => modal.remove();
+    }
+    
+    document.getElementById('finalizarOrcamentoBtn')?.addEventListener('click', mostrarModalFinalizacao);
+    
+    async function gerarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
+      const pageWidth = 210;
+      const marginLeft = 15;
+      let y = 25;
+      
+      function addHeader() {
+        doc.setFillColor(252, 84, 4);
+        doc.rect(0, 0, pageWidth, 35, 'F');
+        
+        try {
+          doc.addImage(LOGO_BASE64, 'PNG', 175, 5, 20, 20);
+        } catch(e) {
+          console.warn("Erro ao adicionar logo:", e);
+        }
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.text('Ótica Grau Divino', marginLeft, 18);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text(`Orçamento gerado em: ${new Date().toLocaleString('pt-BR')}`, marginLeft, 28);
+        doc.setTextColor(30, 31, 42);
+        y = 45;
+      }
+      
+      function addFooter() {
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i);
+          doc.setFontSize(9);
+          doc.setTextColor(100, 100, 120);
+          doc.text(currentOrcamentoId, pageWidth / 2, 287, { align: 'center' });
+        }
+      }
+      
+      addHeader();
+      
+      doc.setFillColor(245, 247, 250);
+      doc.rect(marginLeft, y, 180, 32, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 31, 42);
+      doc.text(`Cliente: ${clientName.value.trim() || 'Cliente'}`, marginLeft+2, y+8);
+      doc.text(`Idade: ${clientAge.value.trim() || '--'} anos`, marginLeft+2, y+16);
+      doc.text(`Telefone: ${document.getElementById('clientPhone').value.trim() || 'Não informado'}`, marginLeft+2, y+24);
+      doc.text(`Atendente: ${atendenteSelect.value}`, marginLeft+120, y+8);
+      y += 38;
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(252, 84, 4);
+      doc.text('ITENS DO ORÇAMENTO', marginLeft, y);
+      y += 10;
+      
+      for(let idx = 0; idx < orcamentos.length; idx++) {
+        const item = orcamentos[idx];
+        const itemHeight = 28;
+        if(y + itemHeight > 270) {
+          doc.addPage();
+          addHeader();
+          y = 45;
+        }
+        
+        doc.setFillColor(249, 250, 252);
+        doc.rect(marginLeft, y-3, 180, itemHeight-2, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(252, 84, 4);
+        doc.text(`${idx+1}. ${item.tipo === 'lente' ? 'LENTE' : (item.tipo === 'armacao' ? 'ARMAÇÃO' : (item.tipo === 'relogio' ? 'RELÓGIO' : 'JOIAS'))}`, marginLeft, y);
+        y += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(60, 60, 70);
+        doc.setFontSize(9);
+        
+        if(item.tipo === 'lente') {
+          doc.text(`   Produto: ${item.produto || '—'}`, marginLeft, y); y += 5;
+          if(item.modelo) { doc.text(`   Modelo: ${item.modelo}`, marginLeft, y); y += 5; }
+          if(item.materialLente) { doc.text(`   Material: ${item.materialLente}`, marginLeft, y); y += 5; }
+          let extras = [];
+          if(item.antirreflexo) extras.push('Antirreflexo');
+          if(item.filtroLuzAzul) extras.push('Filtro Luz Azul');
+          if(extras.length) { doc.text(`   Adicionais: ${extras.join(', ')}`, marginLeft, y); y += 5; }
+          const valorLiq = (item.valorLente||0) - (item.descontoItem||0);
+          doc.text(`   Valor líquido: ${formatMoneyWithSymbol(valorLiq)}`, marginLeft, y); y += 5;
+          if(item.descontoItem > 0) { doc.text(`   Desconto: ${formatMoneyWithSymbol(item.descontoItem)}`, marginLeft, y); y += 5; }
+        } else if(item.tipo === 'armacao') {
+          doc.text(`   Modelo: ${item.nomeArmacao || '—'}`, marginLeft, y); y += 5;
+          if(item.referencia) { doc.text(`   Referência: ${item.referencia}`, marginLeft, y); y += 5; }
+          if(item.materialArmacao) { doc.text(`   Material: ${item.materialArmacao}`, marginLeft, y); y += 5; }
+          const valorLiq = (item.valorArmacao||0) - (item.descontoItem||0);
+          doc.text(`   Valor líquido: ${formatMoneyWithSymbol(valorLiq)}`, marginLeft, y); y += 5;
+          if(item.descontoItem > 0) { doc.text(`   Desconto: ${formatMoneyWithSymbol(item.descontoItem)}`, marginLeft, y); y += 5; }
+        } else if(item.tipo === 'relogio') {
+          doc.text(`   Nome: ${item.nomeRelogio || '—'}`, marginLeft, y); y += 5;
+          if(item.marcaRelogio) { doc.text(`   Marca: ${item.marcaRelogio}`, marginLeft, y); y += 5; }
+          const valorLiq = (item.valorRelogio||0) - (item.descontoItem||0);
+          doc.text(`   Valor líquido: ${formatMoneyWithSymbol(valorLiq)}`, marginLeft, y); y += 5;
+          if(item.descontoItem > 0) { doc.text(`   Desconto: ${formatMoneyWithSymbol(item.descontoItem)}`, marginLeft, y); y += 5; }
+        } else if(item.tipo === 'joias') {
+          doc.text(`   Descrição: ${item.descricaoJoia || '—'}`, marginLeft, y); y += 5;
+          if(item.tipoJoia) { doc.text(`   Tipo: ${item.tipoJoia}`, marginLeft, y); y += 5; }
+          const valorLiq = (item.valorJoia||0) - (item.descontoItem||0);
+          doc.text(`   Valor líquido: ${formatMoneyWithSymbol(valorLiq)}`, marginLeft, y); y += 5;
+          if(item.descontoItem > 0) { doc.text(`   Desconto: ${formatMoneyWithSymbol(item.descontoItem)}`, marginLeft, y); y += 5; }
+        }
+        y += 4;
+        doc.setDrawColor(220, 220, 230);
+        doc.line(marginLeft, y-2, marginLeft+180, y-2);
+      }
+      
+      y += 10;
+      if(y > 270) { doc.addPage(); addHeader(); y = 45; }
+      doc.setFillColor(254, 243, 232);
+      doc.rect(marginLeft+100, y-5, 80, 35, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 31, 42);
+      doc.text(`Subtotal: ${formatMoneyWithSymbol(calcularSubtotalItens())}`, marginLeft+105, y); y += 7;
+      const descontoGeral = parseCurrency(descontoGeralInput?.value);
+      if(descontoGeral > 0) { doc.text(`Desconto geral: - ${formatMoneyWithSymbol(descontoGeral)}`, marginLeft+105, y); y += 7; }
+      doc.setFontSize(14);
+      doc.setTextColor(252, 84, 4);
+      doc.text(`TOTAL: ${formatMoneyWithSymbol(calcularTotalFinal())}`, marginLeft+105, y);
+      
+      addFooter();
+      
+      let nomeCliente = clientName.value.trim() || 'cliente';
+      nomeCliente = nomeCliente.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      nomeCliente = nomeCliente.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+      if (nomeCliente === '') nomeCliente = 'orcamento';
+      doc.save(`orcamento_${nomeCliente}.pdf`);
+    }
+    
+    document.getElementById('pdfBtn')?.addEventListener('click', gerarPDF);
+    document.getElementById('printBtn')?.addEventListener('click', () => { window.print(); });
+    
+    document.getElementById('whatsBtn')?.addEventListener('click', () => {
+      const nome = clientName.value.trim() || 'Cliente';
+      const idade = clientAge.value.trim() || '--';
+      let telefone = document.getElementById('clientPhone').value.trim();
+      const atendente = atendenteSelect.value;
+      const dataAtual = new Date().toLocaleDateString('pt-BR');
+      
+      let itensTexto = '';
+      orcamentos.forEach((item, i) => {
+        let valorBase = 0;
+        let descLinhas = '';
+        if(item.tipo === 'lente') {
+          valorBase = item.valorLente||0;
+          const extras = [];
+          if(item.antirreflexo) extras.push('Antirreflexo incluso');
+          if(item.filtroLuzAzul) extras.push('Filtro Luz Azul incluso');
+          descLinhas = `▸ Produto: ${item.produto || '—'}\n`;
+          if(item.modelo) descLinhas += `▸ Modelo: ${item.modelo}\n`;
+          if(item.materialLente) descLinhas += `▸ Material: ${item.materialLente}\n`;
+          if(extras.length) descLinhas += `▸ Adicionais: ${extras.join(', ')}\n`;
+          itensTexto += `\n\n📌 *LENTE ${i+1}*\n${descLinhas}`;
+        } else if(item.tipo === 'armacao') {
+          valorBase = item.valorArmacao||0;
+          descLinhas = `▸ Modelo: ${item.nomeArmacao || '—'}\n`;
+          if(item.referencia) descLinhas += `▸ Referência: ${item.referencia}\n`;
+          if(item.materialArmacao) descLinhas += `▸ Material: ${item.materialArmacao}\n`;
+          itensTexto += `\n\n🕶️ *ARMAÇÃO ${i+1}*\n${descLinhas}`;
+        } else if(item.tipo === 'relogio') {
+          valorBase = item.valorRelogio||0;
+          descLinhas = `▸ Nome: ${item.nomeRelogio || '—'}\n`;
+          if(item.marcaRelogio) descLinhas += `▸ Marca: ${item.marcaRelogio}\n`;
+          itensTexto += `\n\n⌚ *RELÓGIO ${i+1}*\n${descLinhas}`;
+        } else if(item.tipo === 'joias') {
+          valorBase = item.valorJoia||0;
+          descLinhas = `▸ Descrição: ${item.descricaoJoia || '—'}\n`;
+          if(item.tipoJoia) descLinhas += `▸ Tipo: ${item.tipoJoia}\n`;
+          itensTexto += `\n\n💎 *JOIA ${i+1}*\n${descLinhas}`;
+        }
+        const valorLiq = valorBase - (item.descontoItem||0);
+        if(item.descontoItem > 0) itensTexto += `▸ Desconto: R$ ${formatMoneyWithThousand(item.descontoItem)}\n`;
+        itensTexto += `▸ *Valor: R$ ${formatMoneyWithThousand(valorLiq)}*`;
+      });
+      
+      const subtotal = calcularSubtotalItens();
+      const descontoGeral = parseCurrency(descontoGeralInput?.value);
+      const totalFinal = calcularTotalFinal();
+      
+      const msg = ` *ÓTICA GRAU DIVINO*
+━━━━━━━━━━━━━━━━━
+*ORÇAMENTO: ${nome.toUpperCase()}*
+*ID: ${currentOrcamentoId}*
+━━━━━━━━━━━━━━━━━
+
+*CLIENTE*
+▸ Nome: ${nome}
+▸ Idade: ${idade} anos
+▸ Telefone: ${telefone || 'Não informado'}
+
+*ITENS ORÇADOS*${itensTexto}
+
+━━━━━━━━━━━━━━━━━
+*RESUMO FINANCEIRO*
+▸ Subtotal: R$ ${formatMoneyWithThousand(subtotal)}
+${descontoGeral > 0 ? `▸ Desconto geral: - R$ ${formatMoneyWithThousand(descontoGeral)}\n` : ''}▸ *TOTAL: R$ ${formatMoneyWithThousand(totalFinal)}*
+━━━━━━━━━━━━━━━━━
+
+Atendente: ${atendente}
+${dataAtual}
+
+*Aguardamos sua visita!* `;
+      
+      if(telefone) {
+        const formattedPhone = formatPhoneForWhatsApp(telefone);
+        window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+      } else {
+        alert('Por favor, informe o número de telefone do cliente na etapa 2 para enviar a mensagem!');
+      }
+    });
+    
+    document.getElementById('addOrcamentoBtn')?.addEventListener('click',()=>addOrcamento());
+    carregarOrcamentosTemporarios();
+    if(orcamentos.length === 0) orcamentos.push(getEmptyOrcamento());
+    renderOrcamentosForm();
+    currentOrcamentoId = generateOrcamentoId();
+    updateOrcamentoIdDisplay();
+    goToStep(1);
+
+    // ========== DASHBOARD ADMIN COM FILTROS E DELETE ==========
+    function deletarOrcamento(id, nomeCliente) {
+      const confirmModal = document.createElement('div'); confirmModal.className = 'modal-overlay';
+      confirmModal.innerHTML = `
+        <div class="modal-content" style="max-width:400px;">
+          <h3><i class="fas fa-trash-alt" style="color:#e74c3c;"></i> Confirmar exclusão</h3>
+          <p>Tem certeza que deseja excluir o orçamento de <strong>${escapeHtml(nomeCliente)}</strong>?</p>
+          <p style="font-size:0.8rem; color:#666; margin-top:8px;">ID: ${escapeHtml(id)}</p>
+          <div class="modal-buttons" style="margin-top:20px;">
+            <button id="confirmDeleteBtn" class="btn btn-danger" style="flex:1;">Sim, excluir</button>
+            <button id="cancelDeleteBtn" class="btn btn-outline" style="flex:1;">Cancelar</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(confirmModal);
+      
+      confirmModal.querySelector('#confirmDeleteBtn').onclick = () => {
+        historicoOrcamentosGlobal = historicoOrcamentosGlobal.filter(item => item.id !== id);
+        localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
+        alert(`✅ Orçamento ${id} excluído com sucesso!`);
+        confirmModal.remove();
+        renderizarDashboardComFiltros();
+      };
+      confirmModal.querySelector('#cancelDeleteBtn').onclick = () => confirmModal.remove();
+    }
+    
+    function marcarComoVendaRealizada(id, nomeCliente) {
+      const index = historicoOrcamentosGlobal.findIndex(item => item.id === id);
+      if (index !== -1 && historicoOrcamentosGlobal[index].status !== 'fechado') {
+        historicoOrcamentosGlobal[index].status = 'fechado';
+        historicoOrcamentosGlobal[index].justificativa = 'Convertido para venda via dashboard';
+        localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
+        alert(`✅ Orçamento de ${nomeCliente} marcado como VENDA REALIZADA!`);
+        renderizarDashboardComFiltros();
+      } else if (index !== -1 && historicoOrcamentosGlobal[index].status === 'fechado') {
+        alert(`ℹ️ Este orçamento já está marcado como VENDA REALIZADA.`);
+      } else {
+        alert(`❌ Orçamento não encontrado.`);
+      }
+    }
+    
+    function editarOrcamento(orcamento) {
+      // Fechar o modal do dashboard se estiver aberto
+      const adminModal = document.querySelector('.modal-overlay');
+      if (adminModal) adminModal.remove();
+      
+      // Carregar o orçamento para edição
+      modoEdicao = true;
+      orcamentoEditandoId = orcamento.id;
+      currentOrcamentoId = orcamento.id;
+      
+      atendenteSelect.value = orcamento.atendente;
+      clientName.value = orcamento.cliente;
+      clientAge.value = orcamento.idade || '';
+      document.getElementById('clientPhone').value = orcamento.telefone || '';
+      
+      orcamentos = JSON.parse(JSON.stringify(orcamento.itens));
+      nextId = orcamentos.length + 1;
+      
+      if(descontoGeralInput) descontoGeralInput.value = formatMoneyWithThousand(orcamento.descontoGeral || 0);
+      
+      updateNavButtons();
+      renderOrcamentosForm();
+      updateOrcamentoIdDisplay();
+      goToStep(3);
+      
+      alert(`Editando orçamento: ${orcamento.id}\nCliente: ${orcamento.cliente}\nStatus atual: ${orcamento.status === 'fechado' ? 'FECHADO' : 'PERDIDO'}\n\nVocê pode modificar os itens e finalizar novamente.`);
+    }
+    
+    function renderizarDashboardComFiltros() {
+      let data = [...historicoOrcamentosGlobal];
+      
+      const filtroPeriodo = document.getElementById('filtroPeriodo')?.value || 'todos';
+      const filtroMes = document.getElementById('filtroMes')?.value;
+      const filtroAno = document.getElementById('filtroAno')?.value;
+      const filtroValorTipo = document.getElementById('filtroValorTipo')?.value || 'todos';
+      const filtroValorComp = parseCurrency(document.getElementById('filtroValorComp')?.value || '0');
+      const filtroIdade = document.getElementById('filtroIdade')?.value;
+      const filtroCliente = document.getElementById('filtroCliente')?.value?.toLowerCase() || '';
+      
+      if (filtroPeriodo === 'mes' && filtroMes) {
+        const [ano, mes] = filtroMes.split('-');
+        data = data.filter(item => {
+          const d = new Date(item.dataRaw);
+          return d.getFullYear() === parseInt(ano) && (d.getMonth() + 1) === parseInt(mes);
+        });
+      } else if (filtroPeriodo === 'ano' && filtroAno) {
+        data = data.filter(item => new Date(item.dataRaw).getFullYear() === parseInt(filtroAno));
+      }
+      
+      if (filtroValorTipo !== 'todos' && filtroValorComp > 0) {
+        data = data.filter(item => {
+          const val = item.totalFinal || 0;
+          if (filtroValorTipo === 'maior') return val > filtroValorComp;
+          if (filtroValorTipo === 'menor') return val < filtroValorComp;
+          if (filtroValorTipo === 'igual') return Math.abs(val - filtroValorComp) < 0.01;
+          return true;
+        });
+      }
+      
+      if (filtroIdade && filtroIdade !== '') {
+        data = data.filter(item => item.idade && item.idade.toString() === filtroIdade);
+      }
+      
+      if (filtroCliente && filtroCliente !== '') {
+        data = data.filter(item => item.cliente && item.cliente.toLowerCase().includes(filtroCliente));
+      }
+      
+      const container = document.getElementById('dashboardContent');
+      if (!data || !data.length) {
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-chart-line"></i> Nenhum orçamento encontrado com os filtros aplicados.</div>`;
+        return;
+      }
+
+      const totalOrcamentos = data.length;
+      const totalVendas = data.filter(i => i.status === 'fechado').length;
+      const totalPerdidos = data.filter(i => i.status === 'nao_fechado').length;
+      const valorTotalVendido = data.filter(i => i.status === 'fechado').reduce((acc, i) => acc + (i.totalFinal || 0), 0);
+      const valorPerdidoTotal = data.filter(i => i.status === 'nao_fechado').reduce((acc, i) => acc + (i.totalFinal || 0), 0);
+      const taxaConversaoGeral = totalOrcamentos ? ((totalVendas / totalOrcamentos) * 100).toFixed(1) : 0;
+
+      const mesesMap = new Map();
+      data.forEach(item => {
+        let dataObj = new Date(item.dataRaw);
+        if (isNaN(dataObj)) dataObj = new Date();
+        const mesAno = dataObj.toLocaleString('pt-BR', { month: 'short', year: 'numeric' });
+        if (!mesesMap.has(mesAno)) {
+          mesesMap.set(mesAno, { vendas: 0, perdidos: 0, valorPerdido: 0 });
+        }
+        const grupo = mesesMap.get(mesAno);
+        if (item.status === 'fechado') {
+          grupo.vendas++;
+        } else if (item.status === 'nao_fechado') {
+          grupo.perdidos++;
+          grupo.valorPerdido += (item.totalFinal || 0);
+        }
+      });
+      const mesesLabels = Array.from(mesesMap.keys());
+      const vendasCount = mesesLabels.map(m => mesesMap.get(m).vendas);
+      const perdidosCount = mesesLabels.map(m => mesesMap.get(m).perdidos);
+      const valorPerdidoMensal = mesesLabels.map(m => mesesMap.get(m).valorPerdido);
+
+      const vendedoresMap = new Map();
+      data.forEach(item => {
+        const vendedor = item.atendente || 'Não definido';
+        if (!vendedoresMap.has(vendedor)) {
+          vendedoresMap.set(vendedor, {
+            vendas: 0,
+            perdidos: 0,
+            valorVendido: 0,
+            valorPerdido: 0,
+            justificativas: []
+          });
+        }
+        const reg = vendedoresMap.get(vendedor);
+        if (item.status === 'fechado') {
+          reg.vendas++;
+          reg.valorVendido += (item.totalFinal || 0);
+        } else if (item.status === 'nao_fechado') {
+          reg.perdidos++;
+          reg.valorPerdido += (item.totalFinal || 0);
+          if (item.justificativa) {
+            reg.justificativas.push({
+              id: item.id,
+              data: item.data,
+              cliente: item.cliente,
+              motivo: item.justificativa,
+              valor: item.totalFinal
+            });
+          }
+        }
+      });
+
+      const vendedoresSorted = Array.from(vendedoresMap.entries()).sort((a, b) => b[1].valorPerdido - a[1].valorPerdido);
+
+      let html = `
+        <div class="dashboard-stats">
+          <div class="stat-card"><div class="stat-label">📋 TOTAL ORÇAMENTOS</div><div class="stat-value">${totalOrcamentos}</div><div class="stat-sub">registros no sistema</div></div>
+          <div class="stat-card"><div class="stat-label">✅ VENDAS FECHADAS</div><div class="stat-value">${totalVendas}</div><div class="stat-sub">conversão ${taxaConversaoGeral}%</div></div>
+          <div class="stat-card"><div class="stat-label">❌ PERDIDOS / NÃO FECHADOS</div><div class="stat-value">${totalPerdidos}</div><div class="stat-sub">taxa de perda ${totalOrcamentos ? ((totalPerdidos/totalOrcamentos)*100).toFixed(1) : 0}%</div></div>
+          <div class="stat-card"><div class="stat-label">💰 FATURAMENTO (VENDAS)</div><div class="stat-value">${formatMoneyWithSymbol(valorTotalVendido)}</div><div class="stat-sub">receita líquida</div></div>
+          <div class="stat-card"><div class="stat-label">💸 VALOR PERDIDO (OPORTUNIDADE)</div><div class="stat-value" style="color:#e74c3c;">${formatMoneyWithSymbol(valorPerdidoTotal)}</div><div class="stat-sub">orçamentos não realizados</div></div>
+        </div>
+      `;
+
+      if (mesesLabels.length > 0) {
+        html += `
+          <div class="charts-row">
+            <div class="chart-card"><h4><i class="fas fa-chart-line"></i> Evolução Mensal: Vendas vs. Perdas</h4><canvas id="monthlyCompareChart" width="400" height="250"></canvas></div>
+            <div class="chart-card"><h4><i class="fas fa-money-bill-wave"></i> Valor Perdido por Mês (R$)</h4><canvas id="lostValueChart" width="400" height="250"></canvas></div>
+          </div>
+        `;
+      }
+
+      html += `
+        <div class="section-title"><i class="fas fa-users"></i> Performance por Atendente</div>
+        <table class="performer-table"><thead><th>Vendedor(a)</th><th>Vendas</th><th>Perdidos</th><th>Valor Vendido</th><th>VALOR PERDIDO (R$)</th><th>Taxa Conversão</th></tr></thead><tbody>
+      `;
+      for (const [nome, d] of vendedoresSorted) {
+        const totalAtendimentos = d.vendas + d.perdidos;
+        const taxa = totalAtendimentos > 0 ? ((d.vendas / totalAtendimentos) * 100).toFixed(1) : 0;
+        html += `<tr><td><strong>${escapeHtml(nome)}</strong></td><td>${d.vendas}</td><td>${d.perdidos}</td><td>${formatMoneyWithSymbol(d.valorVendido)}</td><td class="lost-amount">${formatMoneyWithSymbol(d.valorPerdido)}</td><td><span class="badge ${taxa >= 50 ? 'badge-success' : 'badge-danger'}">${taxa}%</span></td></tr>`;
+      }
+      html += `</tbody></table>`;
+
+      html += `<div class="section-title"><i class="fas fa-list"></i> Lista de Orçamentos <button id="btnExcluirSelecionados" class="btn btn-danger" style="padding:6px 12px; font-size:0.75rem; margin-left:10px;"><i class="fas fa-trash-alt"></i> Excluir Selecionados</button></div>`;
+      html += `<div class="orcamentos-list" id="listaOrcamentos">`;
+      
+      data.forEach(item => {
+        const statusClass = item.status === 'fechado' ? 'status-fechado' : 'status-perdido';
+        const statusText = item.status === 'fechado' ? '✅ FECHADO' : '❌ PERDIDO';
+        html += `
+          <div class="orcamento-card" data-id="${escapeHtml(item.id)}">
+            <input type="checkbox" class="checkbox-delete" data-id="${escapeHtml(item.id)}" style="width:20px; height:20px; margin-right:10px;">
+            <div class="orcamento-info">
+              <strong>${escapeHtml(item.id)}</strong><br>
+              <span>👤 ${escapeHtml(item.cliente)}</span> | 
+              <span>📅 ${escapeHtml(item.data)}</span> | 
+              <span>💰 ${formatMoneyWithSymbol(item.totalFinal)}</span> | 
+              <span>👨‍💼 ${escapeHtml(item.atendente)}</span>
+              ${item.idade ? `<span> | 🎂 ${escapeHtml(item.idade)} anos</span>` : ''}
+            </div>
+            <div class="btn-group">
+              <span class="orcamento-status ${statusClass}">${statusText}</span>
+              <button class="btn-delete-single btn btn-delete" data-id="${escapeHtml(item.id)}" data-cliente="${escapeHtml(item.cliente)}"><i class="fas fa-trash"></i> Excluir</button>
+              <button class="btn-edit-single btn btn-edit" data-id="${escapeHtml(item.id)}"><i class="fas fa-edit"></i> Editar</button>
+              ${item.status !== 'fechado' ? `<button class="btn-sale-single btn btn-sale" data-id="${escapeHtml(item.id)}" data-cliente="${escapeHtml(item.cliente)}"><i class="fas fa-check-circle"></i> Venda Realizada</button>` : ''}
+            </div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+
+      html += `<div class="section-title"><i class="fas fa-comment-dots"></i> Principais Motivos de Perda</div>`;
+      let hasJustificativas = false;
+      for (const [nome, d] of vendedoresSorted) {
+        if (d.justificativas.length > 0) {
+          hasJustificativas = true;
+          html += `<div style="margin-top: 20px;"><strong><i class="fas fa-user-tie"></i> ${escapeHtml(nome)}</strong> — Perdeu R$ ${formatMoneyWithThousand(d.valorPerdido)} em ${d.perdidos} orçamento(s)</div>`;
+          for (const j of d.justificativas) {
+            html += `<div class="justificativa-list"><i class="fas fa-times-circle" style="color:#e74c3c"></i> <strong>${escapeHtml(j.cliente)}</strong> (${j.data}) — Valor: ${formatMoneyWithSymbol(j.valor)}<br>📌 Motivo: ${escapeHtml(j.motivo)}<br>🆔 ID: ${j.id}</div>`;
+          }
+        }
+      }
+      if (!hasJustificativas) {
+        html += `<div class="justificativa-list" style="background:#f1f5f9;">Nenhum orçamento perdido com justificativa registrada até o momento.</div>`;
+      }
+
+      container.innerHTML = html;
+      
+      // Adicionar event listeners diretamente aos botões após criar o HTML
+      document.querySelectorAll('.btn-delete-single').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = btn.getAttribute('data-id');
+          const cliente = btn.getAttribute('data-cliente');
+          if (id && cliente) deletarOrcamento(id, cliente);
+        });
+      });
+      
+      document.querySelectorAll('.btn-edit-single').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = btn.getAttribute('data-id');
+          const orcamento = historicoOrcamentosGlobal.find(item => item.id === id);
+          if (orcamento) editarOrcamento(orcamento);
+        });
+      });
+      
+      document.querySelectorAll('.btn-sale-single').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = btn.getAttribute('data-id');
+          const cliente = btn.getAttribute('data-cliente');
+          if (id && cliente) marcarComoVendaRealizada(id, cliente);
+        });
+      });
+      
+      const btnExcluirSelecionados = document.getElementById('btnExcluirSelecionados');
+      if (btnExcluirSelecionados) {
+        btnExcluirSelecionados.onclick = () => {
+          const checkboxes = document.querySelectorAll('.checkbox-delete:checked');
+          if (checkboxes.length === 0) {
+            alert('Selecione pelo menos um orçamento para excluir.');
+            return;
+          }
+          
+          const idsSelecionados = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+          const nomesClientes = [];
+          idsSelecionados.forEach(id => {
+            const item = historicoOrcamentosGlobal.find(i => i.id === id);
+            if (item) nomesClientes.push(item.cliente);
+          });
+          
+          const confirmModal = document.createElement('div'); confirmModal.className = 'modal-overlay';
+          confirmModal.innerHTML = `
+            <div class="modal-content" style="max-width:450px;">
+              <h3><i class="fas fa-trash-alt" style="color:#e74c3c;"></i> Confirmar exclusão em massa</h3>
+              <p>Tem certeza que deseja excluir <strong>${checkboxes.length} orçamento(s)</strong>?</p>
+              <p style="font-size:0.8rem; color:#666;">Clientes: ${nomesClientes.join(', ').substring(0, 100)}${nomesClientes.length > 2 ? '...' : ''}</p>
+              <div class="modal-buttons" style="margin-top:20px;">
+                <button id="confirmMassDeleteBtn" class="btn btn-danger" style="flex:1;">Sim, excluir todos</button>
+                <button id="cancelMassDeleteBtn" class="btn btn-outline" style="flex:1;">Cancelar</button>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(confirmModal);
+          
+          confirmModal.querySelector('#confirmMassDeleteBtn').onclick = () => {
+            historicoOrcamentosGlobal = historicoOrcamentosGlobal.filter(item => !idsSelecionados.includes(item.id));
+            localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
+            alert(`✅ ${idsSelecionados.length} orçamento(s) excluído(s) com sucesso!`);
+            confirmModal.remove();
+            renderizarDashboardComFiltros();
+          };
+          confirmModal.querySelector('#cancelMassDeleteBtn').onclick = () => confirmModal.remove();
+        };
+      }
+
+      if (mesesLabels.length > 0) {
+        setTimeout(() => {
+          const ctxLine = document.getElementById('monthlyCompareChart')?.getContext('2d');
+          const ctxBar = document.getElementById('lostValueChart')?.getContext('2d');
+          if (ctxLine) {
+            new Chart(ctxLine, {
+              type: 'line',
+              data: { labels: mesesLabels, datasets: [{ label: 'Vendas fechadas', data: vendasCount, borderColor: '#25d366', backgroundColor: 'rgba(37,211,102,0.1)', tension: 0.3, fill: true }, { label: 'Orçamentos perdidos', data: perdidosCount, borderColor: '#e74c3c', backgroundColor: 'rgba(231,76,60,0.05)', tension: 0.3, fill: true }] },
+              options: { responsive: true, maintainAspectRatio: true }
+            });
+          }
+          if (ctxBar) {
+            new Chart(ctxBar, {
+              type: 'bar',
+              data: { labels: mesesLabels, datasets: [{ label: 'Valor perdido (R$)', data: valorPerdidoMensal, backgroundColor: '#fc5404', borderRadius: 10 }] },
+              options: { responsive: true, maintainAspectRatio: true, plugins: { tooltip: { callbacks: { label: (ctx) => `R$ ${ctx.raw.toFixed(2)}` } } } }
+            });
+          }
+        }, 100);
+      }
+    }
+
+    document.getElementById('adminAccessBtn').addEventListener('click', () => {
+      let loginModal = document.createElement('div'); loginModal.className = 'modal-overlay';
+      loginModal.innerHTML = `
+        <div class="modal-content" style="max-width:400px;">
+          <h3><i class="fas fa-user-shield"></i> Acesso Administrativo</h3>
+          <div class="input-group"><label>Usuário</label><input type="text" id="adminUser" placeholder="usuário"></div>
+          <div class="input-group"><label>Senha</label><input type="password" id="adminPass" placeholder="senha"></div>
+          <div class="modal-buttons"><button id="loginAdminBtn" class="btn btn-primary">Entrar</button><button id="cancelLoginBtn" class="btn btn-outline">Cancelar</button></div>
+        </div>
+      `;
+      document.body.appendChild(loginModal);
+      
+      const handleLogin = () => {
+        const user = loginModal.querySelector('#adminUser').value;
+        const pass = loginModal.querySelector('#adminPass').value;
+        if (user === 'jauna' && pass === '176320') {
+          loginModal.remove();
+          
+          const mesesOptions = [];
+          const anosSet = new Set();
+          historicoOrcamentosGlobal.forEach(item => {
+            if (item.dataRaw) {
+              const d = new Date(item.dataRaw);
+              if (!isNaN(d)) {
+                const key = `${d.getFullYear()}-${d.getMonth()+1}`;
+                const label = d.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+                if (!mesesOptions.find(m => m.value === key)) {
+                  mesesOptions.push({ value: key, label: label });
+                }
+                anosSet.add(d.getFullYear());
+              }
+            }
+          });
+          mesesOptions.sort((a,b) => b.value.localeCompare(a.value));
+          const anosOptions = Array.from(anosSet).sort((a,b) => b - a);
+          
+          let adminModal = document.createElement('div'); adminModal.className = 'modal-overlay';
+          adminModal.innerHTML = `
+            <div class="modal-content" style="max-width:1300px;">
+              <div class="dashboard-container" style="width:100%;">
+                <div class="dashboard-header">
+                  <h1><i class="fas fa-chart-pie"></i> Dashboard Avançado </h1>
+                  <button class="refresh-btn" id="refreshDashboardBtnAdmin"><i class="fas fa-sync-alt"></i> Atualizar Dados</button>
+                </div>
+                
+                <div class="filter-bar">
+                  <div class="filter-group">
+                    <label>📅 Período:</label>
+                    <select id="filtroPeriodo">
+                      <option value="todos">Todos os períodos</option>
+                      <option value="mes">Mês específico</option>
+                      <option value="ano">Ano específico</option>
+                    </select>
+                  </div>
+                  <div class="filter-group" id="grupoFiltroMes" style="display:none;">
+                    <label>📆 Selecionar Mês/Ano:</label>
+                    <select id="filtroMes">
+                      <option value="">Selecione...</option>
+                      ${mesesOptions.map(m => `<option value="${m.value}">${m.label}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div class="filter-group" id="grupoFiltroAno" style="display:none;">
+                    <label>📆 Selecionar Ano:</label>
+                    <select id="filtroAno">
+                      <option value="">Selecione...</option>
+                      ${anosOptions.map(a => `<option value="${a}">${a}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label>💰 Filtrar por valor:</label>
+                    <select id="filtroValorTipo">
+                      <option value="todos">Todos</option>
+                      <option value="maior">Maior que</option>
+                      <option value="menor">Menor que</option>
+                      <option value="igual">Igual a</option>
+                    </select>
+                  </div>
+                  <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <input type="text" id="filtroValorComp" placeholder="R$ 0,00">
+                  </div>
+                  <div class="filter-group">
+                    <label>🎂 Idade exata:</label>
+                    <input type="text" id="filtroIdade" placeholder="Digite a idade">
+                  </div>
+                  <div class="filter-group">
+                    <label>👤 Nome do cliente:</label>
+                    <input type="text" id="filtroCliente" placeholder="Buscar por nome">
+                  </div>
+                </div>
+                
+                <div id="dashboardContent"><div class="empty-state"><i class="fas fa-spinner fa-pulse"></i> Carregando...</div></div>
+              </div>
+              <div class="modal-buttons"><button id="closeAdminBtn" class="btn btn-primary">Fechar</button></div>
+            </div>
+          `;
+          document.body.appendChild(adminModal);
+          
+          const periodoSelect = adminModal.querySelector('#filtroPeriodo');
+          const grupoMes = adminModal.querySelector('#grupoFiltroMes');
+          const grupoAno = adminModal.querySelector('#grupoFiltroAno');
+          
+          periodoSelect.addEventListener('change', () => {
+            const val = periodoSelect.value;
+            grupoMes.style.display = val === 'mes' ? 'block' : 'none';
+            grupoAno.style.display = val === 'ano' ? 'block' : 'none';
+            renderizarDashboardComFiltros();
+          });
+          
+          adminModal.querySelector('#filtroMes')?.addEventListener('change', () => renderizarDashboardComFiltros());
+          adminModal.querySelector('#filtroAno')?.addEventListener('change', () => renderizarDashboardComFiltros());
+          adminModal.querySelector('#filtroValorTipo')?.addEventListener('change', () => renderizarDashboardComFiltros());
+          adminModal.querySelector('#filtroValorComp')?.addEventListener('blur', function() {
+            this.value = formatMoneyWithThousand(parseCurrency(this.value));
+            renderizarDashboardComFiltros();
+          });
+          adminModal.querySelector('#filtroIdade')?.addEventListener('input', () => renderizarDashboardComFiltros());
+          adminModal.querySelector('#filtroCliente')?.addEventListener('input', () => renderizarDashboardComFiltros());
+          adminModal.querySelector('#refreshDashboardBtnAdmin').onclick = () => renderizarDashboardComFiltros();
+          
+          renderizarDashboardComFiltros();
+          adminModal.querySelector('#closeAdminBtn').onclick = () => adminModal.remove();
+        } else { alert('❌ Usuário ou senha incorretos!'); }
+      };
+      
+      const loginBtn = loginModal.querySelector('#loginAdminBtn');
+      const passInput = loginModal.querySelector('#adminPass');
+      loginBtn.onclick = handleLogin;
+      passInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(); });
+      loginModal.querySelector('#cancelLoginBtn').onclick = () => loginModal.remove();
+    });
+
+    window.addEventListener('beforeunload', (e) => {
+      e.preventDefault();
+      e.returnValue = '';
+    });
+  })();
+</script>
+</body>
+</html>
