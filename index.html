@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * {
       margin: 0;
@@ -103,7 +102,7 @@
       font-size: 1.1rem;
     }
 
-    input, select {
+    input {
       width: 100%;
       padding: 14px 16px 14px 48px;
       font-size: 1rem;
@@ -117,7 +116,7 @@
       font-weight: 500;
     }
 
-    input:focus, select:focus {
+    input:focus {
       border-color: #fc5404;
       background: white;
       box-shadow: 0 0 0 3px rgba(252, 84, 4, 0.1);
@@ -165,20 +164,6 @@
       font-size: 1.2rem;
     }
 
-    .alert-success {
-      background: #e6f7e6;
-      border-left: 4px solid #27ae60;
-      padding: 12px 16px;
-      border-radius: 20px;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 0.85rem;
-      color: #1e8449;
-      font-weight: 500;
-    }
-
     .info-users {
       margin-top: 28px;
       padding-top: 20px;
@@ -186,6 +171,14 @@
       font-size: 0.75rem;
       color: #8f95b0;
       text-align: center;
+    }
+
+    .info-users p {
+      margin-bottom: 8px;
+    }
+
+    .info-users strong {
+      color: #fc5404;
     }
 
     .demo-badge {
@@ -301,21 +294,13 @@
       background: #16a34a;
       transform: scale(1.02);
     }
-
-    .admin-badge {
-      background: #8b5cf6;
-      color: white;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 0.7rem;
-      margin-left: 8px;
-    }
   </style>
 </head>
 <body>
 <div class="login-container">
   <div class="login-card" id="loginCard">
     <div class="logo-area">
+      <!-- LOGO IMAGEM ADICIONADA AQUI -->
       <img src="https://raw.githubusercontent.com/AMAILSON-GAWLINSKI/ORCAMENTO/refs/heads/main/LOGO%20SEM%20FUNDO.png" 
            alt="Ótica Grau Divino Logo" 
            class="logo-image"
@@ -326,6 +311,7 @@
       <div class="subtitle">Acesse o sistema de orçamentos</div>
     </div>
 
+    <!-- Sessão ativa (se houver usuário logado) -->
     <div id="activeSessionDiv" style="display: none;" class="user-session">
       <div class="user-session-info">
         <i class="fas fa-user-check"></i>
@@ -336,14 +322,11 @@
       </button>
     </div>
 
+    <!-- Formulário de login (oculto quando há sessão ativa) -->
     <div id="loginFormDiv">
       <div id="errorMessage" style="display: none;" class="alert-error">
         <i class="fas fa-exclamation-triangle"></i>
         <span id="errorText">Usuário ou senha incorretos!</span>
-      </div>
-      <div id="successMessage" style="display: none;" class="alert-success">
-        <i class="fas fa-check-circle"></i>
-        <span id="successText"></span>
       </div>
 
       <div class="input-group">
@@ -367,6 +350,7 @@
       </button>
     </div>
 
+    <!-- Botão de sair (sempre visível quando logado) -->
     <div class="logout-area" id="logoutArea" style="display: none;">
       <button id="logoutBtn" class="btn-logout">
         <i class="fas fa-sign-out-alt"></i> Sair / Trocar de Atendente
@@ -376,23 +360,28 @@
 </div>
 
 <script>
-  // ==================== SUPABASE CONFIG ====================
-  const SUPABASE_URL = 'https://ywzjyoqqnweinrwbbnza.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_mqal-4CCZLCNMrjwULwh_A_fm76L3K4';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  // ==================== CREDENCIAIS DOS ATENDENTES ====================
+  const USERS = [
+    { login: "Jaúna Constante", password: "176320", nomeExibicao: "Jaúna Constante", isAdmin: true },
+    { login: "Luana Paloschi", password: "luana456", nomeExibicao: "Luana Paloschi", isAdmin: false },
+    { login: "Aline", password: "aline789", nomeExibicao: "Aline", isAdmin: false },
+    { login: "Jaciara Constante", password: "176320", nomeExibicao: "Jaciara Constante", isAdmin: true }
+  ];
 
   let continueButton = null;
-  let currentUser = null;
 
-  // ==================== FUNÇÕES AUXILIARES ====================
+  function validarLogin(login, senha) {
+    const userFound = USERS.find(user => 
+      user.login.toLowerCase() === login.toLowerCase() && user.password === senha
+    );
+    return userFound || null;
+  }
+
   function showError(message) {
     const errorDiv = document.getElementById('errorMessage');
     const errorText = document.getElementById('errorText');
     errorText.textContent = message || 'Usuário ou senha incorretos!';
     errorDiv.style.display = 'flex';
-    
-    const successDiv = document.getElementById('successMessage');
-    if (successDiv) successDiv.style.display = 'none';
     
     const card = document.querySelector('.login-card');
     card.classList.add('shake-animation');
@@ -405,25 +394,9 @@
     }, 3000);
   }
 
-  function showSuccess(message) {
-    const successDiv = document.getElementById('successMessage');
-    const successText = document.getElementById('successText');
-    successText.textContent = message;
-    successDiv.style.display = 'flex';
-    
-    const errorDiv = document.getElementById('errorMessage');
-    if (errorDiv) errorDiv.style.display = 'none';
-    
-    setTimeout(() => {
-      successDiv.style.display = 'none';
-    }, 3000);
-  }
-
   function clearError() {
     const errorDiv = document.getElementById('errorMessage');
     if (errorDiv) errorDiv.style.display = 'none';
-    const successDiv = document.getElementById('successMessage');
-    if (successDiv) successDiv.style.display = 'none';
   }
 
   function removeContinueButton() {
@@ -433,117 +406,7 @@
     }
   }
 
-  async function getClientIP() {
-    try {
-      const res = await fetch('https://api.ipify.org?format=json');
-      const data = await res.json();
-      return data.ip;
-    } catch {
-      return 'desconhecido';
-    }
-  }
-
-  // ==================== LOGIN E VALIDAÇÃO ====================
-  async function validarLogin(login, senha) {
-    const { data, error } = await supabase
-      .from('atendentes')
-      .select('id, nome, login, is_admin, ativo')
-      .eq('login', login)
-      .eq('senha', senha)
-      .single();
-
-    if (error || !data) return null;
-    if (!data.ativo) return { error: 'Usuário desativado!' };
-    return data;
-  }
-
-  async function registrarLog(atendenteId, acao) {
-    const ip = await getClientIP();
-    const { error } = await supabase
-      .from('logs_sessao')
-      .insert([{
-        atendente_id: atendenteId,
-        acao: acao,
-        ip: ip,
-        user_agent: navigator.userAgent
-      }]);
-    
-    if (error) console.error('Erro ao registrar log:', error);
-  }
-
-  async function handleLogin() {
-    const loginInput = document.getElementById('loginUser');
-    const passwordInput = document.getElementById('loginPassword');
-    
-    const login = loginInput.value.trim();
-    const password = passwordInput.value.trim();
-    
-    if (login === '' || password === '') {
-      showError('Por favor, preencha ambos os campos!');
-      return;
-    }
-    
-    const user = await validarLogin(login, password);
-    
-    if (!user) {
-      showError('❌ Login ou senha incorretos! Tente novamente.');
-      passwordInput.value = '';
-      passwordInput.focus();
-      return;
-    }
-    
-    if (user.error) {
-      showError(user.error);
-      return;
-    }
-    
-    await registrarLog(user.id, 'login');
-    
-    const userSession = {
-      id: user.id,
-      nome: user.nome,
-      login: user.login,
-      isAdmin: user.is_admin,
-      loginTimestamp: new Date().toISOString()
-    };
-    
-    localStorage.setItem('usuarioLogado', JSON.stringify(userSession));
-    sessionStorage.setItem('auth', 'true');
-    currentUser = userSession;
-    
-    showSuccess(`✅ Bem-vindo(a), ${user.nome}! Redirecionando...`);
-    
-    setTimeout(() => {
-      window.location.href = 'orcamento.html';
-    }, 1500);
-  }
-
-  // ==================== LOGOUT ====================
-  async function logout() {
-    if (currentUser && currentUser.id) {
-      await registrarLog(currentUser.id, 'logout');
-    }
-    
-    localStorage.removeItem('usuarioLogado');
-    sessionStorage.removeItem('auth');
-    localStorage.removeItem('orcamentosTemp');
-    localStorage.removeItem('nextIdTemp');
-    
-    currentUser = null;
-    
-    const userInput = document.getElementById('loginUser');
-    const passInput = document.getElementById('loginPassword');
-    if (userInput) userInput.value = '';
-    if (passInput) passInput.value = '';
-    
-    removeContinueButton();
-    await updateUIBasedOnSession();
-    
-    showSuccess('👋 Logout realizado com sucesso!');
-  }
-
-  // ==================== ATUALIZAR INTERFACE ====================
-  async function updateUIBasedOnSession() {
+  function updateUIBasedOnSession() {
     const usuarioSalvo = localStorage.getItem('usuarioLogado');
     const activeSessionDiv = document.getElementById('activeSessionDiv');
     const loginFormDiv = document.getElementById('loginFormDiv');
@@ -559,20 +422,18 @@
         const diffHoras = (agora - timestamp) / (1000 * 60 * 60);
         
         if (diffHoras > 8) {
-          await logout();
+          localStorage.removeItem('usuarioLogado');
+          sessionStorage.removeItem('auth');
+          updateUIBasedOnSession();
           return;
         }
-        
-        currentUser = user;
         
         if (activeSessionDiv) activeSessionDiv.style.display = 'flex';
         if (loginFormDiv) loginFormDiv.style.display = 'none';
         if (logoutArea) logoutArea.style.display = 'block';
         
         const activeUserName = document.getElementById('activeUserName');
-        if (activeUserName) {
-          activeUserName.innerHTML = user.nome + (user.isAdmin ? ' <span class="admin-badge">Admin</span>' : '');
-        }
+        if (activeUserName) activeUserName.textContent = user.nome;
         
         const loginCard = document.getElementById('loginCard');
         if (loginCard && !continueButton) {
@@ -593,7 +454,12 @@
         
       } catch(e) {
         console.error('Erro ao ler sessão', e);
-        await logout();
+        localStorage.removeItem('usuarioLogado');
+        sessionStorage.removeItem('auth');
+        if (activeSessionDiv) activeSessionDiv.style.display = 'none';
+        if (loginFormDiv) loginFormDiv.style.display = 'block';
+        if (logoutArea) logoutArea.style.display = 'none';
+        removeContinueButton();
       }
     } else {
       if (activeSessionDiv) activeSessionDiv.style.display = 'none';
@@ -608,7 +474,73 @@
     }
   }
 
-  // ==================== INICIALIZAÇÃO ====================
+  function logout() {
+    localStorage.removeItem('usuarioLogado');
+    sessionStorage.removeItem('auth');
+    localStorage.removeItem('orcamentosTemp');
+    localStorage.removeItem('nextIdTemp');
+    
+    const userInput = document.getElementById('loginUser');
+    const passInput = document.getElementById('loginPassword');
+    if (userInput) userInput.value = '';
+    if (passInput) passInput.value = '';
+    
+    removeContinueButton();
+    updateUIBasedOnSession();
+    
+    const errorDiv = document.getElementById('errorMessage');
+    if (errorDiv) errorDiv.style.display = 'none';
+    
+    const card = document.querySelector('.login-card');
+    const originalBorder = card.style.border;
+    card.style.border = '2px solid #25d366';
+    setTimeout(() => {
+      card.style.border = originalBorder;
+    }, 500);
+  }
+
+  function handleLogin() {
+    const loginInput = document.getElementById('loginUser');
+    const passwordInput = document.getElementById('loginPassword');
+    
+    const login = loginInput.value.trim();
+    const password = passwordInput.value.trim();
+    
+    if (login === '' || password === '') {
+      showError('Por favor, preencha ambos os campos!');
+      return;
+    }
+    
+    const user = validarLogin(login, password);
+    
+    if (!user) {
+      showError('❌ Login ou senha incorretos! Tente novamente.');
+      passwordInput.value = '';
+      passwordInput.focus();
+      return;
+    }
+    
+    localStorage.setItem('usuarioLogado', JSON.stringify({
+      nome: user.nomeExibicao,
+      login: user.login,
+      isAdmin: user.isAdmin,
+      loginTimestamp: new Date().toISOString()
+    }));
+    sessionStorage.setItem('auth', 'true');
+    
+    updateUIBasedOnSession();
+    
+    try {
+      window.location.href = 'orcamento.html';
+    } catch (e) {
+      console.warn('Redirecionamento falhou', e);
+      alert('✅ Login realizado com sucesso!\n\nRedirecionando para o sistema de orçamentos...');
+      setTimeout(() => {
+        window.location.href = 'orcamento.html';
+      }, 500);
+    }
+  }
+
   const loginBtn = document.getElementById('loginBtn');
   const passwordField = document.getElementById('loginPassword');
   const userField = document.getElementById('loginUser');
@@ -645,6 +577,7 @@
   window.addEventListener('load', function() {
     updateUIBasedOnSession();
     
+    // Verificar se a imagem carregou corretamente
     const logoImg = document.querySelector('.logo-image');
     if (logoImg) {
       logoImg.addEventListener('error', function() {
