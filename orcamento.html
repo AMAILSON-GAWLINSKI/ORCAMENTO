@@ -185,6 +185,7 @@
     .btn-outline { background: transparent; border-color: #cbd0dc; }
     .btn-warning { background: #fc5404; border-color: #fc5404; color: white; }
     .btn-danger { background: #e74c3c; border-color: #e74c3c; color: white; }
+    .btn-sm { padding: 8px 16px; font-size: 0.8rem; flex: none; }
     .btn-delete { background: #e74c3c; border-color: #e74c3c; color: white; padding: 6px 12px; font-size: 0.75rem; flex: none; }
     .btn-edit { background: #3498db; border-color: #3498db; color: white; padding: 6px 12px; font-size: 0.75rem; flex: none; }
     .btn-sale { background: #25d366; border-color: #25d366; color: white; padding: 6px 12px; font-size: 0.75rem; flex: none; }
@@ -231,6 +232,7 @@
     .badge-success { background: #25d366; color: white; }
     .badge-danger { background: #e74c3c; color: white; }
     .badge-warning { background: #f39c12; color: white; }
+    .badge-hidden { background: #95a5a6; color: white; }
     .justificativa-list { background: #fff6e5; border-left: 4px solid #f39c12; padding: 12px 16px; margin: 12px 0; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
     .refresh-btn { background: #fc5404; color: white; border: none; border-radius: 40px; padding: 10px 24px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; transition: transform 0.2s; }
     .refresh-btn:hover { transform: scale(1.02); background: #e04a02; }
@@ -297,6 +299,51 @@
     .status-nao-fechado { background: #e74c3c20; color: #c0392b; }
     .btn-group { display: flex; gap: 8px; }
     
+    /* Tabela de atendentes */
+    .atendentes-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .atendentes-table th, .atendentes-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eef2f8; }
+    .atendentes-table th { background: #fc5404; color: white; font-weight: 600; }
+    .atendentes-table tr:hover { background: #fef3e8; }
+    .status-ativo { color: #25d366; font-weight: 600; }
+    .status-oculto { color: #e74c3c; font-weight: 600; }
+    
+    /* Abas do Dashboard Admin */
+    .dashboard-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 12px 24px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #64748b;
+      cursor: pointer;
+      border-radius: 40px 40px 0 0;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab-btn i {
+      font-size: 1rem;
+    }
+    .tab-btn.active {
+      color: #fc5404;
+      background: #fff7ed;
+      border-bottom: 3px solid #fc5404;
+    }
+    .tab-pane {
+      display: none;
+    }
+    .tab-pane.active {
+      display: block;
+    }
+    
     @media print {
       body { background: white; padding: 0; margin: 0; }
       .stepper, .nav-buttons, .action-buttons, .admin-btn, .btn, .add-orc-btn, .btn-remove-orc, .module-header, #backToStep3Edit, #finalizarOrcamentoBtn, #adminAccessBtn, .logout-btn-container, .loading-overlay, .offline-indicator { display: none !important; }
@@ -327,7 +374,7 @@
 
   <div class="module-card" id="step1">
     <div class="module-header"><i class="fas fa-user-md"></i><h2>Atendente</h2></div>
-    <div class="input-group"><label>Selecione o atendente *</label><select id="atendenteSelect"><option value="">-- Escolha --</option><option value="Jaúna Constante">Jaúna Constante</option><option value="Jaciara Constante">Jaciara Constante</option><option value="Luana Paloschi">Luana Paloschi</option><option value="Aline">Aline</option></select></div>
+    <div class="input-group"><label>Selecione o atendente *</label><select id="atendenteSelect"><option value="">-- Escolha --</option></select></div>
     <div class="nav-buttons"><button class="btn btn-primary" id="nextToStep2" disabled><i class="fas fa-arrow-right"></i> Continuar</button></div>
   </div>
 
@@ -400,6 +447,148 @@
     let pendingSyncData = [];
     let isOnline = navigator.onLine;
     
+    // ========== GERENCIAMENTO DE ATENDENTES (COM SENHA E LOGIN) ==========
+    let atendentes = [
+      { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() }
+    ];
+    
+    function carregarAtendentes() {
+      const saved = localStorage.getItem('atendentes');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          // Garantir que todos os atendentes tenham o campo 'login'
+          let precisaSalvar = false;
+          parsed.forEach(a => {
+            if (!a.login && a.nome) {
+              a.login = a.nome.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/\s+/g, '');
+              precisaSalvar = true;
+            }
+          });
+          atendentes = parsed;
+          if (precisaSalvar) {
+            localStorage.setItem('atendentes', JSON.stringify(atendentes));
+          }
+        } catch(e) {
+          console.error('Erro ao carregar atendentes:', e);
+          atendentes = [...DEFAULT_ATENDENTES];
+          localStorage.setItem('atendentes', JSON.stringify(atendentes));
+        }
+      } else {
+        atendentes = [...DEFAULT_ATENDENTES];
+        localStorage.setItem('atendentes', JSON.stringify(atendentes));
+      }
+      atualizarSelectAtendentes();
+    }
+    
+    const DEFAULT_ATENDENTES = [
+      { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() }
+    ];
+    
+    function atualizarSelectAtendentes() {
+      const select = document.getElementById('atendenteSelect');
+      if (!select) return;
+      
+      const valorAtual = select.value;
+      select.innerHTML = '<option value="">-- Escolha --</option>';
+      
+      const atendentesAtivos = atendentes.filter(a => a.ativo === true);
+      atendentesAtivos.forEach(atendente => {
+        const option = document.createElement('option');
+        option.value = atendente.nome;
+        option.textContent = atendente.nome;
+        select.appendChild(option);
+      });
+      
+      if (valorAtual && atendentesAtivos.some(a => a.nome === valorAtual)) {
+        select.value = valorAtual;
+      }
+      
+      updateNavButtons();
+    }
+    
+    function salvarAtendentes() {
+      localStorage.setItem('atendentes', JSON.stringify(atendentes));
+      atualizarSelectAtendentes();
+      // Disparar evento para sincronizar com outras abas
+      window.dispatchEvent(new StorageEvent('storage', { key: 'atendentes', newValue: JSON.stringify(atendentes) }));
+    }
+    
+    function adicionarAtendente(nome, email, senha) {
+      const novoId = Math.max(...atendentes.map(a => a.id), 0) + 1;
+      // Criar login automaticamente a partir do nome (sem acentos, minúsculo, sem espaços)
+      let login = nome.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '');
+      
+      atendentes.push({
+        id: novoId,
+        nome: nome,
+        email: email,
+        senha: senha,
+        login: login,
+        ativo: true,
+        criado_em: new Date().toISOString()
+      });
+      salvarAtendentes();
+    }
+    
+    function editarAtendente(id, nome, email, senha) {
+      const index = atendentes.findIndex(a => a.id === id);
+      if (index !== -1) {
+        atendentes[index].nome = nome;
+        atendentes[index].email = email;
+        // Atualizar login baseado no novo nome
+        let login = nome.toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, '');
+        atendentes[index].login = login;
+        if (senha && senha.trim() !== "") {
+          atendentes[index].senha = senha;
+        }
+        salvarAtendentes();
+      }
+    }
+    
+    function ocultarAtendente(id) {
+      const index = atendentes.findIndex(a => a.id === id);
+      if (index !== -1) {
+        atendentes[index].ativo = false;
+        salvarAtendentes();
+      }
+    }
+    
+    function reativarAtendente(id) {
+      const index = atendentes.findIndex(a => a.id === id);
+      if (index !== -1) {
+        atendentes[index].ativo = true;
+        salvarAtendentes();
+      }
+    }
+    
+    function deletarAtendente(id) {
+      atendentes = atendentes.filter(a => a.id !== id);
+      salvarAtendentes();
+    }
+    
+    function verificarSenhaAtendente(nome, senha) {
+      const atendente = atendentes.find(a => a.nome === nome && a.ativo === true);
+      if (atendente && atendente.senha === senha) {
+        return true;
+      }
+      return false;
+    }
+    
     const stepCards = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3'), document.getElementById('step4')];
     const stepItems = document.querySelectorAll('.step-item');
     const atendenteSelect = document.getElementById('atendenteSelect');
@@ -409,6 +598,9 @@
     const clientSource = document.getElementById('clientSource');
     const descontoGeralInput = document.getElementById('descontoGeralInput');
     let currentOrcamentoId = '';
+    
+    // Carregar atendentes ao iniciar
+    carregarAtendentes();
     
     // Offline sync functions
     function updateOfflineIndicator() {
@@ -739,9 +931,9 @@
           }
           
           const nomeAtendente = user.nome;
-          const optionExists = Array.from(atendenteSelect.options).some(opt => opt.value === nomeAtendente);
+          const atendenteAtivo = atendentes.find(a => a.nome === nomeAtendente && a.ativo === true);
           
-          if (optionExists && nomeAtendente) {
+          if (atendenteAtivo) {
             atendenteSelect.value = nomeAtendente;
             const changeEvent = new Event('change', { bubbles: true });
             atendenteSelect.dispatchEvent(changeEvent);
@@ -1116,7 +1308,31 @@
       return false;
     }
     
-    function resetarFormulario() {
+    function resetarFormularioParaNovoOrcamento() {
+      orcamentos = [getEmptyOrcamento()];
+      nextId = 2;
+      clientName.value = '';
+      clientAge.value = '';
+      clientSource.value = '';
+      clientPhone.value = '';
+      document.getElementById('hasPrescription').value = 'Não';
+      document.getElementById('concorrenteNome').value = '';
+      document.getElementById('concorrenteGroup').style.display = 'none';
+      if(descontoGeralInput) descontoGeralInput.value = '';
+      updateNavButtons();
+      renderOrcamentosForm();
+      
+      localStorage.removeItem('orcamentosTemp');
+      localStorage.removeItem('nextIdTemp');
+      currentOrcamentoId = generateOrcamentoId();
+      updateOrcamentoIdDisplay();
+      modoEdicao = false;
+      orcamentoEditandoId = null;
+      
+      goToStep(2);
+    }
+    
+    function resetarFormularioCompleto() {
       orcamentos = [getEmptyOrcamento()];
       nextId = 2;
       atendenteSelect.value = '';
@@ -1132,13 +1348,6 @@
       updateNavButtons();
       renderOrcamentosForm();
       
-      const usuarioLogado = localStorage.getItem('usuarioLogado');
-      if (usuarioLogado) {
-        verificarUsuarioLogado();
-      } else {
-        goToStep(1);
-      }
-      
       localStorage.removeItem('orcamentosTemp');
       localStorage.removeItem('nextIdTemp');
       currentOrcamentoId = generateOrcamentoId();
@@ -1146,6 +1355,8 @@
       modoEdicao = false;
       orcamentoEditandoId = null;
       toggleAdminButton();
+      
+      goToStep(1);
     }
     
     function carregarOrcamentoParaEdicao(orcamento) {
@@ -1224,7 +1435,7 @@
         const salvou = await salvarHistorico('fechado', ''); 
         if(salvou) alert('✅ Orçamento finalizado com VENDA!'); 
         modal.remove(); 
-        resetarFormulario(); 
+        resetarFormularioParaNovoOrcamento();
       };
       naoBtn.onclick = () => { 
         justArea.style.display = 'block'; 
@@ -1238,7 +1449,7 @@
         const salvou = await salvarHistorico('nao_fechado', just); 
         if(salvou) alert('📋 Orçamento arquivado como NÃO FINALIZADO.'); 
         modal.remove(); 
-        resetarFormulario(); 
+        resetarFormularioParaNovoOrcamento();
       };
       cancelarJust.onclick = () => {
         justArea.style.display = 'none';
@@ -1487,7 +1698,227 @@ ${dataAtual}
     
     // ========== DASHBOARD ADMIN ==========
     
-    // Função para criar dropdown de sugestões
+    function renderizarGestaoAtendentes(container) {
+      const ativos = atendentes.filter(a => a.ativo === true);
+      const ocultos = atendentes.filter(a => a.ativo === false);
+      
+      let html = `
+        <div class="section-title" style="margin-top: 0;">
+          <i class="fas fa-users"></i> Gerenciar Atendentes
+          <button id="btnNovoAtendente" class="btn btn-success btn-sm" style="margin-left: auto; padding: 8px 16px;"><i class="fas fa-plus"></i> Novo Atendente</button>
+        </div>
+        
+        <div style="margin-bottom: 30px;">
+          <h4 style="margin-bottom: 15px; color: #1e293b;">📋 Atendentes Ativos</h4>
+          <table class="atendentes-table">
+            <thead>
+              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Senha</th><th>Status</th><th>Ações</th>
+            </thead>
+            <tbody>
+      `;
+      
+      ativos.forEach(a => {
+        html += `
+          <tr data-id="${a.id}">
+            <td><strong>${escapeHtml(a.nome)}</strong></td>
+            <td>${escapeHtml(a.email)}</td>
+            <td>${escapeHtml(a.login || '')}</td>
+            <td>••••••••</td>
+            <td><span class="status-ativo">● Ativo</span></td>
+            <td>
+              <button class="btn-edit-atendente btn btn-edit btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" data-email="${escapeHtml(a.email)}" data-login="${escapeHtml(a.login || '')}" data-senha="${escapeHtml(a.senha)}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-edit"></i> Editar</button>
+              <button class="btn-ocultar-atendente btn btn-warning btn-sm" data-id="${a.id}" style="padding: 4px 10px; background: #f39c12; border-color: #f39c12;"><i class="fas fa-eye-slash"></i> Ocultar</button>
+              <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
+             </td>
+           </tr>
+        `;
+      });
+      
+      if (ocultos.length > 0) {
+        html += `
+            </tbody>
+           </table>
+          
+          <h4 style="margin: 25px 0 15px 0; color: #1e293b;">🔒 Atendentes Ocultos</h4>
+          <table class="atendentes-table">
+            <thead>
+              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Senha</th><th>Status</th><th>Ações</th>
+            </thead>
+            <tbody>
+        `;
+        
+        ocultos.forEach(a => {
+          html += `
+            <tr data-id="${a.id}">
+              <td><strong>${escapeHtml(a.nome)}</strong></td>
+              <td>${escapeHtml(a.email)}</td>
+              <td>${escapeHtml(a.login || '')}</td>
+              <td>••••••••</td>
+              <td><span class="status-oculto">● Oculto</span></td>
+              <td>
+                <button class="btn-reativar-atendente btn btn-success btn-sm" data-id="${a.id}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-eye"></i> Reativar</button>
+                <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
+               </td>
+             </tr>
+          `;
+        });
+      }
+      
+      html += `
+            </tbody>
+           </table>
+        </div>
+      `;
+      
+      container.innerHTML = html;
+      
+      document.getElementById('btnNovoAtendente')?.addEventListener('click', () => {
+        const modal = document.createElement('div'); modal.className = 'modal-overlay';
+        modal.innerHTML = `
+          <div class="modal-content" style="max-width:450px;">
+            <h3><i class="fas fa-user-plus"></i> Novo Atendente</h3>
+            <div class="input-group"><label>Nome completo *</label><input type="text" id="novoNomeAtendente" placeholder="Ex: Maria Silva"></div>
+            <div class="input-group"><label>E-mail *</label><input type="email" id="novoEmailAtendente" placeholder="exemplo@email.com"></div>
+            <div class="input-group"><label>Login *</label><input type="text" id="novoLoginAtendente" placeholder="usuário para login"></div>
+            <div class="input-group"><label>Senha *</label><input type="password" id="novaSenhaAtendente" placeholder="Digite uma senha"></div>
+            <div class="modal-buttons-row">
+              <button id="confirmarNovoAtendente" class="btn btn-primary">Adicionar</button>
+              <button id="cancelarNovoAtendente" class="btn btn-outline">Cancelar</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        
+        modal.querySelector('#confirmarNovoAtendente').onclick = () => {
+          const nome = modal.querySelector('#novoNomeAtendente').value.trim();
+          const email = modal.querySelector('#novoEmailAtendente').value.trim();
+          let login = modal.querySelector('#novoLoginAtendente').value.trim();
+          const senha = modal.querySelector('#novaSenhaAtendente').value.trim();
+          if (!nome || !email || !login || !senha) {
+            alert('Preencha todos os campos!');
+            return;
+          }
+          // Garantir que o login seja único
+          if (atendentes.some(a => a.login === login)) {
+            alert('Este login já existe! Escolha outro.');
+            return;
+          }
+          adicionarAtendenteComLogin(nome, email, login, senha);
+          modal.remove();
+          renderizarGestaoAtendentes(container);
+        };
+        modal.querySelector('#cancelarNovoAtendente').onclick = () => modal.remove();
+      });
+      
+      function adicionarAtendenteComLogin(nome, email, login, senha) {
+        const novoId = Math.max(...atendentes.map(a => a.id), 0) + 1;
+        atendentes.push({
+          id: novoId,
+          nome: nome,
+          email: email,
+          login: login,
+          senha: senha,
+          ativo: true,
+          criado_em: new Date().toISOString()
+        });
+        salvarAtendentes();
+      }
+      
+      document.querySelectorAll('.btn-edit-atendente').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const nomeAtual = btn.dataset.nome;
+          const emailAtual = btn.dataset.email;
+          const loginAtual = btn.dataset.login;
+          const senhaAtual = btn.dataset.senha;
+          const modal = document.createElement('div'); modal.className = 'modal-overlay';
+          modal.innerHTML = `
+            <div class="modal-content" style="max-width:450px;">
+              <h3><i class="fas fa-edit"></i> Editar Atendente</h3>
+              <div class="input-group"><label>Nome completo *</label><input type="text" id="editarNomeAtendente" value="${escapeHtml(nomeAtual)}"></div>
+              <div class="input-group"><label>E-mail *</label><input type="email" id="editarEmailAtendente" value="${escapeHtml(emailAtual)}"></div>
+              <div class="input-group"><label>Login *</label><input type="text" id="editarLoginAtendente" value="${escapeHtml(loginAtual)}"></div>
+              <div class="input-group"><label>Nova Senha (deixe em branco para manter a atual)</label><input type="password" id="editarSenhaAtendente" placeholder="Digite uma nova senha"></div>
+              <div class="modal-buttons-row">
+                <button id="confirmarEditarAtendente" class="btn btn-primary">Salvar</button>
+                <button id="cancelarEditarAtendente" class="btn btn-outline">Cancelar</button>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(modal);
+          
+          modal.querySelector('#confirmarEditarAtendente').onclick = () => {
+            const nome = modal.querySelector('#editarNomeAtendente').value.trim();
+            const email = modal.querySelector('#editarEmailAtendente').value.trim();
+            const login = modal.querySelector('#editarLoginAtendente').value.trim();
+            const novaSenha = modal.querySelector('#editarSenhaAtendente').value.trim();
+            if (!nome || !email || !login) {
+              alert('Preencha os campos obrigatórios!');
+              return;
+            }
+            // Verificar se o login já existe em outro atendente
+            if (atendentes.some(a => a.id !== id && a.login === login)) {
+              alert('Este login já existe em outro atendente!');
+              return;
+            }
+            editarAtendenteComLogin(id, nome, email, login, novaSenha);
+            modal.remove();
+            renderizarGestaoAtendentes(container);
+          };
+          modal.querySelector('#cancelarEditarAtendente').onclick = () => modal.remove();
+        });
+      });
+      
+      function editarAtendenteComLogin(id, nome, email, login, senha) {
+        const index = atendentes.findIndex(a => a.id === id);
+        if (index !== -1) {
+          atendentes[index].nome = nome;
+          atendentes[index].email = email;
+          atendentes[index].login = login;
+          if (senha && senha.trim() !== "") {
+            atendentes[index].senha = senha;
+          }
+          salvarAtendentes();
+        }
+      }
+      
+      document.querySelectorAll('.btn-ocultar-atendente').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const atendente = atendentes.find(a => a.id === id);
+          if (confirm(`Deseja ocultar o atendente "${atendente?.nome}"? Ele não aparecerá mais na lista de seleção.`)) {
+            ocultarAtendente(id);
+            renderizarGestaoAtendentes(container);
+          }
+        });
+      });
+      
+      document.querySelectorAll('.btn-reativar-atendente').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const atendente = atendentes.find(a => a.id === id);
+          if (confirm(`Deseja reativar o atendente "${atendente?.nome}"?`)) {
+            reativarAtendente(id);
+            renderizarGestaoAtendentes(container);
+          }
+        });
+      });
+      
+      document.querySelectorAll('.btn-deletar-atendente').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const atendente = atendentes.find(a => a.id === id);
+          if (confirm(`⚠️ ATENÇÃO: Excluir o atendente "${atendente?.nome}" removerá permanentemente este registro. Deseja continuar?`)) {
+            deletarAtendente(id);
+            renderizarGestaoAtendentes(container);
+          }
+        });
+      });
+    }
+    
+    // Redefinir a função adicionarAtendente original para usar a nova versão
+    window.adicionarAtendente = adicionarAtendenteComLogin;
+    
     function createSuggestionsDropdown(inputId, getSuggestionsFn, onSelectFn) {
       const input = document.getElementById(inputId);
       if (!input) return;
@@ -1867,62 +2298,85 @@ ${dataAtual}
               <button class="refresh-btn" id="refreshDashboardBtnAdmin"><i class="fas fa-sync-alt"></i> Atualizar Dados</button>
             </div>
             
-            <div class="filter-bar">
-              <div class="filter-group">
-                <label>📅 Período:</label>
-                <select id="filtroPeriodo">
-                  <option value="todos">Todos os períodos</option>
-                  <option value="mes">Mês específico</option>
-                  <option value="ano">Ano específico</option>
-                </select>
-              </div>
-              <div class="filter-group" id="grupoFiltroMes" style="display:none;">
-                <label>📆 Selecionar Mês/Ano:</label>
-                <select id="filtroMes">
-                  <option value="">Selecione...</option>
-                  ${mesesOptions.map(m => `<option value="${m.value}">${m.label}</option>`).join('')}
-                </select>
-              </div>
-              <div class="filter-group" id="grupoFiltroAno" style="display:none;">
-                <label>📆 Selecionar Ano:</label>
-                <select id="filtroAno">
-                  <option value="">Selecione...</option>
-                  ${anosOptions.map(a => `<option value="${a}">${a}</option>`).join('')}
-                </select>
-              </div>
-              <div class="filter-group">
-                <label>💰 Filtrar por valor:</label>
-                <select id="filtroValorTipo">
-                  <option value="todos">Todos</option>
-                  <option value="maior">Maior que</option>
-                  <option value="menor">Menor que</option>
-                  <option value="igual">Igual a</option>
-                </select>
-              </div>
-              <div class="filter-group">
-                <label>&nbsp;</label>
-                <input type="text" id="filtroValorComp" placeholder="R$ 0,00">
-              </div>
-              <div class="filter-group">
-                <label>🎂 Idade exata:</label>
-                <input type="text" id="filtroIdade" placeholder="Digite a idade">
-              </div>
-              <div class="filter-group">
-                <label>👤 Nome do cliente:</label>
-                <input type="text" id="filtroCliente" placeholder="Buscar por nome">
-              </div>
-              <div class="filter-group">
-                <label>🆔 ID do Orçamento:</label>
-                <input type="text" id="filtroIdOrcamento" placeholder="Buscar por ID">
-              </div>
+            <div class="dashboard-tabs">
+              <button class="tab-btn active" data-tab="analytics"><i class="fas fa-chart-line"></i> Análises</button>
+              <button class="tab-btn" data-tab="atendentes"><i class="fas fa-users"></i> Gerenciar Atendentes</button>
             </div>
             
-            <div id="dashboardContent"><div class="empty-state"><i class="fas fa-spinner fa-pulse"></i> Carregando...</div></div>
+            <div class="tab-pane active" id="tab-analytics">
+              <div class="filter-bar">
+                <div class="filter-group">
+                  <label>📅 Período:</label>
+                  <select id="filtroPeriodo">
+                    <option value="todos">Todos os períodos</option>
+                    <option value="mes">Mês específico</option>
+                    <option value="ano">Ano específico</option>
+                  </select>
+                </div>
+                <div class="filter-group" id="grupoFiltroMes" style="display:none;">
+                  <label>📆 Selecionar Mês/Ano:</label>
+                  <select id="filtroMes">
+                    <option value="">Selecione...</option>
+                    ${mesesOptions.map(m => `<option value="${m.value}">${m.label}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="filter-group" id="grupoFiltroAno" style="display:none;">
+                  <label>📆 Selecionar Ano:</label>
+                  <select id="filtroAno">
+                    <option value="">Selecione...</option>
+                    ${anosOptions.map(a => `<option value="${a}">${a}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>💰 Filtrar por valor:</label>
+                  <select id="filtroValorTipo">
+                    <option value="todos">Todos</option>
+                    <option value="maior">Maior que</option>
+                    <option value="menor">Menor que</option>
+                    <option value="igual">Igual a</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>&nbsp;</label>
+                  <input type="text" id="filtroValorComp" placeholder="R$ 0,00">
+                </div>
+                <div class="filter-group">
+                  <label>🎂 Idade exata:</label>
+                  <input type="text" id="filtroIdade" placeholder="Digite a idade">
+                </div>
+                <div class="filter-group">
+                  <label>👤 Nome do cliente:</label>
+                  <input type="text" id="filtroCliente" placeholder="Buscar por nome">
+                </div>
+                <div class="filter-group">
+                  <label>🆔 ID do Orçamento:</label>
+                  <input type="text" id="filtroIdOrcamento" placeholder="Buscar por ID">
+                </div>
+              </div>
+              
+              <div id="dashboardContent"><div class="empty-state"><i class="fas fa-spinner fa-pulse"></i> Carregando...</div></div>
+            </div>
+            
+            <div class="tab-pane" id="tab-atendentes">
+              <div id="gestaoAtendentesContainer"></div>
+            </div>
           </div>
           <div class="modal-buttons-row"><button id="closeAdminBtn" class="btn btn-primary">Fechar</button></div>
         </div>
       `;
       document.body.appendChild(adminModal);
+      
+      const tabs = adminModal.querySelectorAll('.tab-btn');
+      const panes = adminModal.querySelectorAll('.tab-pane');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetTab = tab.dataset.tab;
+          tabs.forEach(t => t.classList.remove('active'));
+          panes.forEach(p => p.classList.remove('active'));
+          tab.classList.add('active');
+          adminModal.querySelector(`#tab-${targetTab}`).classList.add('active');
+        });
+      });
       
       const periodoSelect = adminModal.querySelector('#filtroPeriodo');
       const grupoMes = adminModal.querySelector('#grupoFiltroMes');
@@ -1946,14 +2400,12 @@ ${dataAtual}
       adminModal.querySelector('#filtroCliente')?.addEventListener('input', () => window.renderizarDashboardComFiltrosAtual());
       adminModal.querySelector('#filtroIdOrcamento')?.addEventListener('input', () => window.renderizarDashboardComFiltrosAtual());
       
-      // Configurar dropdown de sugestões para o campo ID do orçamento
       const idsUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.id))];
       createSuggestionsDropdown('filtroIdOrcamento', 
         (value) => idsUnicos.filter(id => id.toLowerCase().includes(value)).slice(0, 10),
         (selected) => window.renderizarDashboardComFiltrosAtual()
       );
       
-      // Configurar dropdown de sugestões para o campo Nome do cliente
       const clientesUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.cliente))];
       createSuggestionsDropdown('filtroCliente',
         (value) => clientesUnicos.filter(nome => nome && nome.toLowerCase().includes(value)).slice(0, 10),
@@ -1963,6 +2415,7 @@ ${dataAtual}
       adminModal.querySelector('#refreshDashboardBtnAdmin').onclick = async () => {
         await carregarHistoricoDoSupabase();
         window.renderizarDashboardComFiltrosAtual();
+        renderizarGestaoAtendentes(adminModal.querySelector('#gestaoAtendentesContainer'));
       };
       
       const dashboardContent = adminModal.querySelector('#dashboardContent');
@@ -2002,6 +2455,7 @@ ${dataAtual}
       });
       
       window.renderizarDashboardComFiltrosAtual();
+      renderizarGestaoAtendentes(adminModal.querySelector('#gestaoAtendentesContainer'));
       adminModal.querySelector('#closeAdminBtn').onclick = () => adminModal.remove();
     });
     
