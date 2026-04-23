@@ -447,53 +447,24 @@
     let pendingSyncData = [];
     let isOnline = navigator.onLine;
     
-    // ========== GERENCIAMENTO DE ATENDENTES (COM SENHA E LOGIN) ==========
+    // ========== GERENCIAMENTO DE ATENDENTES (COM SENHA) ==========
     let atendentes = [
-      { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() }
+      { id: 1, nome: "Jaúna Constante", email: "jauna@oticagraudivino.com", senha: "jauna123", ativo: true, criado_em: new Date().toISOString() },
+      { id: 2, nome: "Jaciara Constante", email: "jaciara@oticagraudivino.com", senha: "jaciara123", ativo: true, criado_em: new Date().toISOString() },
+      { id: 3, nome: "Luana Paloschi", email: "luana@oticagraudivino.com", senha: "luana123", ativo: true, criado_em: new Date().toISOString() },
+      { id: 4, nome: "Aline", email: "aline@oticagraudivino.com", senha: "aline123", ativo: true, criado_em: new Date().toISOString() },
+      { id: 5, nome: "Amailson Gawlinski", email: "amailson@oticagraudivino.com", senha: "amailson123", ativo: true, criado_em: new Date().toISOString() }
     ];
     
     function carregarAtendentes() {
       const saved = localStorage.getItem('atendentes');
       if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          // Garantir que todos os atendentes tenham o campo 'login'
-          let precisaSalvar = false;
-          parsed.forEach(a => {
-            if (!a.login && a.nome) {
-              a.login = a.nome.toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .replace(/\s+/g, '');
-              precisaSalvar = true;
-            }
-          });
-          atendentes = parsed;
-          if (precisaSalvar) {
-            localStorage.setItem('atendentes', JSON.stringify(atendentes));
-          }
-        } catch(e) {
-          console.error('Erro ao carregar atendentes:', e);
-          atendentes = [...DEFAULT_ATENDENTES];
-          localStorage.setItem('atendentes', JSON.stringify(atendentes));
-        }
+        atendentes = JSON.parse(saved);
       } else {
-        atendentes = [...DEFAULT_ATENDENTES];
         localStorage.setItem('atendentes', JSON.stringify(atendentes));
       }
       atualizarSelectAtendentes();
     }
-    
-    const DEFAULT_ATENDENTES = [
-      { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() }
-    ];
     
     function atualizarSelectAtendentes() {
       const select = document.getElementById('atendenteSelect');
@@ -515,29 +486,20 @@
       }
       
       updateNavButtons();
-      toggleAdminButton();
     }
     
     function salvarAtendentes() {
       localStorage.setItem('atendentes', JSON.stringify(atendentes));
       atualizarSelectAtendentes();
-      // Disparar evento para sincronizar com outras abas
-      window.dispatchEvent(new StorageEvent('storage', { key: 'atendentes', newValue: JSON.stringify(atendentes) }));
     }
     
     function adicionarAtendente(nome, email, senha) {
       const novoId = Math.max(...atendentes.map(a => a.id), 0) + 1;
-      // Criar login automaticamente a partir do nome (sem acentos, minúsculo, sem espaços)
-      let login = nome.toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .replace(/\s+/g, '');
-      
       atendentes.push({
         id: novoId,
         nome: nome,
         email: email,
         senha: senha,
-        login: login,
         ativo: true,
         criado_em: new Date().toISOString()
       });
@@ -549,11 +511,6 @@
       if (index !== -1) {
         atendentes[index].nome = nome;
         atendentes[index].email = email;
-        // Atualizar login baseado no novo nome
-        let login = nome.toLowerCase()
-          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-          .replace(/\s+/g, '');
-        atendentes[index].login = login;
         if (senha && senha.trim() !== "") {
           atendentes[index].senha = senha;
         }
@@ -1694,9 +1651,6 @@ ${dataAtual}
       const usuarioFoiPreenchido = verificarUsuarioLogado();
       if (!usuarioFoiPreenchido) {
         goToStep(1);
-      } else {
-        // Após login, garantir que o botão admin fique visível se aplicável
-        toggleAdminButton();
       }
     });
     
@@ -1716,7 +1670,7 @@ ${dataAtual}
           <h4 style="margin-bottom: 15px; color: #1e293b;">📋 Atendentes Ativos</h4>
           <table class="atendentes-table">
             <thead>
-              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Senha</th><th>Status</th><th>Ações</th>
+              <tr><th>Nome</th><th>E-mail</th><th>Senha</th><th>Status</th><th>Ações</th>
             </thead>
             <tbody>
       `;
@@ -1726,15 +1680,14 @@ ${dataAtual}
           <tr data-id="${a.id}">
             <td><strong>${escapeHtml(a.nome)}</strong></td>
             <td>${escapeHtml(a.email)}</td>
-            <td>${escapeHtml(a.login || '')}</td>
             <td>••••••••</td>
             <td><span class="status-ativo">● Ativo</span></td>
             <td>
-              <button class="btn-edit-atendente btn btn-edit btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" data-email="${escapeHtml(a.email)}" data-login="${escapeHtml(a.login || '')}" data-senha="${escapeHtml(a.senha)}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-edit"></i> Editar</button>
+              <button class="btn-edit-atendente btn btn-edit btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" data-email="${escapeHtml(a.email)}" data-senha="${escapeHtml(a.senha)}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-edit"></i> Editar</button>
               <button class="btn-ocultar-atendente btn btn-warning btn-sm" data-id="${a.id}" style="padding: 4px 10px; background: #f39c12; border-color: #f39c12;"><i class="fas fa-eye-slash"></i> Ocultar</button>
               <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
-              </td>
-            </tr>
+            </td>
+          </tr>
         `;
       });
       
@@ -1746,7 +1699,7 @@ ${dataAtual}
           <h4 style="margin: 25px 0 15px 0; color: #1e293b;">🔒 Atendentes Ocultos</h4>
           <table class="atendentes-table">
             <thead>
-              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Senha</th><th>Status</th><th>Ações</th>
+              <tr><th>Nome</th><th>E-mail</th><th>Senha</th><th>Status</th><th>Ações</th>
             </thead>
             <tbody>
         `;
@@ -1756,14 +1709,13 @@ ${dataAtual}
             <tr data-id="${a.id}">
               <td><strong>${escapeHtml(a.nome)}</strong></td>
               <td>${escapeHtml(a.email)}</td>
-              <td>${escapeHtml(a.login || '')}</td>
               <td>••••••••</td>
               <td><span class="status-oculto">● Oculto</span></td>
               <td>
                 <button class="btn-reativar-atendente btn btn-success btn-sm" data-id="${a.id}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-eye"></i> Reativar</button>
                 <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
-                </td>
-              </tr>
+              </td>
+            </table>
           `;
         });
       }
@@ -1783,7 +1735,6 @@ ${dataAtual}
             <h3><i class="fas fa-user-plus"></i> Novo Atendente</h3>
             <div class="input-group"><label>Nome completo *</label><input type="text" id="novoNomeAtendente" placeholder="Ex: Maria Silva"></div>
             <div class="input-group"><label>E-mail *</label><input type="email" id="novoEmailAtendente" placeholder="exemplo@email.com"></div>
-            <div class="input-group"><label>Login *</label><input type="text" id="novoLoginAtendente" placeholder="usuário para login"></div>
             <div class="input-group"><label>Senha *</label><input type="password" id="novaSenhaAtendente" placeholder="Digite uma senha"></div>
             <div class="modal-buttons-row">
               <button id="confirmarNovoAtendente" class="btn btn-primary">Adicionar</button>
@@ -1796,44 +1747,23 @@ ${dataAtual}
         modal.querySelector('#confirmarNovoAtendente').onclick = () => {
           const nome = modal.querySelector('#novoNomeAtendente').value.trim();
           const email = modal.querySelector('#novoEmailAtendente').value.trim();
-          let login = modal.querySelector('#novoLoginAtendente').value.trim();
           const senha = modal.querySelector('#novaSenhaAtendente').value.trim();
-          if (!nome || !email || !login || !senha) {
+          if (!nome || !email || !senha) {
             alert('Preencha todos os campos!');
             return;
           }
-          // Garantir que o login seja único
-          if (atendentes.some(a => a.login === login)) {
-            alert('Este login já existe! Escolha outro.');
-            return;
-          }
-          adicionarAtendenteComLogin(nome, email, login, senha);
+          adicionarAtendente(nome, email, senha);
           modal.remove();
           renderizarGestaoAtendentes(container);
         };
         modal.querySelector('#cancelarNovoAtendente').onclick = () => modal.remove();
       });
       
-      function adicionarAtendenteComLogin(nome, email, login, senha) {
-        const novoId = Math.max(...atendentes.map(a => a.id), 0) + 1;
-        atendentes.push({
-          id: novoId,
-          nome: nome,
-          email: email,
-          login: login,
-          senha: senha,
-          ativo: true,
-          criado_em: new Date().toISOString()
-        });
-        salvarAtendentes();
-      }
-      
       document.querySelectorAll('.btn-edit-atendente').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = parseInt(btn.dataset.id);
           const nomeAtual = btn.dataset.nome;
           const emailAtual = btn.dataset.email;
-          const loginAtual = btn.dataset.login;
           const senhaAtual = btn.dataset.senha;
           const modal = document.createElement('div'); modal.className = 'modal-overlay';
           modal.innerHTML = `
@@ -1841,7 +1771,6 @@ ${dataAtual}
               <h3><i class="fas fa-edit"></i> Editar Atendente</h3>
               <div class="input-group"><label>Nome completo *</label><input type="text" id="editarNomeAtendente" value="${escapeHtml(nomeAtual)}"></div>
               <div class="input-group"><label>E-mail *</label><input type="email" id="editarEmailAtendente" value="${escapeHtml(emailAtual)}"></div>
-              <div class="input-group"><label>Login *</label><input type="text" id="editarLoginAtendente" value="${escapeHtml(loginAtual)}"></div>
               <div class="input-group"><label>Nova Senha (deixe em branco para manter a atual)</label><input type="password" id="editarSenhaAtendente" placeholder="Digite uma nova senha"></div>
               <div class="modal-buttons-row">
                 <button id="confirmarEditarAtendente" class="btn btn-primary">Salvar</button>
@@ -1854,37 +1783,18 @@ ${dataAtual}
           modal.querySelector('#confirmarEditarAtendente').onclick = () => {
             const nome = modal.querySelector('#editarNomeAtendente').value.trim();
             const email = modal.querySelector('#editarEmailAtendente').value.trim();
-            const login = modal.querySelector('#editarLoginAtendente').value.trim();
             const novaSenha = modal.querySelector('#editarSenhaAtendente').value.trim();
-            if (!nome || !email || !login) {
+            if (!nome || !email) {
               alert('Preencha os campos obrigatórios!');
               return;
             }
-            // Verificar se o login já existe em outro atendente
-            if (atendentes.some(a => a.id !== id && a.login === login)) {
-              alert('Este login já existe em outro atendente!');
-              return;
-            }
-            editarAtendenteComLogin(id, nome, email, login, novaSenha);
+            editarAtendente(id, nome, email, novaSenha);
             modal.remove();
             renderizarGestaoAtendentes(container);
           };
           modal.querySelector('#cancelarEditarAtendente').onclick = () => modal.remove();
         });
       });
-      
-      function editarAtendenteComLogin(id, nome, email, login, senha) {
-        const index = atendentes.findIndex(a => a.id === id);
-        if (index !== -1) {
-          atendentes[index].nome = nome;
-          atendentes[index].email = email;
-          atendentes[index].login = login;
-          if (senha && senha.trim() !== "") {
-            atendentes[index].senha = senha;
-          }
-          salvarAtendentes();
-        }
-      }
       
       document.querySelectorAll('.btn-ocultar-atendente').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1919,9 +1829,6 @@ ${dataAtual}
         });
       });
     }
-    
-    // Redefinir a função adicionarAtendente original para usar a nova versão
-    window.adicionarAtendente = adicionarAtendenteComLogin;
     
     function createSuggestionsDropdown(inputId, getSuggestionsFn, onSelectFn) {
       const input = document.getElementById(inputId);
@@ -2152,7 +2059,7 @@ ${dataAtual}
       for (const [nome, d] of vendedoresSorted) {
         const totalAtendimentos = d.vendas + d.perdidos;
         const taxa = totalAtendimentos > 0 ? ((d.vendas / totalAtendimentos) * 100).toFixed(1) : 0;
-        html += `<tr><td><strong>${escapeHtml(nome)}</strong></td><td>${d.vendas}</td><td>${d.perdidos}</td><td>${formatMoneyWithSymbol(d.valorVendido)}</td><td class="lost-amount">${formatMoneyWithSymbol(d.valorPerdido)}</td><td><span class="badge ${taxa >= 50 ? 'badge-success' : 'badge-danger'}">${taxa}%</span></td></tr>`;
+        html += `<tr><td><strong>${escapeHtml(nome)}</strong></td></td>${d.vendas}</td><td>${d.perdidos}</td><td>${formatMoneyWithSymbol(d.valorVendido)}</td><td class="lost-amount">${formatMoneyWithSymbol(d.valorPerdido)}</td><td><span class="badge ${taxa >= 50 ? 'badge-success' : 'badge-danger'}">${taxa}%</span></td></tr>`;
       }
       html += `</tbody></table>`;
       
