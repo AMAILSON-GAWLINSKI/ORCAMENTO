@@ -64,13 +64,6 @@
       transform: scale(1.02);
     }
 
-    h1 {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: #1e1f2a;
-      margin-bottom: 8px;
-    }
-
     .subtitle {
       color: #6b7280;
       font-size: 0.9rem;
@@ -164,72 +157,6 @@
       font-size: 1.2rem;
     }
 
-    .info-users {
-      margin-top: 28px;
-      padding-top: 20px;
-      border-top: 1px solid #edeef3;
-      font-size: 0.75rem;
-      color: #8f95b0;
-      text-align: center;
-    }
-
-    .info-users p {
-      margin-bottom: 8px;
-    }
-
-    .info-users strong {
-      color: #fc5404;
-    }
-
-    .demo-badge {
-      display: inline-block;
-      background: #fef3e8;
-      padding: 4px 12px;
-      border-radius: 30px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: #fc5404;
-      margin-top: 8px;
-    }
-
-    .logout-area {
-      margin-top: 20px;
-      text-align: center;
-      border-top: 1px solid #edeef3;
-      padding-top: 20px;
-    }
-
-    .btn-logout {
-      background: transparent;
-      border: 1.5px solid #e2e6ee;
-      padding: 10px 20px;
-      border-radius: 40px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      color: #5f647e;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-
-    .btn-logout:hover {
-      background: #fee2e2;
-      border-color: #e74c3c;
-      color: #e74c3c;
-    }
-
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      75% { transform: translateX(5px); }
-    }
-
-    .shake-animation {
-      animation: shake 0.3s ease-in-out;
-    }
-
     .user-session {
       background: #f0fdf4;
       border-radius: 20px;
@@ -294,24 +221,67 @@
       background: #16a34a;
       transform: scale(1.02);
     }
+    
+    .logout-area {
+      margin-top: 20px;
+      text-align: center;
+      border-top: 1px solid #edeef3;
+      padding-top: 20px;
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1.5px solid #e2e6ee;
+      padding: 10px 20px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: #5f647e;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: #fee2e2;
+      border-color: #e74c3c;
+      color: #e74c3c;
+    }
+
+    .sync-status {
+      font-size: 0.7rem;
+      text-align: center;
+      margin-top: 16px;
+      color: #94a3b8;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .shake-animation {
+      animation: shake 0.3s ease-in-out;
+    }
   </style>
 </head>
 <body>
 <div class="login-container">
   <div class="login-card" id="loginCard">
     <div class="logo-area">
-      <!-- LOGO IMAGEM ADICIONADA AQUI -->
       <img src="https://raw.githubusercontent.com/AMAILSON-GAWLINSKI/ORCAMENTO/refs/heads/main/LOGO%20SEM%20FUNDO.png" 
            alt="Ótica Grau Divino Logo" 
            class="logo-image"
            onerror="this.onerror=null; this.style.display='none'; document.getElementById('fallbackIcon').style.display='inline-flex';">
-      <div id="fallbackIcon" class="logo-icon" style="display: none;">
+      <div id="fallbackIcon" style="display: none; font-size: 3rem; color: #fc5404;">
         <i class="fas fa-glasses"></i>
       </div>
       <div class="subtitle">Acesse o sistema de orçamentos</div>
     </div>
 
-    <!-- Sessão ativa (se houver usuário logado) -->
     <div id="activeSessionDiv" style="display: none;" class="user-session">
       <div class="user-session-info">
         <i class="fas fa-user-check"></i>
@@ -322,7 +292,6 @@
       </button>
     </div>
 
-    <!-- Formulário de login (oculto quando há sessão ativa) -->
     <div id="loginFormDiv">
       <div id="errorMessage" style="display: none;" class="alert-error">
         <i class="fas fa-exclamation-triangle"></i>
@@ -330,10 +299,10 @@
       </div>
 
       <div class="input-group">
-        <label><i class="fas fa-user"></i> Atendente</label>
+        <label><i class="fas fa-user"></i> Login</label>
         <div class="input-with-icon">
           <i class="fas fa-user-circle"></i>
-          <input type="text" id="loginUser" placeholder="Digite seu usuário" autocomplete="off">
+          <input type="text" id="loginUser" placeholder="Digite seu login" autocomplete="off">
         </div>
       </div>
 
@@ -350,31 +319,86 @@
       </button>
     </div>
 
-    <!-- Botão de sair (sempre visível quando logado) -->
     <div class="logout-area" id="logoutArea" style="display: none;">
       <button id="logoutBtn" class="btn-logout">
         <i class="fas fa-sign-out-alt"></i> Sair / Trocar de Atendente
       </button>
     </div>
+    
+    <div class="sync-status" id="syncStatus">
+      <i class="fas fa-sync-alt"></i> Carregando atendentes...
+    </div>
   </div>
 </div>
 
 <script>
-  // ==================== CREDENCIAIS DOS ATENDENTES ====================
-  const USERS = [
-    { login: "jauna", password: "176320", nomeExibicao: "Jaúna Constante", isAdmin: true },
-    { login: "Luana Paloschi", password: "luana456", nomeExibicao: "Luana Paloschi", isAdmin: false },
-    { login: "Aline", password: "aline789", nomeExibicao: "Aline", isAdmin: false },
-    { login: "Jaciara Constante", password: "176320", nomeExibicao: "Jaciara Constante", isAdmin: true }
+  // ==================== ATENDENTES PADRÃO (MESMOS DO ORCAMENTO.HTML) ====================
+  const DEFAULT_ATENDENTES = [
+    { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+    { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+    { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+    { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+    { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() }
   ];
 
+  let atendentes = [];
   let continueButton = null;
 
+  // Função para carregar atendentes do localStorage (sincronizado com orcamento.html)
+  function carregarAtendentes() {
+    const saved = localStorage.getItem('atendentes');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          atendentes = parsed;
+          console.log('Atendentes carregados do localStorage:', atendentes.length);
+          document.getElementById('syncStatus').innerHTML = '<i class="fas fa-check-circle"></i> Atendentes sincronizados com o sistema';
+          setTimeout(() => {
+            const statusDiv = document.getElementById('syncStatus');
+            if (statusDiv) statusDiv.style.opacity = '0.5';
+          }, 3000);
+        } else {
+          atendentes = [...DEFAULT_ATENDENTES];
+          localStorage.setItem('atendentes', JSON.stringify(atendentes));
+          document.getElementById('syncStatus').innerHTML = '<i class="fas fa-info-circle"></i> Configuração inicial carregada';
+        }
+      } catch(e) {
+        console.error('Erro ao parser atendentes:', e);
+        atendentes = [...DEFAULT_ATENDENTES];
+        localStorage.setItem('atendentes', JSON.stringify(atendentes));
+      }
+    } else {
+      // Inicializar com os atendentes padrão
+      atendentes = [...DEFAULT_ATENDENTES];
+      localStorage.setItem('atendentes', JSON.stringify(atendentes));
+      document.getElementById('syncStatus').innerHTML = '<i class="fas fa-info-circle"></i> Configuração inicial carregada';
+    }
+  }
+
+  // Função para validar login (usando os campos corretos: login e senha)
   function validarLogin(login, senha) {
-    const userFound = USERS.find(user => 
-      user.login.toLowerCase() === login.toLowerCase() && user.password === senha
+    console.log('Tentando login:', login);
+    console.log('Atendentes disponíveis:', atendentes.map(a => ({ login: a.login, nome: a.nome, ativo: a.ativo })));
+    
+    const userFound = atendentes.find(atendente => 
+      atendente.ativo === true && 
+      atendente.login && 
+      atendente.login.toLowerCase() === login.toLowerCase() && 
+      atendente.senha === senha
     );
-    return userFound || null;
+    
+    if (userFound) {
+      console.log('Usuário encontrado:', userFound.nome);
+      return {
+        nomeExibicao: userFound.nome,
+        login: userFound.login,
+        isAdmin: userFound.nome === 'Jaúna Constante' || userFound.nome === 'Jaciara Constante',
+        id: userFound.id
+      };
+    }
+    console.log('Usuário não encontrado ou credenciais inválidas');
+    return null;
   }
 
   function showError(message) {
@@ -541,6 +565,45 @@
     }
   }
 
+  // Escutar mudanças no localStorage (para sincronização em tempo real)
+  function escutarMudancasAtendentes() {
+    window.addEventListener('storage', function(event) {
+      if (event.key === 'atendentes') {
+        console.log('Atendentes atualizados em outra aba/janela');
+        carregarAtendentes();
+        // Se houver sessão ativa, verificar se o usuário ainda existe
+        const usuarioSalvo = localStorage.getItem('usuarioLogado');
+        if (usuarioSalvo) {
+          try {
+            const user = JSON.parse(usuarioSalvo);
+            const aindaExiste = atendentes.some(a => a.ativo === true && a.nome === user.nome);
+            if (!aindaExiste) {
+              logout();
+              alert('⚠️ Seu usuário foi desativado ou removido. Faça login novamente.');
+            }
+          } catch(e) {}
+        }
+      }
+    });
+  }
+
+  // Inicialização
+  function init() {
+    carregarAtendentes();
+    escutarMudancasAtendentes();
+    updateUIBasedOnSession();
+    
+    // Verificar se a imagem carregou corretamente
+    const logoImg = document.querySelector('.logo-image');
+    if (logoImg) {
+      logoImg.addEventListener('error', function() {
+        this.style.display = 'none';
+        const fallback = document.getElementById('fallbackIcon');
+        if (fallback) fallback.style.display = 'inline-flex';
+      });
+    }
+  }
+
   const loginBtn = document.getElementById('loginBtn');
   const passwordField = document.getElementById('loginPassword');
   const userField = document.getElementById('loginUser');
@@ -574,19 +637,7 @@
     passwordField.addEventListener('input', clearError);
   }
   
-  window.addEventListener('load', function() {
-    updateUIBasedOnSession();
-    
-    // Verificar se a imagem carregou corretamente
-    const logoImg = document.querySelector('.logo-image');
-    if (logoImg) {
-      logoImg.addEventListener('error', function() {
-        this.style.display = 'none';
-        const fallback = document.getElementById('fallbackIcon');
-        if (fallback) fallback.style.display = 'inline-flex';
-      });
-    }
-  });
+  init();
 </script>
 </body>
 </html>
