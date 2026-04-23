@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -21,7 +22,94 @@
       justify-content: center;
       color: #1e1f2a;
     }
-    .app-container { max-width: 950px; width: 100%; margin: 0 auto; }
+    .app-container { max-width: 950px; width: 100%; margin: 0 auto; position: relative; }
+    
+    /* Botão Sair permanente */
+    .logout-btn-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+    .btn-logout {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 24px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: all 0.2s ease;
+    }
+    .btn-logout:hover {
+      background: #c0392b;
+      transform: scale(1.02);
+    }
+    .btn-logout i {
+      font-size: 1.1rem;
+    }
+    
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      backdrop-filter: blur(4px);
+    }
+    .loading-spinner {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      color: #fc5404;
+    }
+    .loading-spinner i {
+      font-size: 1.5rem;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Offline indicator */
+    .offline-indicator {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: #e74c3c;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      z-index: 99;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .offline-indicator.online {
+      background: #25d366;
+    }
+    .offline-indicator.show {
+      display: flex;
+    }
+    
     .stepper {
       display: flex; justify-content: space-between; margin-bottom: 24px;
       background: white; padding: 16px 12px; border-radius: 40px;
@@ -59,6 +147,7 @@
       border: 1.5px solid #e2e6ee; border-radius: 20px; background: #fafbfc;
       transition: all 0.15s; outline: none; color: #1e1f2a; font-weight: 500;
     }
+    input.required-error { border-color: #e74c3c; background: #fff5f5; }
     input:focus, select:focus, textarea:focus { border-color: #fc5404; background: white; box-shadow: 0 0 0 3px rgba(252,84,4,0.1); }
     .double-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .checkbox-row { display: flex; align-items: center; gap: 32px; margin: 18px 0 16px; flex-wrap: wrap; }
@@ -151,13 +240,51 @@
     .modal-content h3 { margin-bottom: 16px; font-size: 1.5rem; }
     .justificativa-input { width: 100%; min-height: 100px; resize: vertical; margin: 12px 0; }
     .modal-buttons { display: flex; gap: 12px; margin-top: 16px; }
+    .modal-buttons-row { display: flex; gap: 12px; margin-top: 20px; justify-content: center; }
+    .modal-buttons-row .btn { flex: 0 1 auto; min-width: 120px; }
     #orcamentoIdDisplay { text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px dashed #ccc; font-size: 0.9rem; color: #5f647e; font-weight: 500; }
     
     /* Filtros do Dashboard */
     .filter-bar { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; background: #f8fafc; padding: 16px; border-radius: 32px; align-items: flex-end; }
-    .filter-group { flex: 1; min-width: 140px; }
+    .filter-group { flex: 1; min-width: 140px; position: relative; }
     .filter-group label { font-size: 0.7rem; margin-bottom: 4px; display: block; font-weight: 600; color: #475569; }
     .filter-group input, .filter-group select { padding: 10px 12px; font-size: 0.85rem; }
+    
+    /* Sugestões dropdown */
+    .suggestions-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #e2e6ee;
+      border-radius: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: none;
+    }
+    .suggestions-dropdown.show {
+      display: block;
+    }
+    .suggestion-item {
+      padding: 10px 12px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      border-bottom: 1px solid #f0f2f7;
+      transition: background 0.15s;
+    }
+    .suggestion-item:hover {
+      background: #fef3e8;
+    }
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+    
+    /* Campo concorrente */
+    .concorrente-group { margin-top: 8px; }
+    .concorrente-group input { margin-top: 4px; }
     
     /* Lista de orçamentos no dashboard */
     .orcamentos-list { margin-top: 20px; }
@@ -167,12 +294,12 @@
     .orcamento-info strong { color: #fc5404; }
     .orcamento-status { padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
     .status-fechado { background: #25d36620; color: #1e7e34; }
-    .status-perdido { background: #e74c3c20; color: #c0392b; }
+    .status-nao-fechado { background: #e74c3c20; color: #c0392b; }
     .btn-group { display: flex; gap: 8px; }
     
     @media print {
       body { background: white; padding: 0; margin: 0; }
-      .stepper, .nav-buttons, .action-buttons, .admin-btn, .btn, .add-orc-btn, .btn-remove-orc, .module-header, #backToStep3Edit, #finalizarOrcamentoBtn, #adminAccessBtn { display: none !important; }
+      .stepper, .nav-buttons, .action-buttons, .admin-btn, .btn, .add-orc-btn, .btn-remove-orc, .module-header, #backToStep3Edit, #finalizarOrcamentoBtn, #adminAccessBtn, .logout-btn-container, .loading-overlay, .offline-indicator { display: none !important; }
       .module-card { display: block !important; box-shadow: none; padding: 0; margin: 0; }
       .module-card.active-step { display: block !important; }
       .summary-title { background: #fc5404; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -183,6 +310,14 @@
 </head>
 <body>
 <div class="app-container">
+  <div class="logout-btn-container">
+    <button class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</button>
+  </div>
+  
+  <div class="offline-indicator" id="offlineIndicator">
+    <i class="fas fa-wifi"></i> <span id="offlineStatus">Offline</span>
+  </div>
+
   <div class="stepper">
     <div class="step-item" data-step="1"><div class="step-circle">1</div><span class="step-label">Atendente</span></div>
     <div class="step-item" data-step="2"><div class="step-circle">2</div><span class="step-label">Cliente</span></div>
@@ -199,10 +334,24 @@
   <div class="module-card" id="step2">
     <div class="module-header"><i class="fas fa-address-card"></i><h2>Identificação do Cliente</h2></div>
     <div class="input-group"><label>Nome do Cliente *</label><input type="text" id="clientName" placeholder="Nome completo"></div>
-    <div class="double-col"><div class="input-group"><label>Telefone (WhatsApp)</label><input type="tel" id="clientPhone" placeholder="(11) 91234-5678"></div><div class="input-group"><label>Idade</label><input type="text" id="clientAge" placeholder="anos"></div></div>
-    <div class="double-col"><div class="input-group"><label>De onde veio *</label><select id="clientSource"><option value="">Selecione</option><option value="Teste de visão">Teste de visão</option><option value="Consulta com Oftalmo">Consulta com Oftalmo</option><option value="Indicação">Indicação</option><option value="Loja">Loja</option></select></div>
-    <div class="input-group"><label>Possui receita?</label><select id="hasPrescription"><option value="Não">Não</option><option value="Sim">Sim</option></select></div></div>
-    <div class="nav-buttons"><button class="btn" id="backToStep1"><i class="fas fa-arrow-left"></i> Voltar</button><button class="btn btn-primary" id="nextToStep3" disabled><i class="fas fa-arrow-right"></i> Continuar</button></div>
+    <div class="double-col"><div class="input-group"><label>Telefone (WhatsApp) *</label><input type="tel" id="clientPhone" placeholder="(11) 91234-5678"></div><div class="input-group"><label>Idade</label><input type="text" id="clientAge" placeholder="anos"></div></div>
+    <div class="double-col">
+      <div class="input-group"><label>De onde veio *</label><select id="clientSource">
+        <option value="">Selecione</option>
+        <option value="Consulta com Oftalmo">Consulta com Oftalmo</option>
+        <option value="Concorrente">Concorrente</option>
+        <option value="Indicação">Indicação</option>
+        <option value="Instagram Josi">Instagram Josi</option>
+        <option value="Instagram Loja">Instagram Loja</option>
+        <option value="Loja">Loja</option>
+        <option value="Teste de visão">Teste de visão</option>
+      </select></div>
+      <div class="input-group"><label>Possui receita?</label><select id="hasPrescription"><option value="Não">Não</option><option value="Sim">Sim</option></select></div>
+    </div>
+    <div class="concorrente-group" id="concorrenteGroup" style="display:none;">
+      <div class="input-group"><label>Nome do Concorrente</label><input type="text" id="concorrenteNome" placeholder="Digite o nome do concorrente"></div>
+    </div>
+    <div class="nav-buttons"><button class="btn" id="backToStep1" disabled><i class="fas fa-arrow-left"></i> Voltar</button><button class="btn btn-primary" id="nextToStep3" disabled><i class="fas fa-arrow-right"></i> Continuar</button></div>
   </div>
 
   <div class="module-card" id="step3">
@@ -235,24 +384,261 @@
 
 <script>
   (function() {
-    // LOGO BASE64 PARA O PDF (Ótica Grau Divino)
+    // ========== SUPABASE CONFIG ==========
+    const SUPABASE_URL = 'https://ywzjyoqqnweinrwbbnza.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODA5ODcsImV4cCI6MjA5MjQ1Njk4N30.6Rf26bE_yeE2NwJgggyGa-GrgM4bpMgaTvwQ_QiyPs0';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
     const LOGO_BASE64 = "data:image/png;base64,iVBORxw==";
 
-    // Variável global para o histórico de orçamentos
-    let historicoOrcamentosGlobal = JSON.parse(localStorage.getItem('historicoOrcamentos') || '[]');
-
-    // Variáveis globais para edição
+    let historicoOrcamentosGlobal = [];
     let modoEdicao = false;
     let orcamentoEditandoId = null;
     let currentStep = 1;
+    let jaPassouStep1 = false;
+    let pendingSyncData = [];
+    let isOnline = navigator.onLine;
+    
     const stepCards = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3'), document.getElementById('step4')];
     const stepItems = document.querySelectorAll('.step-item');
     const atendenteSelect = document.getElementById('atendenteSelect');
     const clientName = document.getElementById('clientName');
     const clientAge = document.getElementById('clientAge');
+    const clientPhone = document.getElementById('clientPhone');
     const clientSource = document.getElementById('clientSource');
     const descontoGeralInput = document.getElementById('descontoGeralInput');
     let currentOrcamentoId = '';
+    
+    // Offline sync functions
+    function updateOfflineIndicator() {
+      const indicator = document.getElementById('offlineIndicator');
+      const statusSpan = document.getElementById('offlineStatus');
+      if (!navigator.onLine) {
+        indicator.classList.add('show');
+        indicator.classList.remove('online');
+        statusSpan.innerHTML = '<i class="fas fa-plug"></i> Offline - Dados salvos localmente';
+      } else {
+        indicator.classList.add('show');
+        indicator.classList.add('online');
+        statusSpan.innerHTML = '<i class="fas fa-check-circle"></i> Online - Sincronizado';
+        setTimeout(() => {
+          indicator.classList.remove('show');
+        }, 3000);
+        syncPendingData();
+      }
+    }
+    
+    async function syncPendingData() {
+      const pending = JSON.parse(localStorage.getItem('pendingSync') || '[]');
+      if (pending.length === 0) return;
+      
+      showLoading();
+      let successCount = 0;
+      
+      for (const data of pending) {
+        try {
+          const { error } = await supabase
+            .from('orcamentos')
+            .upsert({
+              id: data.id,
+              cliente: data.cliente,
+              idade: data.idade,
+              telefone: data.telefone,
+              atendente: data.atendente,
+              origem: data.origem,
+              concorrente: data.concorrente || '',
+              itens: JSON.stringify(data.itens),
+              subtotal: data.subtotal,
+              desconto_geral: data.descontoGeral,
+              total_final: data.totalFinal,
+              status: data.status,
+              justificativa: data.justificativa || '',
+              data_raw: data.dataRaw,
+              created_at: data.dataRaw
+            }, { onConflict: 'id' });
+          
+          if (!error) successCount++;
+        } catch(e) {
+          console.error('Erro ao sincronizar:', e);
+        }
+      }
+      
+      if (successCount === pending.length) {
+        localStorage.removeItem('pendingSync');
+        await carregarHistoricoDoSupabase();
+      }
+      hideLoading();
+    }
+    
+    async function salvarComFallback(orcamentoData) {
+      if (navigator.onLine) {
+        try {
+          const { error } = await supabase
+            .from('orcamentos')
+            .upsert({
+              id: orcamentoData.id,
+              cliente: orcamentoData.cliente,
+              idade: orcamentoData.idade,
+              telefone: orcamentoData.telefone,
+              atendente: orcamentoData.atendente,
+              origem: orcamentoData.origem,
+              concorrente: orcamentoData.concorrente || '',
+              itens: JSON.stringify(orcamentoData.itens),
+              subtotal: orcamentoData.subtotal,
+              desconto_geral: orcamentoData.descontoGeral,
+              total_final: orcamentoData.totalFinal,
+              status: orcamentoData.status,
+              justificativa: orcamentoData.justificativa || '',
+              data_raw: orcamentoData.dataRaw,
+              created_at: orcamentoData.dataRaw
+            }, { onConflict: 'id' });
+          
+          if (!error) {
+            await carregarHistoricoDoSupabase();
+            return true;
+          } else {
+            throw error;
+          }
+        } catch(error) {
+          console.error('Erro ao salvar no Supabase, salvando localmente:', error);
+          addToPendingSync(orcamentoData);
+          return true;
+        }
+      } else {
+        addToPendingSync(orcamentoData);
+        return true;
+      }
+    }
+    
+    function addToPendingSync(orcamentoData) {
+      const pending = JSON.parse(localStorage.getItem('pendingSync') || '[]');
+      const existingIndex = pending.findIndex(p => p.id === orcamentoData.id);
+      if (existingIndex !== -1) {
+        pending[existingIndex] = orcamentoData;
+      } else {
+        pending.push(orcamentoData);
+      }
+      localStorage.setItem('pendingSync', JSON.stringify(pending));
+      
+      const localIndex = historicoOrcamentosGlobal.findIndex(h => h.id === orcamentoData.id);
+      if (localIndex !== -1) {
+        historicoOrcamentosGlobal[localIndex] = orcamentoData;
+      } else {
+        historicoOrcamentosGlobal.unshift(orcamentoData);
+      }
+      localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
+    }
+    
+    function showLoading() {
+      let loading = document.querySelector('.loading-overlay');
+      if (!loading) {
+        loading = document.createElement('div');
+        loading.className = 'loading-overlay';
+        loading.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner"></i> Carregando...</div>';
+        document.body.appendChild(loading);
+      }
+      loading.style.display = 'flex';
+    }
+    
+    function hideLoading() {
+      const loading = document.querySelector('.loading-overlay');
+      if (loading) loading.style.display = 'none';
+    }
+    
+    async function carregarHistoricoDoSupabase() {
+      showLoading();
+      try {
+        if (!navigator.onLine) {
+          const localData = localStorage.getItem('historicoOrcamentos');
+          if (localData) historicoOrcamentosGlobal = JSON.parse(localData);
+          hideLoading();
+          return;
+        }
+        
+        const { data, error } = await supabase
+          .from('orcamentos')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        historicoOrcamentosGlobal = data.map(item => ({
+          ...item,
+          itens: typeof item.itens === 'string' ? JSON.parse(item.itens) : item.itens,
+          dataRaw: item.data_raw || item.created_at,
+          data: new Date(item.created_at).toLocaleString('pt-BR')
+        }));
+        
+        localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
+      } catch (error) {
+        console.error('Erro ao carregar do Supabase:', error);
+        const localData = localStorage.getItem('historicoOrcamentos');
+        if (localData) historicoOrcamentosGlobal = JSON.parse(localData);
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    async function deletarOrcamentoDoSupabase(id) {
+      showLoading();
+      try {
+        if (navigator.onLine) {
+          const { error } = await supabase
+            .from('orcamentos')
+            .delete()
+            .eq('id', id);
+          
+          if (error) throw error;
+          await carregarHistoricoDoSupabase();
+        } else {
+          historicoOrcamentosGlobal = historicoOrcamentosGlobal.filter(item => item.id !== id);
+          localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
+          const pendingDeletes = JSON.parse(localStorage.getItem('pendingDeletes') || '[]');
+          if (!pendingDeletes.includes(id)) pendingDeletes.push(id);
+          localStorage.setItem('pendingDeletes', JSON.stringify(pendingDeletes));
+        }
+        return true;
+      } catch (error) {
+        console.error('Erro ao deletar:', error);
+        return false;
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    window.addEventListener('online', () => {
+      isOnline = true;
+      updateOfflineIndicator();
+      syncPendingData();
+      carregarHistoricoDoSupabase();
+    });
+    window.addEventListener('offline', () => {
+      isOnline = false;
+      updateOfflineIndicator();
+    });
+    
+    updateOfflineIndicator();
+    
+    clientSource.addEventListener('change', function() {
+      const concorrenteGroup = document.getElementById('concorrenteGroup');
+      if (this.value === 'Concorrente') {
+        concorrenteGroup.style.display = 'block';
+      } else {
+        concorrenteGroup.style.display = 'none';
+        document.getElementById('concorrenteNome').value = '';
+      }
+      updateNavButtons();
+    });
+    
+    function fazerLogout() {
+      localStorage.removeItem('usuarioLogado');
+      localStorage.removeItem('orcamentosTemp');
+      localStorage.removeItem('nextIdTemp');
+      window.location.href = 'index.html';
+    }
+    
+    document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
     
     function generateOrcamentoId() {
       return 'ORC-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -301,18 +687,36 @@
     
     function validateStep1() { return atendenteSelect.value !== ''; }
     function validateStep2() { 
-      return clientName.value.trim() !== '' && clientSource.value !== ''; 
+      const phoneValid = clientPhone.value.trim() !== '';
+      const nameValid = clientName.value.trim() !== '';
+      const sourceValid = clientSource.value !== '';
+      
+      if (!phoneValid) {
+        clientPhone.classList.add('required-error');
+      } else {
+        clientPhone.classList.remove('required-error');
+      }
+      if (!nameValid) {
+        clientName.classList.add('required-error');
+      } else {
+        clientName.classList.remove('required-error');
+      }
+      if (!sourceValid) {
+        clientSource.classList.add('required-error');
+      } else {
+        clientSource.classList.remove('required-error');
+      }
+      
+      return nameValid && phoneValid && sourceValid;
     }
     function updateNavButtons() { 
       document.getElementById('nextToStep2').disabled = !validateStep1(); 
       document.getElementById('nextToStep3').disabled = !validateStep2(); 
     }
     
-    // Função para mostrar/esconder botão admin baseado no atendente selecionado
     function toggleAdminButton() {
       const adminBtn = document.getElementById('adminAccessBtn');
       const atendente = atendenteSelect.value;
-      // Mostrar apenas para Jaúna Constante ou Jaciara Constante
       if (atendente === 'Jaúna Constante' || atendente === 'Jaciara Constante') {
         adminBtn.classList.add('visible');
       } else {
@@ -320,13 +724,11 @@
       }
     }
     
-    // ========== NOVA FUNÇÃO: Verificar usuário logado e preencher automaticamente ==========
     function verificarUsuarioLogado() {
       const usuarioSalvo = localStorage.getItem('usuarioLogado');
       if (usuarioSalvo) {
         try {
           const user = JSON.parse(usuarioSalvo);
-          // Verifica se a sessão expirou (8 horas)
           const timestamp = new Date(user.loginTimestamp);
           const agora = new Date();
           const diffHoras = (agora - timestamp) / (1000 * 60 * 60);
@@ -336,33 +738,23 @@
             return false;
           }
           
-          // Nome do atendente logado
           const nomeAtendente = user.nome;
-          
-          // Verifica se o nome está na lista de opções do select
           const optionExists = Array.from(atendenteSelect.options).some(opt => opt.value === nomeAtendente);
           
           if (optionExists && nomeAtendente) {
-            // Seleciona o atendente automaticamente
             atendenteSelect.value = nomeAtendente;
-            
-            // Dispara evento change para atualizar validações
             const changeEvent = new Event('change', { bubbles: true });
             atendenteSelect.dispatchEvent(changeEvent);
             
-            // Se o atendente foi selecionado com sucesso, avança para a etapa 2 (Cliente)
             if (validateStep1()) {
-              // Pequeno delay para garantir que o DOM foi atualizado
+              jaPassouStep1 = true;
               setTimeout(() => {
                 goToStep(2);
               }, 50);
             }
-            
             return true;
-          } else {
-            console.warn('Atendente logado não encontrado na lista de opções:', nomeAtendente);
-            return false;
           }
+          return false;
         } catch(e) {
           console.error('Erro ao ler usuário logado:', e);
           localStorage.removeItem('usuarioLogado');
@@ -372,31 +764,47 @@
       return false;
     }
     
-    document.getElementById('nextToStep2')?.addEventListener('click',()=>{if(validateStep1()) goToStep(2);});
-    document.getElementById('backToStep1')?.addEventListener('click',()=>goToStep(1));
+    document.getElementById('nextToStep2')?.addEventListener('click',()=>{
+      if(validateStep1()) {
+        jaPassouStep1 = true;
+        goToStep(2);
+      }
+    });
+    
+    document.getElementById('backToStep1')?.addEventListener('click',()=>{
+      if(!jaPassouStep1) {
+        goToStep(1);
+      } else {
+        alert('⚠️ Você não pode voltar para a seleção de atendente. Clique em "Sair" para trocar de atendente.');
+      }
+    });
+    
     document.getElementById('nextToStep3')?.addEventListener('click',()=>{if(validateStep2()){goToStep(3);renderOrcamentosForm();}});
     document.getElementById('backToStep2_from3')?.addEventListener('click',()=>goToStep(2));
     document.getElementById('nextToStep4')?.addEventListener('click',()=>{goToStep(4);renderResumoFinal();});
     document.getElementById('backToStep3Edit')?.addEventListener('click',()=>goToStep(3));
+    
     atendenteSelect.addEventListener('change', () => {
       updateNavButtons();
       toggleAdminButton();
     });
     clientName.addEventListener('input',updateNavButtons);
     clientAge.addEventListener('input',updateNavButtons);
+    clientPhone.addEventListener('input',updateNavButtons);
     clientSource.addEventListener('change',updateNavButtons);
     updateNavButtons();
-    toggleAdminButton(); // Verificar estado inicial
+    toggleAdminButton();
     
     function getEmptyOrcamento() { 
       return { 
         id: nextId++, 
         tipo: 'lente', 
         produto: '', 
-        modelo: '', 
+        marca: '', 
         materialLente: '', 
         antirreflexo: false, 
-        filtroLuzAzul: false, 
+        filtroLuzAzul: false,
+        lenteFotocromatica: false,
         valorLente: 0, 
         valorLenteStr: '', 
         nomeArmacao: '', 
@@ -434,11 +842,12 @@
       
       if(field==='tipo') item.tipo=value;
       else if(field==='produto') item.produto=value;
-      else if(field==='modelo') item.modelo=value;
+      else if(field==='marca') item.marca=value;
       else if(field==='referencia') item.referencia=value;
       else if(field==='materialLente') item.materialLente=value;
       else if(field==='antirreflexo') item.antirreflexo=value;
       else if(field==='filtroLuzAzul') item.filtroLuzAzul=value;
+      else if(field==='lenteFotocromatica') item.lenteFotocromatica=value;
       else if(field==='valorLente') { 
         item.valorLenteStr = value; 
         item.valorLente = parseCurrency(value); 
@@ -541,17 +950,18 @@
               <div class="input-group"><label>📋 Produto / Tipo de lente *</label><input type="text" class="text-input" value="${escapeHtml(item.produto)}" data-id="${item.id}" data-field="produto" placeholder="Ex: Multifocal, Blue Control"></div>
               <div class="input-group"><label>💰 Valor da Lente (R$)</label><input type="text" class="discount-input valor-field" style="width:100%" value="${escapeHtml(valorBaseStr)}" data-id="${item.id}" data-field="valorLente" placeholder="0,00"></div>
             </div>
-            <div class="double-col"><div class="input-group"><label>📐 Modelo</label><input type="text" class="text-input" value="${escapeHtml(item.modelo)}" data-id="${item.id}" data-field="modelo" placeholder="Ex: Exclusive Pro"></div>
+            <div class="double-col"><div class="input-group"><label>🏷️ Marca</label><input type="text" class="text-input" value="${escapeHtml(item.marca)}" data-id="${item.id}" data-field="marca" placeholder="Ex: Essilor, Zeiss, Hoya"></div>
             <div class="input-group"><label>🔬 Material</label><input type="text" class="text-input" value="${escapeHtml(item.materialLente)}" data-id="${item.id}" data-field="materialLente" placeholder="Policarbonato, Resina 1.56"></div></div>
             <div class="checkbox-row">
               <label><input type="checkbox" class="checkbox-ar" ${item.antirreflexo?'checked':''} data-id="${item.id}" data-field="antirreflexo"> ✨ Antirreflexo</label>
               <label><input type="checkbox" class="checkbox-filtro" ${item.filtroLuzAzul?'checked':''} data-id="${item.id}" data-field="filtroLuzAzul"> 🔵 Filtro de Luz Azul</label>
+              <label><input type="checkbox" class="checkbox-fotocromatica" ${item.lenteFotocromatica?'checked':''} data-id="${item.id}" data-field="lenteFotocromatica"> 🌞 Lente Fotocromática</label>
             </div>
           `;
         } else if(item.tipo === 'armacao') {
           fieldsHtml = `
             <div class="field-row-2col">
-              <div class="input-group"><label>📋 Modelo da Armação *</label><input type="text" class="text-input" value="${escapeHtml(item.nomeArmacao)}" data-id="${item.id}" data-field="nomeArmacao" placeholder="Ex: Ray-Ban, Ótica VIP"></div>
+              <div class="input-group"><label>🏷️ Marca</label><input type="text" class="text-input" value="${escapeHtml(item.marca)}" data-id="${item.id}" data-field="marca" placeholder="Ex: Ray-Ban, Oakley, Vogue"></div>
               <div class="input-group"><label>💰 Valor da Armação (R$)</label><input type="text" class="discount-input valor-field" style="width:100%" value="${escapeHtml(valorBaseStr)}" data-id="${item.id}" data-field="valorArmacao" placeholder="0,00"></div>
             </div>
             <div class="double-col">
@@ -595,7 +1005,7 @@
         inp.value = formatMoneyWithThousand(val);
         updateOrcamentoField(parseInt(inp.dataset.id), inp.dataset.field, inp.value);
       }));
-      document.querySelectorAll('.checkbox-ar, .checkbox-filtro').forEach(chk => chk.addEventListener('change', (e) => updateOrcamentoField(parseInt(chk.dataset.id), chk.dataset.field, chk.checked)));
+      document.querySelectorAll('.checkbox-ar, .checkbox-filtro, .checkbox-fotocromatica').forEach(chk => chk.addEventListener('change', (e) => updateOrcamentoField(parseInt(chk.dataset.id), chk.dataset.field, chk.checked)));
     }
     
     function calcularSubtotalItens() { 
@@ -629,11 +1039,12 @@
           let extras = [];
           if(item.antirreflexo) extras.push('AR');
           if(item.filtroLuzAzul) extras.push('Filtro Azul');
-          descricao=`👓 ${item.produto||'Lente'} ${item.modelo?`·${item.modelo}`:''} ${item.materialLente?`(${item.materialLente})`:''} ${extras.length?`[${extras.join(', ')}]`:''}`; 
+          if(item.lenteFotocromatica) extras.push('Fotocromática');
+          descricao=`👓 ${item.produto||'Lente'} ${item.marca?`·${item.marca}`:''} ${item.materialLente?`(${item.materialLente})`:''} ${extras.length?`[${extras.join(', ')}]`:''}`; 
           valorBase=item.valorLente||0; 
         }
         else if(item.tipo==='armacao') { 
-          descricao=`🕶️ ${item.nomeArmacao||'Armação'} ${item.referencia?`(Ref: ${item.referencia})`:''} ${item.materialArmacao?`${item.materialArmacao}`:''}`; 
+          descricao=`🕶️ ${item.marca?`${item.marca}`:'Armação'} ${item.referencia?`Ref: ${item.referencia}`:''}`; 
           valorBase=item.valorArmacao||0; 
         }
         else if(item.tipo==='relogio') {
@@ -673,15 +1084,16 @@
       });
     }
     
-    function salvarHistorico(status, justificativa='') {
+    async function salvarHistorico(status, justificativa='') {
       let orcamentoData = {
         id: currentOrcamentoId,
-        data: new Date().toLocaleString('pt-BR'),
         dataRaw: new Date().toISOString(),
         atendente: atendenteSelect.value,
         cliente: clientName.value.trim(),
         idade: clientAge.value.trim(),
-        telefone: document.getElementById('clientPhone').value.trim(),
+        telefone: clientPhone.value.trim(),
+        origem: clientSource.value,
+        concorrente: clientSource.value === 'Concorrente' ? document.getElementById('concorrenteNome').value.trim() : '',
         itens: JSON.parse(JSON.stringify(orcamentos)),
         subtotal: calcularSubtotalItens(),
         descontoGeral: parseCurrency(descontoGeralInput?.value),
@@ -690,39 +1102,36 @@
         justificativa: justificativa
       };
       
-      if (modoEdicao && orcamentoEditandoId) {
-        const index = historicoOrcamentosGlobal.findIndex(item => item.id === orcamentoEditandoId);
-        if (index !== -1) {
-          historicoOrcamentosGlobal[index] = orcamentoData;
-        } else {
-          historicoOrcamentosGlobal.unshift(orcamentoData);
-        }
-        modoEdicao = false;
-        orcamentoEditandoId = null;
-      } else {
-        historicoOrcamentosGlobal.unshift(orcamentoData);
-      }
+      const salvou = await salvarComFallback(orcamentoData);
       
-      if(historicoOrcamentosGlobal.length > 200) historicoOrcamentosGlobal.pop();
-      localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
-      localStorage.removeItem('orcamentosTemp');
-      localStorage.removeItem('nextIdTemp');
+      if (salvou) {
+        if (modoEdicao && orcamentoEditandoId) {
+          modoEdicao = false;
+          orcamentoEditandoId = null;
+        }
+        localStorage.removeItem('orcamentosTemp');
+        localStorage.removeItem('nextIdTemp');
+        return true;
+      }
+      return false;
     }
     
     function resetarFormulario() {
       orcamentos = [getEmptyOrcamento()];
       nextId = 2;
       atendenteSelect.value = '';
+      jaPassouStep1 = false;
       clientName.value = '';
       clientAge.value = '';
       clientSource.value = '';
-      document.getElementById('clientPhone').value = '';
+      clientPhone.value = '';
       document.getElementById('hasPrescription').value = 'Não';
+      document.getElementById('concorrenteNome').value = '';
+      document.getElementById('concorrenteGroup').style.display = 'none';
       if(descontoGeralInput) descontoGeralInput.value = '';
       updateNavButtons();
       renderOrcamentosForm();
       
-      // Após resetar, verificar se há usuário logado para preencher novamente
       const usuarioLogado = localStorage.getItem('usuarioLogado');
       if (usuarioLogado) {
         verificarUsuarioLogado();
@@ -736,18 +1145,24 @@
       updateOrcamentoIdDisplay();
       modoEdicao = false;
       orcamentoEditandoId = null;
-      toggleAdminButton(); // Atualizar visibilidade do botão admin
+      toggleAdminButton();
     }
     
     function carregarOrcamentoParaEdicao(orcamento) {
       modoEdicao = true;
       orcamentoEditandoId = orcamento.id;
       currentOrcamentoId = orcamento.id;
+      jaPassouStep1 = true;
       
       atendenteSelect.value = orcamento.atendente;
       clientName.value = orcamento.cliente;
       clientAge.value = orcamento.idade || '';
-      document.getElementById('clientPhone').value = orcamento.telefone || '';
+      clientPhone.value = orcamento.telefone || '';
+      clientSource.value = orcamento.origem || '';
+      if (clientSource.value === 'Concorrente' && orcamento.concorrente) {
+        document.getElementById('concorrenteGroup').style.display = 'block';
+        document.getElementById('concorrenteNome').value = orcamento.concorrente;
+      }
       
       orcamentos = JSON.parse(JSON.stringify(orcamento.itens));
       nextId = orcamentos.length + 1;
@@ -759,7 +1174,7 @@
       updateOrcamentoIdDisplay();
       goToStep(3);
       
-      alert(`Editando orçamento: ${orcamento.id}\nCliente: ${orcamento.cliente}\nStatus atual: ${orcamento.status === 'fechado' ? 'FECHADO' : 'PERDIDO'}\n\nVocê pode modificar os itens e finalizar novamente.`);
+      alert(`Editando orçamento: ${orcamento.id}\nCliente: ${orcamento.cliente}\nStatus atual: ${orcamento.status === 'fechado' ? 'FECHADO' : 'NÃO FINALIZADO'}\n\nVocê pode modificar os itens e finalizar novamente.`);
     }
     
     function formatPhoneForWhatsApp(phone) {
@@ -779,16 +1194,21 @@
         <div class="modal-content" style="max-width:450px;">
           <h3><i class="fas fa-question-circle"></i> Finalizar Orçamento</h3>
           <p>O cliente fechou o orçamento?</p>
-          <div style="display:flex; gap:12px; margin:16px 0;">
-            <button id="simFechouBtn" class="btn btn-success" style="flex:1;"><i class="fas fa-check"></i> Sim, fechou</button>
-            <button id="naoFechouBtn" class="btn btn-danger" style="flex:1; background:#e74c3c; color:white;"><i class="fas fa-times"></i> Não fechou</button>
+          <div class="modal-buttons-row">
+            <button id="simFechouBtn" class="btn btn-success" style="flex:0 1 auto; min-width:120px;"><i class="fas fa-check"></i> Sim, fechou</button>
+            <button id="naoFechouBtn" class="btn btn-danger" style="flex:0 1 auto; min-width:120px; background:#e74c3c; color:white;"><i class="fas fa-times"></i> Não fechou</button>
           </div>
-          <div id="justificativaArea" style="display:none;">
+          <div id="justificativaArea" style="display:none; margin-top:16px;">
             <label>Justificativa para não fechamento:</label>
             <textarea id="justificativaTexto" class="justificativa-input" placeholder="Ex: Cliente achou caro, vai pensar, etc..."></textarea>
-            <button id="confirmarNaoFechouBtn" class="btn btn-primary">Confirmar</button>
+            <div class="modal-buttons-row">
+              <button id="confirmarNaoFechouBtn" class="btn btn-primary">Confirmar</button>
+              <button id="cancelarJustificativaBtn" class="btn btn-outline">Cancelar</button>
+            </div>
           </div>
-          <button id="cancelarModalBtn" class="btn btn-outline" style="margin-top:12px;">Cancelar</button>
+          <div class="modal-buttons-row" id="botoesIniciais">
+            <button id="cancelarModalBtn" class="btn btn-outline" style="flex:0 1 auto; min-width:120px;">Cancelar</button>
+          </div>
         </div>
       `;
       document.body.appendChild(modal);
@@ -796,10 +1216,36 @@
       const naoBtn = modal.querySelector('#naoFechouBtn');
       const justArea = modal.querySelector('#justificativaArea');
       const confirmarNao = modal.querySelector('#confirmarNaoFechouBtn');
+      const cancelarJust = modal.querySelector('#cancelarJustificativaBtn');
       const cancelar = modal.querySelector('#cancelarModalBtn');
-      simBtn.onclick = () => { salvarHistorico('fechado', ''); alert('✅ Orçamento finalizado com VENDA!'); modal.remove(); resetarFormulario(); };
-      naoBtn.onclick = () => { justArea.style.display = 'block'; naoBtn.disabled = true; simBtn.disabled = true; };
-      confirmarNao.onclick = () => { let just = modal.querySelector('#justificativaTexto').value.trim(); if(!just) { alert('Por favor, informe uma justificativa'); return; } salvarHistorico('nao_fechado', just); alert('📋 Orçamento arquivado sem venda.'); modal.remove(); resetarFormulario(); };
+      const botoesIniciais = modal.querySelector('#botoesIniciais');
+      
+      simBtn.onclick = async () => { 
+        const salvou = await salvarHistorico('fechado', ''); 
+        if(salvou) alert('✅ Orçamento finalizado com VENDA!'); 
+        modal.remove(); 
+        resetarFormulario(); 
+      };
+      naoBtn.onclick = () => { 
+        justArea.style.display = 'block'; 
+        botoesIniciais.style.display = 'none';
+        naoBtn.disabled = true; 
+        simBtn.disabled = true; 
+      };
+      confirmarNao.onclick = async () => { 
+        let just = modal.querySelector('#justificativaTexto').value.trim(); 
+        if(!just) { alert('Por favor, informe uma justificativa'); return; } 
+        const salvou = await salvarHistorico('nao_fechado', just); 
+        if(salvou) alert('📋 Orçamento arquivado como NÃO FINALIZADO.'); 
+        modal.remove(); 
+        resetarFormulario(); 
+      };
+      cancelarJust.onclick = () => {
+        justArea.style.display = 'none';
+        botoesIniciais.style.display = 'flex';
+        naoBtn.disabled = false;
+        simBtn.disabled = false;
+      };
       cancelar.onclick = () => modal.remove();
     }
     
@@ -852,7 +1298,7 @@
       doc.setTextColor(30, 31, 42);
       doc.text(`Cliente: ${clientName.value.trim() || 'Cliente'}`, marginLeft+2, y+8);
       doc.text(`Idade: ${clientAge.value.trim() || '--'} anos`, marginLeft+2, y+16);
-      doc.text(`Telefone: ${document.getElementById('clientPhone').value.trim() || 'Não informado'}`, marginLeft+2, y+24);
+      doc.text(`Telefone: ${clientPhone.value.trim() || 'Não informado'}`, marginLeft+2, y+24);
       doc.text(`Atendente: ${atendenteSelect.value}`, marginLeft+120, y+8);
       y += 38;
       
@@ -883,17 +1329,18 @@
         
         if(item.tipo === 'lente') {
           doc.text(`   Produto: ${item.produto || '—'}`, marginLeft, y); y += 5;
-          if(item.modelo) { doc.text(`   Modelo: ${item.modelo}`, marginLeft, y); y += 5; }
+          if(item.marca) { doc.text(`   Marca: ${item.marca}`, marginLeft, y); y += 5; }
           if(item.materialLente) { doc.text(`   Material: ${item.materialLente}`, marginLeft, y); y += 5; }
           let extras = [];
           if(item.antirreflexo) extras.push('Antirreflexo');
           if(item.filtroLuzAzul) extras.push('Filtro Luz Azul');
+          if(item.lenteFotocromatica) extras.push('Lente Fotocromática');
           if(extras.length) { doc.text(`   Adicionais: ${extras.join(', ')}`, marginLeft, y); y += 5; }
           const valorLiq = (item.valorLente||0) - (item.descontoItem||0);
           doc.text(`   Valor líquido: ${formatMoneyWithSymbol(valorLiq)}`, marginLeft, y); y += 5;
           if(item.descontoItem > 0) { doc.text(`   Desconto: ${formatMoneyWithSymbol(item.descontoItem)}`, marginLeft, y); y += 5; }
         } else if(item.tipo === 'armacao') {
-          doc.text(`   Modelo: ${item.nomeArmacao || '—'}`, marginLeft, y); y += 5;
+          if(item.marca) { doc.text(`   Marca: ${item.marca}`, marginLeft, y); y += 5; }
           if(item.referencia) { doc.text(`   Referência: ${item.referencia}`, marginLeft, y); y += 5; }
           if(item.materialArmacao) { doc.text(`   Material: ${item.materialArmacao}`, marginLeft, y); y += 5; }
           const valorLiq = (item.valorArmacao||0) - (item.descontoItem||0);
@@ -946,7 +1393,7 @@
     document.getElementById('whatsBtn')?.addEventListener('click', () => {
       const nome = clientName.value.trim() || 'Cliente';
       const idade = clientAge.value.trim() || '--';
-      let telefone = document.getElementById('clientPhone').value.trim();
+      let telefone = clientPhone.value.trim();
       const atendente = atendenteSelect.value;
       const dataAtual = new Date().toLocaleDateString('pt-BR');
       
@@ -959,14 +1406,16 @@
           const extras = [];
           if(item.antirreflexo) extras.push('Antirreflexo incluso');
           if(item.filtroLuzAzul) extras.push('Filtro Luz Azul incluso');
+          if(item.lenteFotocromatica) extras.push('Lente Fotocromática');
           descLinhas = `▸ Produto: ${item.produto || '—'}\n`;
-          if(item.modelo) descLinhas += `▸ Modelo: ${item.modelo}\n`;
+          if(item.marca) descLinhas += `▸ Marca: ${item.marca}\n`;
           if(item.materialLente) descLinhas += `▸ Material: ${item.materialLente}\n`;
           if(extras.length) descLinhas += `▸ Adicionais: ${extras.join(', ')}\n`;
           itensTexto += `\n\n📌 *LENTE ${i+1}*\n${descLinhas}`;
         } else if(item.tipo === 'armacao') {
           valorBase = item.valorArmacao||0;
-          descLinhas = `▸ Modelo: ${item.nomeArmacao || '—'}\n`;
+          descLinhas = ``;
+          if(item.marca) descLinhas += `▸ Marca: ${item.marca}\n`;
           if(item.referencia) descLinhas += `▸ Referência: ${item.referencia}\n`;
           if(item.materialArmacao) descLinhas += `▸ Material: ${item.materialArmacao}\n`;
           itensTexto += `\n\n🕶️ *ARMAÇÃO ${i+1}*\n${descLinhas}`;
@@ -991,7 +1440,8 @@
       const totalFinal = calcularTotalFinal();
       
       const msg = ` *ÓTICA GRAU DIVINO*
-━━━━━━━━━━━━━━━━━*ORÇAMENTO: ${nome.toUpperCase()}*
+━━━━━━━━━━━━━━━━━
+*ORÇAMENTO: ${nome.toUpperCase()}*
 *ID: ${currentOrcamentoId}*
 ━━━━━━━━━━━━━━━━━
 
@@ -1028,36 +1478,77 @@ ${dataAtual}
     currentOrcamentoId = generateOrcamentoId();
     updateOrcamentoIdDisplay();
     
-    // ========== VERIFICAR USUÁRIO LOGADO E REDIRECIONAR ==========
-    const usuarioFoiPreenchido = verificarUsuarioLogado();
+    carregarHistoricoDoSupabase().then(() => {
+      const usuarioFoiPreenchido = verificarUsuarioLogado();
+      if (!usuarioFoiPreenchido) {
+        goToStep(1);
+      }
+    });
     
-    // Se não houver usuário logado, fica na etapa 1 normalmente
-    if (!usuarioFoiPreenchido) {
-      goToStep(1);
+    // ========== DASHBOARD ADMIN ==========
+    
+    // Função para criar dropdown de sugestões
+    function createSuggestionsDropdown(inputId, getSuggestionsFn, onSelectFn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      
+      const wrapper = input.parentElement;
+      let dropdown = wrapper.querySelector('.suggestions-dropdown');
+      if (!dropdown) {
+        dropdown = document.createElement('div');
+        dropdown.className = 'suggestions-dropdown';
+        wrapper.appendChild(dropdown);
+      }
+      
+      input.addEventListener('input', function() {
+        const value = this.value.toLowerCase();
+        if (value.length === 0) {
+          dropdown.classList.remove('show');
+          return;
+        }
+        
+        const suggestions = getSuggestionsFn(value);
+        if (suggestions.length === 0) {
+          dropdown.classList.remove('show');
+          return;
+        }
+        
+        dropdown.innerHTML = suggestions.map(s => `<div class="suggestion-item" data-value="${escapeHtml(s)}">${escapeHtml(s)}</div>`).join('');
+        dropdown.classList.add('show');
+        
+        dropdown.querySelectorAll('.suggestion-item').forEach(item => {
+          item.addEventListener('click', function() {
+            input.value = this.dataset.value;
+            dropdown.classList.remove('show');
+            if (onSelectFn) onSelectFn(this.dataset.value);
+          });
+        });
+      });
+      
+      document.addEventListener('click', function(e) {
+        if (!wrapper.contains(e.target)) {
+          dropdown.classList.remove('show');
+        }
+      });
     }
-
-    // ========== FUNÇÕES DO DASHBOARD ADMIN ==========
     
-    // Função para deletar um orçamento individual
-    window.deletarOrcamento = function(id, nomeCliente) {
+    window.deletarOrcamento = async function(id, nomeCliente) {
       const confirmModal = document.createElement('div'); confirmModal.className = 'modal-overlay';
       confirmModal.innerHTML = `
         <div class="modal-content" style="max-width:400px;">
           <h3><i class="fas fa-trash-alt" style="color:#e74c3c;"></i> Confirmar exclusão</h3>
           <p>Tem certeza que deseja excluir o orçamento de <strong>${escapeHtml(nomeCliente)}</strong>?</p>
           <p style="font-size:0.8rem; color:#666; margin-top:8px;">ID: ${escapeHtml(id)}</p>
-          <div class="modal-buttons" style="margin-top:20px;">
-            <button id="confirmDeleteBtn" class="btn btn-danger" style="flex:1;">Sim, excluir</button>
-            <button id="cancelDeleteBtn" class="btn btn-outline" style="flex:1;">Cancelar</button>
+          <div class="modal-buttons-row">
+            <button id="confirmDeleteBtn" class="btn btn-danger" style="flex:0 1 auto;">Sim, excluir</button>
+            <button id="cancelDeleteBtn" class="btn btn-outline" style="flex:0 1 auto;">Cancelar</button>
           </div>
         </div>
       `;
       document.body.appendChild(confirmModal);
       
-      confirmModal.querySelector('#confirmDeleteBtn').onclick = () => {
-        historicoOrcamentosGlobal = historicoOrcamentosGlobal.filter(item => item.id !== id);
-        localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
-        alert(`✅ Orçamento ${id} excluído com sucesso!`);
+      confirmModal.querySelector('#confirmDeleteBtn').onclick = async () => {
+        await deletarOrcamentoDoSupabase(id);
         confirmModal.remove();
         if (window.renderizarDashboardComFiltrosAtual) {
           window.renderizarDashboardComFiltrosAtual();
@@ -1066,17 +1557,14 @@ ${dataAtual}
       confirmModal.querySelector('#cancelDeleteBtn').onclick = () => confirmModal.remove();
     };
     
-    // Função para marcar como venda realizada
-    window.marcarComoVendaRealizada = function(id, nomeCliente) {
+    window.marcarComoVendaRealizada = async function(id, nomeCliente) {
       const index = historicoOrcamentosGlobal.findIndex(item => item.id === id);
       if (index !== -1 && historicoOrcamentosGlobal[index].status !== 'fechado') {
-        historicoOrcamentosGlobal[index].status = 'fechado';
-        historicoOrcamentosGlobal[index].justificativa = 'Convertido para venda via dashboard';
-        localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
-        alert(`✅ Orçamento de ${nomeCliente} marcado como VENDA REALIZADA!`);
-        if (window.renderizarDashboardComFiltrosAtual) {
-          window.renderizarDashboardComFiltrosAtual();
-        }
+        const orcamentoData = historicoOrcamentosGlobal[index];
+        orcamentoData.status = 'fechado';
+        orcamentoData.justificativa = 'Convertido para venda via dashboard';
+        const atualizado = await salvarComFallback(orcamentoData);
+        if(atualizado) alert(`✅ Orçamento de ${nomeCliente} marcado como VENDA REALIZADA!`);
       } else if (index !== -1 && historicoOrcamentosGlobal[index].status === 'fechado') {
         alert(`ℹ️ Este orçamento já está marcado como VENDA REALIZADA.`);
       } else {
@@ -1084,36 +1572,12 @@ ${dataAtual}
       }
     };
     
-    // Função para editar orçamento
     window.editarOrcamento = function(orcamento) {
-      // Fechar o modal do dashboard se estiver aberto
       const adminModal = document.querySelector('.modal-overlay');
       if (adminModal) adminModal.remove();
-      
-      // Carregar o orçamento para edição
-      modoEdicao = true;
-      orcamentoEditandoId = orcamento.id;
-      currentOrcamentoId = orcamento.id;
-      
-      atendenteSelect.value = orcamento.atendente;
-      clientName.value = orcamento.cliente;
-      clientAge.value = orcamento.idade || '';
-      document.getElementById('clientPhone').value = orcamento.telefone || '';
-      
-      orcamentos = JSON.parse(JSON.stringify(orcamento.itens));
-      nextId = orcamentos.length + 1;
-      
-      if(descontoGeralInput) descontoGeralInput.value = formatMoneyWithThousand(orcamento.descontoGeral || 0);
-      
-      updateNavButtons();
-      renderOrcamentosForm();
-      updateOrcamentoIdDisplay();
-      goToStep(3);
-      
-      alert(`Editando orçamento: ${orcamento.id}\nCliente: ${orcamento.cliente}\nStatus atual: ${orcamento.status === 'fechado' ? 'FECHADO' : 'PERDIDO'}\n\nVocê pode modificar os itens e finalizar novamente.`);
+      carregarOrcamentoParaEdicao(orcamento);
     };
     
-    // Função principal de renderização do dashboard com filtros
     window.renderizarDashboardComFiltrosAtual = function() {
       const container = document.getElementById('dashboardContent');
       if (!container) return;
@@ -1127,6 +1591,7 @@ ${dataAtual}
       const filtroValorComp = parseCurrency(document.getElementById('filtroValorComp')?.value || '0');
       const filtroIdade = document.getElementById('filtroIdade')?.value;
       const filtroCliente = document.getElementById('filtroCliente')?.value?.toLowerCase() || '';
+      const filtroIdOrcamento = document.getElementById('filtroIdOrcamento')?.value?.toLowerCase() || '';
       
       if (filtroPeriodo === 'mes' && filtroMes) {
         const [ano, mes] = filtroMes.split('-');
@@ -1156,18 +1621,22 @@ ${dataAtual}
         data = data.filter(item => item.cliente && item.cliente.toLowerCase().includes(filtroCliente));
       }
       
+      if (filtroIdOrcamento && filtroIdOrcamento !== '') {
+        data = data.filter(item => item.id && item.id.toLowerCase().includes(filtroIdOrcamento));
+      }
+      
       if (!data || !data.length) {
         container.innerHTML = `<div class="empty-state"><i class="fas fa-chart-line"></i> Nenhum orçamento encontrado com os filtros aplicados.</div>`;
         return;
       }
-
+      
       const totalOrcamentos = data.length;
       const totalVendas = data.filter(i => i.status === 'fechado').length;
       const totalPerdidos = data.filter(i => i.status === 'nao_fechado').length;
       const valorTotalVendido = data.filter(i => i.status === 'fechado').reduce((acc, i) => acc + (i.totalFinal || 0), 0);
       const valorPerdidoTotal = data.filter(i => i.status === 'nao_fechado').reduce((acc, i) => acc + (i.totalFinal || 0), 0);
       const taxaConversaoGeral = totalOrcamentos ? ((totalVendas / totalOrcamentos) * 100).toFixed(1) : 0;
-
+      
       const mesesMap = new Map();
       data.forEach(item => {
         let dataObj = new Date(item.dataRaw);
@@ -1188,7 +1657,7 @@ ${dataAtual}
       const vendasCount = mesesLabels.map(m => mesesMap.get(m).vendas);
       const perdidosCount = mesesLabels.map(m => mesesMap.get(m).perdidos);
       const valorPerdidoMensal = mesesLabels.map(m => mesesMap.get(m).valorPerdido);
-
+      
       const vendedoresMap = new Map();
       data.forEach(item => {
         const vendedor = item.atendente || 'Não definido';
@@ -1219,31 +1688,31 @@ ${dataAtual}
           }
         }
       });
-
+      
       const vendedoresSorted = Array.from(vendedoresMap.entries()).sort((a, b) => b[1].valorPerdido - a[1].valorPerdido);
-
+      
       let html = `
         <div class="dashboard-stats">
           <div class="stat-card"><div class="stat-label">📋 TOTAL ORÇAMENTOS</div><div class="stat-value">${totalOrcamentos}</div><div class="stat-sub">registros no sistema</div></div>
           <div class="stat-card"><div class="stat-label">✅ VENDAS FECHADAS</div><div class="stat-value">${totalVendas}</div><div class="stat-sub">conversão ${taxaConversaoGeral}%</div></div>
-          <div class="stat-card"><div class="stat-label">❌ PERDIDOS / NÃO FECHADOS</div><div class="stat-value">${totalPerdidos}</div><div class="stat-sub">taxa de perda ${totalOrcamentos ? ((totalPerdidos/totalOrcamentos)*100).toFixed(1) : 0}%</div></div>
+          <div class="stat-card"><div class="stat-label">❌ NÃO FINALIZADOS</div><div class="stat-value">${totalPerdidos}</div><div class="stat-sub">taxa de perda ${totalOrcamentos ? ((totalPerdidos/totalOrcamentos)*100).toFixed(1) : 0}%</div></div>
           <div class="stat-card"><div class="stat-label">💰 FATURAMENTO (VENDAS)</div><div class="stat-value">${formatMoneyWithSymbol(valorTotalVendido)}</div><div class="stat-sub">receita líquida</div></div>
           <div class="stat-card"><div class="stat-label">💸 VALOR PERDIDO (OPORTUNIDADE)</div><div class="stat-value" style="color:#e74c3c;">${formatMoneyWithSymbol(valorPerdidoTotal)}</div><div class="stat-sub">orçamentos não realizados</div></div>
         </div>
       `;
-
+      
       if (mesesLabels.length > 0) {
         html += `
           <div class="charts-row">
-            <div class="chart-card"><h4><i class="fas fa-chart-line"></i> Evolução Mensal: Vendas vs. Perdas</h4><canvas id="monthlyCompareChart" width="400" height="250"></canvas></div>
+            <div class="chart-card"><h4><i class="fas fa-chart-line"></i> Evolução Mensal: Vendas vs. Não Finalizados</h4><canvas id="monthlyCompareChart" width="400" height="250"></canvas></div>
             <div class="chart-card"><h4><i class="fas fa-money-bill-wave"></i> Valor Perdido por Mês (R$)</h4><canvas id="lostValueChart" width="400" height="250"></canvas></div>
           </div>
         `;
       }
-
+      
       html += `
         <div class="section-title"><i class="fas fa-users"></i> Performance por Atendente</div>
-        <table class="performer-table"><thead><tr><th>Vendedor(a)</th><th>Vendas</th><th>Perdidos</th><th>Valor Vendido</th><th>VALOR PERDIDO (R$)</th><th>Taxa Conversão</th></tr></thead><tbody>
+        <table class="performer-table"><thead><tr><th>Vendedor(a)</th><th>Vendas</th><th>Não Finalizados</th><th>Valor Vendido</th><th>VALOR PERDIDO (R$)</th><th>Taxa Conversão</th></tr></thead><tbody>
       `;
       for (const [nome, d] of vendedoresSorted) {
         const totalAtendimentos = d.vendas + d.perdidos;
@@ -1251,13 +1720,15 @@ ${dataAtual}
         html += `<tr><td><strong>${escapeHtml(nome)}</strong></td><td>${d.vendas}</td><td>${d.perdidos}</td><td>${formatMoneyWithSymbol(d.valorVendido)}</td><td class="lost-amount">${formatMoneyWithSymbol(d.valorPerdido)}</td><td><span class="badge ${taxa >= 50 ? 'badge-success' : 'badge-danger'}">${taxa}%</span></td></tr>`;
       }
       html += `</tbody></table>`;
-
+      
       html += `<div class="section-title"><i class="fas fa-list"></i> Lista de Orçamentos <button id="btnExcluirSelecionados" class="btn btn-danger" style="padding:6px 12px; font-size:0.75rem; margin-left:10px;"><i class="fas fa-trash-alt"></i> Excluir Selecionados</button></div>`;
       html += `<div class="orcamentos-list" id="listaOrcamentos">`;
       
       data.forEach(item => {
-        const statusClass = item.status === 'fechado' ? 'status-fechado' : 'status-perdido';
-        const statusText = item.status === 'fechado' ? '✅ FECHADO' : '❌ PERDIDO';
+        const statusClass = item.status === 'fechado' ? 'status-fechado' : 'status-nao-fechado';
+        const statusText = item.status === 'fechado' ? '✅ VENDA REALIZADA' : '❌ NÃO FINALIZADO';
+        const origemTexto = item.origem || 'Não informado';
+        const concorrenteTexto = item.concorrente ? ` (${item.concorrente})` : '';
         html += `
           <div class="orcamento-card" data-id="${escapeHtml(item.id)}">
             <input type="checkbox" class="checkbox-delete" data-id="${escapeHtml(item.id)}" style="width:20px; height:20px; margin-right:10px;">
@@ -1266,7 +1737,8 @@ ${dataAtual}
               <span>👤 ${escapeHtml(item.cliente)}</span> | 
               <span>📅 ${escapeHtml(item.data)}</span> | 
               <span>💰 ${formatMoneyWithSymbol(item.totalFinal)}</span> | 
-              <span>👨‍💼 ${escapeHtml(item.atendente)}</span>
+              <span>👨‍💼 ${escapeHtml(item.atendente)}</span> |
+              <span>📍 ${escapeHtml(origemTexto)}${escapeHtml(concorrenteTexto)}</span>
               ${item.idade ? `<span> | 🎂 ${escapeHtml(item.idade)} anos</span>` : ''}
             </div>
             <div class="btn-group">
@@ -1279,7 +1751,7 @@ ${dataAtual}
         `;
       });
       html += `</div>`;
-
+      
       html += `<div class="section-title"><i class="fas fa-comment-dots"></i> Principais Motivos de Perda</div>`;
       let hasJustificativas = false;
       for (const [nome, d] of vendedoresSorted) {
@@ -1292,12 +1764,11 @@ ${dataAtual}
         }
       }
       if (!hasJustificativas) {
-        html += `<div class="justificativa-list" style="background:#f1f5f9;">Nenhum orçamento perdido com justificativa registrada até o momento.</div>`;
+        html += `<div class="justificativa-list" style="background:#f1f5f9;">Nenhum orçamento não finalizado com justificativa registrada até o momento.</div>`;
       }
-
+      
       container.innerHTML = html;
       
-      // Gráficos
       if (mesesLabels.length > 0) {
         setTimeout(() => {
           const ctxLine = document.getElementById('monthlyCompareChart')?.getContext('2d');
@@ -1305,7 +1776,7 @@ ${dataAtual}
           if (ctxLine) {
             new Chart(ctxLine, {
               type: 'line',
-              data: { labels: mesesLabels, datasets: [{ label: 'Vendas fechadas', data: vendasCount, borderColor: '#25d366', backgroundColor: 'rgba(37,211,102,0.1)', tension: 0.3, fill: true }, { label: 'Orçamentos perdidos', data: perdidosCount, borderColor: '#e74c3c', backgroundColor: 'rgba(231,76,60,0.05)', tension: 0.3, fill: true }] },
+              data: { labels: mesesLabels, datasets: [{ label: 'Vendas fechadas', data: vendasCount, borderColor: '#25d366', backgroundColor: 'rgba(37,211,102,0.1)', tension: 0.3, fill: true }, { label: 'Orçamentos não finalizados', data: perdidosCount, borderColor: '#e74c3c', backgroundColor: 'rgba(231,76,60,0.05)', tension: 0.3, fill: true }] },
               options: { responsive: true, maintainAspectRatio: true }
             });
           }
@@ -1319,10 +1790,9 @@ ${dataAtual}
         }, 100);
       }
       
-      // Botão de excluir selecionados
       const btnExcluirSelecionados = document.getElementById('btnExcluirSelecionados');
       if (btnExcluirSelecionados) {
-        btnExcluirSelecionados.onclick = () => {
+        btnExcluirSelecionados.onclick = async () => {
           const checkboxes = document.querySelectorAll('.checkbox-delete:checked');
           if (checkboxes.length === 0) {
             alert('Selecione pelo menos um orçamento para excluir.');
@@ -1330,29 +1800,27 @@ ${dataAtual}
           }
           
           const idsSelecionados = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
-          const nomesClientes = [];
-          idsSelecionados.forEach(id => {
-            const item = historicoOrcamentosGlobal.find(i => i.id === id);
-            if (item) nomesClientes.push(item.cliente);
-          });
           
           const confirmModal = document.createElement('div'); confirmModal.className = 'modal-overlay';
           confirmModal.innerHTML = `
             <div class="modal-content" style="max-width:450px;">
               <h3><i class="fas fa-trash-alt" style="color:#e74c3c;"></i> Confirmar exclusão em massa</h3>
               <p>Tem certeza que deseja excluir <strong>${checkboxes.length} orçamento(s)</strong>?</p>
-              <p style="font-size:0.8rem; color:#666;">Clientes: ${nomesClientes.join(', ').substring(0, 100)}${nomesClientes.length > 2 ? '...' : ''}</p>
-              <div class="modal-buttons" style="margin-top:20px;">
-                <button id="confirmMassDeleteBtn" class="btn btn-danger" style="flex:1;">Sim, excluir todos</button>
-                <button id="cancelMassDeleteBtn" class="btn btn-outline" style="flex:1;">Cancelar</button>
+              <div class="modal-buttons-row">
+                <button id="confirmMassDeleteBtn" class="btn btn-danger" style="flex:0 1 auto;">Sim, excluir todos</button>
+                <button id="cancelMassDeleteBtn" class="btn btn-outline" style="flex:0 1 auto;">Cancelar</button>
               </div>
             </div>
           `;
           document.body.appendChild(confirmModal);
           
-          confirmModal.querySelector('#confirmMassDeleteBtn').onclick = () => {
-            historicoOrcamentosGlobal = historicoOrcamentosGlobal.filter(item => !idsSelecionados.includes(item.id));
-            localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
+          confirmModal.querySelector('#confirmMassDeleteBtn').onclick = async () => {
+            showLoading();
+            for (const id of idsSelecionados) {
+              await deletarOrcamentoDoSupabase(id);
+            }
+            await carregarHistoricoDoSupabase();
+            hideLoading();
             alert(`✅ ${idsSelecionados.length} orçamento(s) excluído(s) com sucesso!`);
             confirmModal.remove();
             window.renderizarDashboardComFiltrosAtual();
@@ -1361,15 +1829,15 @@ ${dataAtual}
         };
       }
     };
-
-    // ========== BOTÃO ADMIN - SEM SENHA ==========
-    document.getElementById('adminAccessBtn').addEventListener('click', () => {
-      // Verificar novamente se o atendente atual tem permissão (segurança extra)
+    
+    document.getElementById('adminAccessBtn').addEventListener('click', async () => {
       const atendenteAtual = atendenteSelect.value;
       if (atendenteAtual !== 'Jaúna Constante' && atendenteAtual !== 'Jaciara Constante') {
         alert('⚠️ Acesso negado! O Dashboard Avançado está disponível apenas para as atendentes Jaúna Constante e Jaciara Constante.');
         return;
       }
+      
+      await carregarHistoricoDoSupabase();
       
       const mesesOptions = [];
       const anosSet = new Set();
@@ -1443,11 +1911,15 @@ ${dataAtual}
                 <label>👤 Nome do cliente:</label>
                 <input type="text" id="filtroCliente" placeholder="Buscar por nome">
               </div>
+              <div class="filter-group">
+                <label>🆔 ID do Orçamento:</label>
+                <input type="text" id="filtroIdOrcamento" placeholder="Buscar por ID">
+              </div>
             </div>
             
             <div id="dashboardContent"><div class="empty-state"><i class="fas fa-spinner fa-pulse"></i> Carregando...</div></div>
           </div>
-          <div class="modal-buttons"><button id="closeAdminBtn" class="btn btn-primary">Fechar</button></div>
+          <div class="modal-buttons-row"><button id="closeAdminBtn" class="btn btn-primary">Fechar</button></div>
         </div>
       `;
       document.body.appendChild(adminModal);
@@ -1472,12 +1944,29 @@ ${dataAtual}
       });
       adminModal.querySelector('#filtroIdade')?.addEventListener('input', () => window.renderizarDashboardComFiltrosAtual());
       adminModal.querySelector('#filtroCliente')?.addEventListener('input', () => window.renderizarDashboardComFiltrosAtual());
-      adminModal.querySelector('#refreshDashboardBtnAdmin').onclick = () => window.renderizarDashboardComFiltrosAtual();
+      adminModal.querySelector('#filtroIdOrcamento')?.addEventListener('input', () => window.renderizarDashboardComFiltrosAtual());
       
-      // DELEGAÇÃO DE EVENTOS para os botões dinâmicos
+      // Configurar dropdown de sugestões para o campo ID do orçamento
+      const idsUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.id))];
+      createSuggestionsDropdown('filtroIdOrcamento', 
+        (value) => idsUnicos.filter(id => id.toLowerCase().includes(value)).slice(0, 10),
+        (selected) => window.renderizarDashboardComFiltrosAtual()
+      );
+      
+      // Configurar dropdown de sugestões para o campo Nome do cliente
+      const clientesUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.cliente))];
+      createSuggestionsDropdown('filtroCliente',
+        (value) => clientesUnicos.filter(nome => nome && nome.toLowerCase().includes(value)).slice(0, 10),
+        (selected) => window.renderizarDashboardComFiltrosAtual()
+      );
+      
+      adminModal.querySelector('#refreshDashboardBtnAdmin').onclick = async () => {
+        await carregarHistoricoDoSupabase();
+        window.renderizarDashboardComFiltrosAtual();
+      };
+      
       const dashboardContent = adminModal.querySelector('#dashboardContent');
       dashboardContent.addEventListener('click', (e) => {
-        // Botão excluir
         const deleteBtn = e.target.closest('.btn-delete-single');
         if (deleteBtn) {
           e.preventDefault();
@@ -1488,18 +1977,19 @@ ${dataAtual}
           return;
         }
         
-        // Botão editar
         const editBtn = e.target.closest('.btn-edit-single');
         if (editBtn) {
           e.preventDefault();
           e.stopPropagation();
           const id = editBtn.getAttribute('data-id');
           const orcamento = historicoOrcamentosGlobal.find(item => item.id === id);
-          if (orcamento) window.editarOrcamento(orcamento);
+          if (orcamento) {
+            adminModal.remove();
+            window.editarOrcamento(orcamento);
+          }
           return;
         }
         
-        // Botão venda realizada
         const saleBtn = e.target.closest('.btn-sale-single');
         if (saleBtn) {
           e.preventDefault();
@@ -1514,7 +2004,7 @@ ${dataAtual}
       window.renderizarDashboardComFiltrosAtual();
       adminModal.querySelector('#closeAdminBtn').onclick = () => adminModal.remove();
     });
-
+    
     window.addEventListener('beforeunload', (e) => {
       e.preventDefault();
       e.returnValue = '';
