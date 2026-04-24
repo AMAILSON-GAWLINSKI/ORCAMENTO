@@ -50,9 +50,7 @@
       background: #c0392b;
       transform: scale(1.02);
     }
-    .btn-logout i {
-      font-size: 1.1rem;
-    }
+    .btn-logout i { font-size: 1.1rem; }
     
     .loading-overlay {
       position: fixed;
@@ -103,12 +101,8 @@
       z-index: 99;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    .offline-indicator.online {
-      background: #25d366;
-    }
-    .offline-indicator.show {
-      display: flex;
-    }
+    .offline-indicator.online { background: #25d366; }
+    .offline-indicator.show { display: flex; }
     
     .stepper {
       display: flex; justify-content: space-between; margin-bottom: 24px;
@@ -267,9 +261,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       display: none;
     }
-    .suggestions-dropdown.show {
-      display: block;
-    }
+    .suggestions-dropdown.show { display: block; }
     .suggestion-item {
       padding: 10px 12px;
       cursor: pointer;
@@ -277,12 +269,8 @@
       border-bottom: 1px solid #f0f2f7;
       transition: background 0.15s;
     }
-    .suggestion-item:hover {
-      background: #fef3e8;
-    }
-    .suggestion-item:last-child {
-      border-bottom: none;
-    }
+    .suggestion-item:hover { background: #fef3e8; }
+    .suggestion-item:last-child { border-bottom: none; }
     
     /* Campo concorrente */
     .concorrente-group { margin-top: 8px; }
@@ -329,20 +317,14 @@
       align-items: center;
       gap: 8px;
     }
-    .tab-btn i {
-      font-size: 1rem;
-    }
+    .tab-btn i { font-size: 1rem; }
     .tab-btn.active {
       color: #fc5404;
       background: #fff7ed;
       border-bottom: 3px solid #fc5404;
     }
-    .tab-pane {
-      display: none;
-    }
-    .tab-pane.active {
-      display: block;
-    }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
     
     @media print {
       body { background: white; padding: 0; margin: 0; }
@@ -448,7 +430,9 @@
     let isOnline = navigator.onLine;
     
     // ========== GERENCIAMENTO DE ATENDENTES (COM SENHA E LOGIN) ==========
-    let atendentes = [
+    let atendentes = [];
+    
+    const DEFAULT_ATENDENTES = [
       { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
       { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
       { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
@@ -461,7 +445,6 @@
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          // Garantir que todos os atendentes tenham o campo 'login'
           let precisaSalvar = false;
           parsed.forEach(a => {
             if (!a.login && a.nome) {
@@ -486,14 +469,6 @@
       }
       atualizarSelectAtendentes();
     }
-    
-    const DEFAULT_ATENDENTES = [
-      { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() }
-    ];
     
     function atualizarSelectAtendentes() {
       const select = document.getElementById('atendenteSelect');
@@ -521,38 +496,28 @@
     function salvarAtendentes() {
       localStorage.setItem('atendentes', JSON.stringify(atendentes));
       atualizarSelectAtendentes();
-      // Disparar evento para sincronizar com outras abas
       window.dispatchEvent(new StorageEvent('storage', { key: 'atendentes', newValue: JSON.stringify(atendentes) }));
     }
     
-    function adicionarAtendente(nome, email, senha) {
+    function adicionarAtendenteComLogin(nome, email, login, senha) {
       const novoId = Math.max(...atendentes.map(a => a.id), 0) + 1;
-      // Criar login automaticamente a partir do nome (sem acentos, minúsculo, sem espaços)
-      let login = nome.toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .replace(/\s+/g, '');
-      
       atendentes.push({
         id: novoId,
         nome: nome,
         email: email,
-        senha: senha,
         login: login,
+        senha: senha,
         ativo: true,
         criado_em: new Date().toISOString()
       });
       salvarAtendentes();
     }
     
-    function editarAtendente(id, nome, email, senha) {
+    function editarAtendenteComLogin(id, nome, email, login, senha) {
       const index = atendentes.findIndex(a => a.id === id);
       if (index !== -1) {
         atendentes[index].nome = nome;
         atendentes[index].email = email;
-        // Atualizar login baseado no novo nome
-        let login = nome.toLowerCase()
-          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-          .replace(/\s+/g, '');
         atendentes[index].login = login;
         if (senha && senha.trim() !== "") {
           atendentes[index].senha = senha;
@@ -590,6 +555,21 @@
       return false;
     }
     
+    function sincronizarAtendenteAtual() {
+      const usuarioSalvo = localStorage.getItem('usuarioLogado');
+      if (usuarioSalvo && atendenteSelect) {
+        try {
+          const user = JSON.parse(usuarioSalvo);
+          const optionExists = Array.from(atendenteSelect.options).some(opt => opt.value === user.nome);
+          if (optionExists && atendenteSelect.value !== user.nome) {
+            atendenteSelect.value = user.nome;
+            const changeEvent = new Event('change', { bubbles: true });
+            atendenteSelect.dispatchEvent(changeEvent);
+          }
+        } catch(e) {}
+      }
+    }
+    
     const stepCards = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3'), document.getElementById('step4')];
     const stepItems = document.querySelectorAll('.step-item');
     const atendenteSelect = document.getElementById('atendenteSelect');
@@ -600,8 +580,8 @@
     const descontoGeralInput = document.getElementById('descontoGeralInput');
     let currentOrcamentoId = '';
     
-    // Carregar atendentes ao iniciar
     carregarAtendentes();
+    sincronizarAtendenteAtual();
     
     // Offline sync functions
     function updateOfflineIndicator() {
@@ -909,7 +889,19 @@
     
     function toggleAdminButton() {
       const adminBtn = document.getElementById('adminAccessBtn');
-      const atendente = atendenteSelect.value;
+      let atendente = atendenteSelect.value;
+      
+      // Se o select estiver vazio, tentar recuperar do localStorage
+      if (!atendente || atendente === '') {
+        const usuarioSalvo = localStorage.getItem('usuarioLogado');
+        if (usuarioSalvo) {
+          try {
+            const user = JSON.parse(usuarioSalvo);
+            atendente = user.nome;
+          } catch(e) {}
+        }
+      }
+      
       if (atendente === 'Jaúna Constante' || atendente === 'Jaciara Constante') {
         adminBtn.classList.add('visible');
       } else {
@@ -1695,12 +1687,11 @@ ${dataAtual}
       if (!usuarioFoiPreenchido) {
         goToStep(1);
       } else {
-        // Após login, garantir que o botão admin fique visível se aplicável
         toggleAdminButton();
       }
     });
     
-    // ========== DASHBOARD ADMIN ==========
+    // ========== FUNÇÕES DO DASHBOARD ADMIN ==========
     
     function renderizarGestaoAtendentes(container) {
       const ativos = atendentes.filter(a => a.ativo === true);
@@ -1733,15 +1724,15 @@ ${dataAtual}
               <button class="btn-edit-atendente btn btn-edit btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" data-email="${escapeHtml(a.email)}" data-login="${escapeHtml(a.login || '')}" data-senha="${escapeHtml(a.senha)}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-edit"></i> Editar</button>
               <button class="btn-ocultar-atendente btn btn-warning btn-sm" data-id="${a.id}" style="padding: 4px 10px; background: #f39c12; border-color: #f39c12;"><i class="fas fa-eye-slash"></i> Ocultar</button>
               <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
-              </td>
-            </tr>
+            </td>
+           </tr>
         `;
       });
       
       if (ocultos.length > 0) {
         html += `
             </tbody>
-          </table>
+           </table>
           
           <h4 style="margin: 25px 0 15px 0; color: #1e293b;">🔒 Atendentes Ocultos</h4>
           <table class="atendentes-table">
@@ -1762,15 +1753,15 @@ ${dataAtual}
               <td>
                 <button class="btn-reativar-atendente btn btn-success btn-sm" data-id="${a.id}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-eye"></i> Reativar</button>
                 <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
-                </td>
-              </tr>
+              </td>
+             </tr>
           `;
         });
       }
       
       html += `
             </tbody>
-          </table>
+           </table>
         </div>
       `;
       
@@ -1796,13 +1787,12 @@ ${dataAtual}
         modal.querySelector('#confirmarNovoAtendente').onclick = () => {
           const nome = modal.querySelector('#novoNomeAtendente').value.trim();
           const email = modal.querySelector('#novoEmailAtendente').value.trim();
-          let login = modal.querySelector('#novoLoginAtendente').value.trim();
+          const login = modal.querySelector('#novoLoginAtendente').value.trim();
           const senha = modal.querySelector('#novaSenhaAtendente').value.trim();
           if (!nome || !email || !login || !senha) {
             alert('Preencha todos os campos!');
             return;
           }
-          // Garantir que o login seja único
           if (atendentes.some(a => a.login === login)) {
             alert('Este login já existe! Escolha outro.');
             return;
@@ -1814,27 +1804,12 @@ ${dataAtual}
         modal.querySelector('#cancelarNovoAtendente').onclick = () => modal.remove();
       });
       
-      function adicionarAtendenteComLogin(nome, email, login, senha) {
-        const novoId = Math.max(...atendentes.map(a => a.id), 0) + 1;
-        atendentes.push({
-          id: novoId,
-          nome: nome,
-          email: email,
-          login: login,
-          senha: senha,
-          ativo: true,
-          criado_em: new Date().toISOString()
-        });
-        salvarAtendentes();
-      }
-      
       document.querySelectorAll('.btn-edit-atendente').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = parseInt(btn.dataset.id);
           const nomeAtual = btn.dataset.nome;
           const emailAtual = btn.dataset.email;
           const loginAtual = btn.dataset.login;
-          const senhaAtual = btn.dataset.senha;
           const modal = document.createElement('div'); modal.className = 'modal-overlay';
           modal.innerHTML = `
             <div class="modal-content" style="max-width:450px;">
@@ -1860,7 +1835,6 @@ ${dataAtual}
               alert('Preencha os campos obrigatórios!');
               return;
             }
-            // Verificar se o login já existe em outro atendente
             if (atendentes.some(a => a.id !== id && a.login === login)) {
               alert('Este login já existe em outro atendente!');
               return;
@@ -1872,19 +1846,6 @@ ${dataAtual}
           modal.querySelector('#cancelarEditarAtendente').onclick = () => modal.remove();
         });
       });
-      
-      function editarAtendenteComLogin(id, nome, email, login, senha) {
-        const index = atendentes.findIndex(a => a.id === id);
-        if (index !== -1) {
-          atendentes[index].nome = nome;
-          atendentes[index].email = email;
-          atendentes[index].login = login;
-          if (senha && senha.trim() !== "") {
-            atendentes[index].senha = senha;
-          }
-          salvarAtendentes();
-        }
-      }
       
       document.querySelectorAll('.btn-ocultar-atendente').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1919,9 +1880,6 @@ ${dataAtual}
         });
       });
     }
-    
-    // Redefinir a função adicionarAtendente original para usar a nova versão
-    window.adicionarAtendente = adicionarAtendenteComLogin;
     
     function createSuggestionsDropdown(inputId, getSuggestionsFn, onSelectFn) {
       const input = document.getElementById(inputId);
@@ -2164,13 +2122,15 @@ ${dataAtual}
         const statusText = item.status === 'fechado' ? '✅ VENDA REALIZADA' : '❌ NÃO FINALIZADO';
         const origemTexto = item.origem || 'Não informado';
         const concorrenteTexto = item.concorrente ? ` (${item.concorrente})` : '';
+        // CORREÇÃO: Garantir que a data seja exibida corretamente
+        const dataExibicao = item.data || (item.dataRaw ? new Date(item.dataRaw).toLocaleString('pt-BR') : 'Data não registrada');
         html += `
           <div class="orcamento-card" data-id="${escapeHtml(item.id)}">
             <input type="checkbox" class="checkbox-delete" data-id="${escapeHtml(item.id)}" style="width:20px; height:20px; margin-right:10px;">
             <div class="orcamento-info">
               <strong>${escapeHtml(item.id)}</strong><br>
               <span>👤 ${escapeHtml(item.cliente)}</span> | 
-              <span>📅 ${escapeHtml(item.data)}</span> | 
+              <span>📅 ${escapeHtml(dataExibicao)}</span> | 
               <span>💰 ${formatMoneyWithSymbol(item.totalFinal)}</span> | 
               <span>👨‍💼 ${escapeHtml(item.atendente)}</span> |
               <span>📍 ${escapeHtml(origemTexto)}${escapeHtml(concorrenteTexto)}</span>
@@ -2265,15 +2225,40 @@ ${dataAtual}
       }
     };
     
+    // ========== BOTÃO ADMIN CORRIGIDO ==========
     document.getElementById('adminAccessBtn').addEventListener('click', async () => {
-      const atendenteAtual = atendenteSelect.value;
+      // CORREÇÃO: Verificação robusta do atendente
+      let atendenteAtual = atendenteSelect?.value;
+      
+      // Se o select estiver vazio, tentar recuperar do localStorage
+      if (!atendenteAtual || atendenteAtual === '') {
+        const usuarioSalvo = localStorage.getItem('usuarioLogado');
+        if (usuarioSalvo) {
+          try {
+            const user = JSON.parse(usuarioSalvo);
+            atendenteAtual = user.nome;
+            // Sincronizar o select
+            if (atendenteSelect) {
+              const optionExists = Array.from(atendenteSelect.options).some(opt => opt.value === atendenteAtual);
+              if (optionExists) {
+                atendenteSelect.value = atendenteAtual;
+              }
+            }
+          } catch(e) {
+            console.error('Erro ao recuperar usuário logado:', e);
+          }
+        }
+      }
+      
+      // Verificação final
       if (atendenteAtual !== 'Jaúna Constante' && atendenteAtual !== 'Jaciara Constante') {
-        alert('⚠️ Acesso negado! O Dashboard Avançado está disponível apenas para as atendentes Jaúna Constante e Jaciara Constante.');
+        alert('⚠️ Acesso negado! O Dashboard Avançado está disponível apenas para as atendentes Jaúna Constante e Jaciara Constante.\n\nAtendente atual: ' + (atendenteAtual || 'Nenhum'));
         return;
       }
       
       await carregarHistoricoDoSupabase();
       
+      // Gerar opções de meses e anos
       const mesesOptions = [];
       const anosSet = new Set();
       historicoOrcamentosGlobal.forEach(item => {
@@ -2370,6 +2355,7 @@ ${dataAtual}
       `;
       document.body.appendChild(adminModal);
       
+      // Configurar tabs
       const tabs = adminModal.querySelectorAll('.tab-btn');
       const panes = adminModal.querySelectorAll('.tab-pane');
       tabs.forEach(tab => {
@@ -2382,6 +2368,7 @@ ${dataAtual}
         });
       });
       
+      // Configurar filtros
       const periodoSelect = adminModal.querySelector('#filtroPeriodo');
       const grupoMes = adminModal.querySelector('#grupoFiltroMes');
       const grupoAno = adminModal.querySelector('#grupoFiltroAno');
@@ -2390,35 +2377,48 @@ ${dataAtual}
         const val = periodoSelect.value;
         grupoMes.style.display = val === 'mes' ? 'block' : 'none';
         grupoAno.style.display = val === 'ano' ? 'block' : 'none';
-        window.renderizarDashboardComFiltrosAtual();
+        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
       });
       
-      adminModal.querySelector('#filtroMes')?.addEventListener('change', () => window.renderizarDashboardComFiltrosAtual());
-      adminModal.querySelector('#filtroAno')?.addEventListener('change', () => window.renderizarDashboardComFiltrosAtual());
-      adminModal.querySelector('#filtroValorTipo')?.addEventListener('change', () => window.renderizarDashboardComFiltrosAtual());
+      adminModal.querySelector('#filtroMes')?.addEventListener('change', () => {
+        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+      });
+      adminModal.querySelector('#filtroAno')?.addEventListener('change', () => {
+        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+      });
+      adminModal.querySelector('#filtroValorTipo')?.addEventListener('change', () => {
+        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+      });
       adminModal.querySelector('#filtroValorComp')?.addEventListener('blur', function() {
         this.value = formatMoneyWithThousand(parseCurrency(this.value));
-        window.renderizarDashboardComFiltrosAtual();
+        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
       });
-      adminModal.querySelector('#filtroIdade')?.addEventListener('input', () => window.renderizarDashboardComFiltrosAtual());
-      adminModal.querySelector('#filtroCliente')?.addEventListener('input', () => window.renderizarDashboardComFiltrosAtual());
-      adminModal.querySelector('#filtroIdOrcamento')?.addEventListener('input', () => window.renderizarDashboardComFiltrosAtual());
+      adminModal.querySelector('#filtroIdade')?.addEventListener('input', () => {
+        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+      });
+      adminModal.querySelector('#filtroCliente')?.addEventListener('input', () => {
+        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+      });
+      adminModal.querySelector('#filtroIdOrcamento')?.addEventListener('input', () => {
+        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+      });
       
+      // Sugestões
       const idsUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.id))];
       createSuggestionsDropdown('filtroIdOrcamento', 
         (value) => idsUnicos.filter(id => id.toLowerCase().includes(value)).slice(0, 10),
-        (selected) => window.renderizarDashboardComFiltrosAtual()
+        (selected) => { if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual(); }
       );
       
       const clientesUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.cliente))];
       createSuggestionsDropdown('filtroCliente',
         (value) => clientesUnicos.filter(nome => nome && nome.toLowerCase().includes(value)).slice(0, 10),
-        (selected) => window.renderizarDashboardComFiltrosAtual()
+        (selected) => { if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual(); }
       );
       
       adminModal.querySelector('#refreshDashboardBtnAdmin').onclick = async () => {
         await carregarHistoricoDoSupabase();
-        window.renderizarDashboardComFiltrosAtual();
+        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
         renderizarGestaoAtendentes(adminModal.querySelector('#gestaoAtendentesContainer'));
       };
       
@@ -2458,8 +2458,9 @@ ${dataAtual}
         }
       });
       
-      window.renderizarDashboardComFiltrosAtual();
+      if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
       renderizarGestaoAtendentes(adminModal.querySelector('#gestaoAtendentesContainer'));
+      
       adminModal.querySelector('#closeAdminBtn').onclick = () => adminModal.remove();
     });
     
