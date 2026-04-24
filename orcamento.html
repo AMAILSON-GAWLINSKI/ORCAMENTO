@@ -447,20 +447,56 @@
     let pendingSyncData = [];
     let isOnline = navigator.onLine;
     
-    // ========== GERENCIAMENTO DE ATENDENTES (COM SENHA) ==========
+    // ========== GERENCIAMENTO DE ATENDENTES (COM LOGIN E SENHA) ==========
     let atendentes = [
-      { id: 1, nome: "Jaúna Constante", email: "jauna@oticagraudivino.com", senha: "jauna123", ativo: true, criado_em: new Date().toISOString() },
-      { id: 2, nome: "Jaciara Constante", email: "jaciara@oticagraudivino.com", senha: "jaciara123", ativo: true, criado_em: new Date().toISOString() },
-      { id: 3, nome: "Luana Paloschi", email: "luana@oticagraudivino.com", senha: "luana123", ativo: true, criado_em: new Date().toISOString() },
-      { id: 4, nome: "Aline", email: "aline@oticagraudivino.com", senha: "aline123", ativo: true, criado_em: new Date().toISOString() },
-      { id: 5, nome: "Amailson Gawlinski", email: "amailson@oticagraudivino.com", senha: "amailson123", ativo: true, criado_em: new Date().toISOString() }
+      { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() }
     ];
+    
+    // Função para gerar login a partir do nome
+    function gerarLoginFromNome(nome) {
+      return nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/\s/g, '');
+    }
+    
+    // Função para sincronizar atendentes (garantindo que todos tenham login e senha)
+    function sincronizarAtendentes(atendentesArray) {
+      return atendentesArray.map(a => {
+        // Se não tiver login, gerar a partir do nome
+        if (!a.login) {
+          a.login = gerarLoginFromNome(a.nome);
+        }
+        // Se não tiver senha, criar uma padrão baseada no nome
+        if (!a.senha) {
+          a.senha = gerarLoginFromNome(a.nome) + "123";
+        }
+        return a;
+      });
+    }
     
     function carregarAtendentes() {
       const saved = localStorage.getItem('atendentes');
       if (saved) {
-        atendentes = JSON.parse(saved);
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            atendentes = sincronizarAtendentes(parsed);
+            console.log('Atendentes carregados do localStorage:', atendentes);
+          } else {
+            atendentes = sincronizarAtendentes([...atendentes]);
+            localStorage.setItem('atendentes', JSON.stringify(atendentes));
+          }
+        } catch(e) {
+          console.error('Erro ao parser atendentes:', e);
+          atendentes = sincronizarAtendentes([...atendentes]);
+          localStorage.setItem('atendentes', JSON.stringify(atendentes));
+        }
       } else {
+        atendentes = sincronizarAtendentes([...atendentes]);
         localStorage.setItem('atendentes', JSON.stringify(atendentes));
       }
       atualizarSelectAtendentes();
@@ -477,7 +513,7 @@
       atendentesAtivos.forEach(atendente => {
         const option = document.createElement('option');
         option.value = atendente.nome;
-        option.textContent = atendente.nome;
+        option.textContent = atendente.nome + (atendente.login ? ` (${atendente.login})` : '');
         select.appendChild(option);
       });
       
@@ -491,25 +527,32 @@
     function salvarAtendentes() {
       localStorage.setItem('atendentes', JSON.stringify(atendentes));
       atualizarSelectAtendentes();
+      // Disparar evento storage para sincronizar com outras abas (incluindo index.html)
+      window.dispatchEvent(new StorageEvent('storage', { key: 'atendentes', newValue: JSON.stringify(atendentes) }));
     }
     
     function adicionarAtendente(nome, email, senha) {
       const novoId = Math.max(...atendentes.map(a => a.id), 0) + 1;
+      const login = gerarLoginFromNome(nome);
+      const novaSenha = senha || (login + "123");
       atendentes.push({
         id: novoId,
         nome: nome,
+        login: login,
+        senha: novaSenha,
         email: email,
-        senha: senha,
         ativo: true,
         criado_em: new Date().toISOString()
       });
       salvarAtendentes();
+      return { login, senha: novaSenha };
     }
     
     function editarAtendente(id, nome, email, senha) {
       const index = atendentes.findIndex(a => a.id === id);
       if (index !== -1) {
         atendentes[index].nome = nome;
+        atendentes[index].login = gerarLoginFromNome(nome);
         atendentes[index].email = email;
         if (senha && senha.trim() !== "") {
           atendentes[index].senha = senha;
@@ -1670,7 +1713,7 @@ ${dataAtual}
           <h4 style="margin-bottom: 15px; color: #1e293b;">📋 Atendentes Ativos</h4>
           <table class="atendentes-table">
             <thead>
-              <tr><th>Nome</th><th>E-mail</th><th>Senha</th><th>Status</th><th>Ações</th>
+              <tr><th>Nome</th><th>Login</th><th>E-mail</th><th>Senha</th><th>Status</th><th>Ações</th>
             </thead>
             <tbody>
       `;
@@ -1679,6 +1722,7 @@ ${dataAtual}
         html += `
           <tr data-id="${a.id}">
             <td><strong>${escapeHtml(a.nome)}</strong></td>
+            <td>${escapeHtml(a.login || gerarLoginFromNome(a.nome))}</td>
             <td>${escapeHtml(a.email)}</td>
             <td>••••••••</td>
             <td><span class="status-ativo">● Ativo</span></td>
@@ -1694,12 +1738,12 @@ ${dataAtual}
       if (ocultos.length > 0) {
         html += `
             </tbody>
-          </table>
+           </table>
           
           <h4 style="margin: 25px 0 15px 0; color: #1e293b;">🔒 Atendentes Ocultos</h4>
           <table class="atendentes-table">
             <thead>
-              <tr><th>Nome</th><th>E-mail</th><th>Senha</th><th>Status</th><th>Ações</th>
+              <tr><th>Nome</th><th>Login</th><th>E-mail</th><th>Senha</th><th>Status</th><th>Ações</th>
             </thead>
             <tbody>
         `;
@@ -1708,6 +1752,7 @@ ${dataAtual}
           html += `
             <tr data-id="${a.id}">
               <td><strong>${escapeHtml(a.nome)}</strong></td>
+              <td>${escapeHtml(a.login || gerarLoginFromNome(a.nome))}</td>
               <td>${escapeHtml(a.email)}</td>
               <td>••••••••</td>
               <td><span class="status-oculto">● Oculto</span></td>
@@ -1715,14 +1760,14 @@ ${dataAtual}
                 <button class="btn-reativar-atendente btn btn-success btn-sm" data-id="${a.id}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-eye"></i> Reativar</button>
                 <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
               </td>
-            </table>
+            </tr>
           `;
         });
       }
       
       html += `
             </tbody>
-          </table>
+           </table>
         </div>
       `;
       
@@ -1752,7 +1797,8 @@ ${dataAtual}
             alert('Preencha todos os campos!');
             return;
           }
-          adicionarAtendente(nome, email, senha);
+          const resultado = adicionarAtendente(nome, email, senha);
+          alert(`✅ Atendente adicionado com sucesso!\n\nLogin: ${resultado.login}\nSenha: ${resultado.senha}`);
           modal.remove();
           renderizarGestaoAtendentes(container);
         };
@@ -1764,7 +1810,6 @@ ${dataAtual}
           const id = parseInt(btn.dataset.id);
           const nomeAtual = btn.dataset.nome;
           const emailAtual = btn.dataset.email;
-          const senhaAtual = btn.dataset.senha;
           const modal = document.createElement('div'); modal.className = 'modal-overlay';
           modal.innerHTML = `
             <div class="modal-content" style="max-width:450px;">
@@ -1789,6 +1834,7 @@ ${dataAtual}
               return;
             }
             editarAtendente(id, nome, email, novaSenha);
+            alert(`✅ Atendente editado com sucesso!\n\nNovo login: ${gerarLoginFromNome(nome)}`);
             modal.remove();
             renderizarGestaoAtendentes(container);
           };
@@ -1800,7 +1846,7 @@ ${dataAtual}
         btn.addEventListener('click', () => {
           const id = parseInt(btn.dataset.id);
           const atendente = atendentes.find(a => a.id === id);
-          if (confirm(`Deseja ocultar o atendente "${atendente?.nome}"? Ele não aparecerá mais na lista de seleção.`)) {
+          if (confirm(`Deseja ocultar o atendente "${atendente?.nome}"? Ele não aparecerá mais na lista de seleção e não poderá fazer login.`)) {
             ocultarAtendente(id);
             renderizarGestaoAtendentes(container);
           }
@@ -2059,7 +2105,7 @@ ${dataAtual}
       for (const [nome, d] of vendedoresSorted) {
         const totalAtendimentos = d.vendas + d.perdidos;
         const taxa = totalAtendimentos > 0 ? ((d.vendas / totalAtendimentos) * 100).toFixed(1) : 0;
-        html += `<tr><td><strong>${escapeHtml(nome)}</strong></td></td>${d.vendas}</td><td>${d.perdidos}</td><td>${formatMoneyWithSymbol(d.valorVendido)}</td><td class="lost-amount">${formatMoneyWithSymbol(d.valorPerdido)}</td><td><span class="badge ${taxa >= 50 ? 'badge-success' : 'badge-danger'}">${taxa}%</span></td></tr>`;
+        html += `<tr><td><strong>${escapeHtml(nome)}</strong></td><td>${d.vendas}</td><td>${d.perdidos}</td><td>${formatMoneyWithSymbol(d.valorVendido)}</td><td class="lost-amount">${formatMoneyWithSymbol(d.valorPerdido)}</td><td><span class="badge ${taxa >= 50 ? 'badge-success' : 'badge-danger'}">${taxa}%</span></td></tr>`;
       }
       html += `</tbody></table>`;
       
