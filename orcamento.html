@@ -24,6 +24,7 @@
     }
     .app-container { max-width: 950px; width: 100%; margin: 0 auto; position: relative; }
     
+    /* Botão Sair permanente */
     .logout-btn-container {
       position: fixed;
       top: 20px;
@@ -49,7 +50,9 @@
       background: #c0392b;
       transform: scale(1.02);
     }
-    .btn-logout i { font-size: 1.1rem; }
+    .btn-logout i {
+      font-size: 1.1rem;
+    }
     
     .loading-overlay {
       position: fixed;
@@ -83,6 +86,7 @@
       to { transform: rotate(360deg); }
     }
     
+    /* Offline indicator */
     .offline-indicator {
       position: fixed;
       bottom: 80px;
@@ -99,8 +103,12 @@
       z-index: 99;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    .offline-indicator.online { background: #25d366; }
-    .offline-indicator.show { display: flex; }
+    .offline-indicator.online {
+      background: #25d366;
+    }
+    .offline-indicator.show {
+      display: flex;
+    }
     
     .stepper {
       display: flex; justify-content: space-between; margin-bottom: 24px;
@@ -200,6 +208,7 @@
     .admin-btn.visible { display: flex; align-items: center; gap: 8px; }
     .admin-btn:hover { transform: scale(1.05); background: #e04a02; }
     
+    /* Dashboard Admin Styles */
     .dashboard-container { max-width: 1400px; margin: 0 auto; }
     .dashboard-header { margin-bottom: 28px; }
     .dashboard-header h1 { font-size: 1.8rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 12px; }
@@ -237,11 +246,13 @@
     .modal-buttons-row .btn { flex: 0 1 auto; min-width: 120px; }
     #orcamentoIdDisplay { text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px dashed #ccc; font-size: 0.9rem; color: #5f647e; font-weight: 500; }
     
+    /* Filtros do Dashboard */
     .filter-bar { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; background: #f8fafc; padding: 16px; border-radius: 32px; align-items: flex-end; }
     .filter-group { flex: 1; min-width: 140px; position: relative; }
     .filter-group label { font-size: 0.7rem; margin-bottom: 4px; display: block; font-weight: 600; color: #475569; }
     .filter-group input, .filter-group select { padding: 10px 12px; font-size: 0.85rem; }
     
+    /* Sugestões dropdown */
     .suggestions-dropdown {
       position: absolute;
       top: 100%;
@@ -256,7 +267,9 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       display: none;
     }
-    .suggestions-dropdown.show { display: block; }
+    .suggestions-dropdown.show {
+      display: block;
+    }
     .suggestion-item {
       padding: 10px 12px;
       cursor: pointer;
@@ -264,12 +277,18 @@
       border-bottom: 1px solid #f0f2f7;
       transition: background 0.15s;
     }
-    .suggestion-item:hover { background: #fef3e8; }
-    .suggestion-item:last-child { border-bottom: none; }
+    .suggestion-item:hover {
+      background: #fef3e8;
+    }
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
     
+    /* Campo concorrente */
     .concorrente-group { margin-top: 8px; }
     .concorrente-group input { margin-top: 4px; }
     
+    /* Lista de orçamentos no dashboard */
     .orcamentos-list { margin-top: 20px; }
     .orcamento-card { background: white; border-radius: 20px; padding: 16px; margin-bottom: 12px; border: 1px solid #eef2f8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; transition: all 0.2s; }
     .orcamento-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
@@ -280,6 +299,7 @@
     .status-nao-fechado { background: #e74c3c20; color: #c0392b; }
     .btn-group { display: flex; gap: 8px; }
     
+    /* Tabela de atendentes */
     .atendentes-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     .atendentes-table th, .atendentes-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eef2f8; }
     .atendentes-table th { background: #fc5404; color: white; font-weight: 600; }
@@ -287,6 +307,7 @@
     .status-ativo { color: #25d366; font-weight: 600; }
     .status-oculto { color: #e74c3c; font-weight: 600; }
     
+    /* Abas do Dashboard Admin */
     .dashboard-tabs {
       display: flex;
       gap: 8px;
@@ -308,45 +329,19 @@
       align-items: center;
       gap: 8px;
     }
-    .tab-btn i { font-size: 1rem; }
+    .tab-btn i {
+      font-size: 1rem;
+    }
     .tab-btn.active {
       color: #fc5404;
       background: #fff7ed;
       border-bottom: 3px solid #fc5404;
     }
-    .tab-pane { display: none; }
-    .tab-pane.active { display: block; }
-    
-    .mass-delete-bar {
-      background: #fff3cd;
-      border: 1px solid #ffecb5;
-      border-radius: 16px;
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
+    .tab-pane {
+      display: none;
     }
-    .mass-delete-bar .selected-count {
-      font-weight: 600;
-      color: #856404;
-    }
-    .checkbox-select-all {
-      margin-right: 10px;
-      transform: scale(1.1);
-      accent-color: #fc5404;
-    }
-    .orcamento-checkbox {
-      margin-right: 12px;
-      transform: scale(1.1);
-      accent-color: #fc5404;
-    }
-    .orcamento-card-with-checkbox {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
+    .tab-pane.active {
+      display: block;
     }
     
     @media print {
@@ -436,6 +431,7 @@
 
 <script>
   (function() {
+    // ========== SUPABASE CONFIG ==========
     const SUPABASE_URL = 'https://ywzjyoqqnweinrwbbnza.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODA5ODcsImV4cCI6MjA5MjQ1Njk4N30.6Rf26bE_yeE2NwJgggyGa-GrgM4bpMgaTvwQ_QiyPs0';
     
@@ -448,15 +444,10 @@
     let orcamentoEditandoId = null;
     let currentStep = 1;
     let jaPassouStep1 = false;
+    let pendingSyncData = [];
     let isOnline = navigator.onLine;
     
-    // ========== FUNÇÃO PARA VERIFICAR SE É ADMINISTRADOR ==========
-    function isCurrentUserAdmin() {
-      const atendenteAtual = atendenteSelect ? atendenteSelect.value : null;
-      return atendenteAtual === 'Jaúna Constante' || atendenteAtual === 'Jaciara Constante';
-    }
-    
-    // ========== GERENCIAMENTO DE ATENDENTES ==========
+    // ========== GERENCIAMENTO DE ATENDENTES (COM SENHA E LOGIN) ==========
     let atendentes = [
       { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
       { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
@@ -470,35 +461,39 @@
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            atendentes = parsed;
-            console.log('Atendentes carregados:', atendentes);
-          } else {
-            atendentes = JSON.parse(JSON.stringify([
-              { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-              { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-              { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-              { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-              { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() }
-            ]));
+          // Garantir que todos os atendentes tenham o campo 'login'
+          let precisaSalvar = false;
+          parsed.forEach(a => {
+            if (!a.login && a.nome) {
+              a.login = a.nome.toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/\s+/g, '');
+              precisaSalvar = true;
+            }
+          });
+          atendentes = parsed;
+          if (precisaSalvar) {
             localStorage.setItem('atendentes', JSON.stringify(atendentes));
           }
         } catch(e) {
-          console.error('Erro ao parser atendentes:', e);
-          atendentes = JSON.parse(JSON.stringify([
-            { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-            { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-            { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-            { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-            { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() }
-          ]));
+          console.error('Erro ao carregar atendentes:', e);
+          atendentes = [...DEFAULT_ATENDENTES];
           localStorage.setItem('atendentes', JSON.stringify(atendentes));
         }
       } else {
+        atendentes = [...DEFAULT_ATENDENTES];
         localStorage.setItem('atendentes', JSON.stringify(atendentes));
       }
       atualizarSelectAtendentes();
     }
+    
+    const DEFAULT_ATENDENTES = [
+      { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
+      { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() }
+    ];
     
     function atualizarSelectAtendentes() {
       const select = document.getElementById('atendenteSelect');
@@ -520,38 +515,45 @@
       }
       
       updateNavButtons();
+      toggleAdminButton();
     }
     
     function salvarAtendentes() {
       localStorage.setItem('atendentes', JSON.stringify(atendentes));
       atualizarSelectAtendentes();
+      // Disparar evento para sincronizar com outras abas
       window.dispatchEvent(new StorageEvent('storage', { key: 'atendentes', newValue: JSON.stringify(atendentes) }));
     }
     
-    function adicionarAtendente(nome, email, login, senha) {
+    function adicionarAtendente(nome, email, senha) {
       const novoId = Math.max(...atendentes.map(a => a.id), 0) + 1;
-      const novoLogin = login ? login.toLowerCase() : nome.toLowerCase().replace(/\s/g, '');
-      const novaSenha = senha || novoLogin + "123";
+      // Criar login automaticamente a partir do nome (sem acentos, minúsculo, sem espaços)
+      let login = nome.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '');
       
       atendentes.push({
         id: novoId,
         nome: nome,
-        login: novoLogin,
-        senha: novaSenha,
         email: email,
+        senha: senha,
+        login: login,
         ativo: true,
         criado_em: new Date().toISOString()
       });
       salvarAtendentes();
-      return { login: novoLogin, senha: novaSenha };
     }
     
-    function editarAtendente(id, nome, email, login, senha) {
+    function editarAtendente(id, nome, email, senha) {
       const index = atendentes.findIndex(a => a.id === id);
       if (index !== -1) {
         atendentes[index].nome = nome;
-        atendentes[index].login = login ? login.toLowerCase() : nome.toLowerCase().replace(/\s/g, '');
         atendentes[index].email = email;
+        // Atualizar login baseado no novo nome
+        let login = nome.toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, '');
+        atendentes[index].login = login;
         if (senha && senha.trim() !== "") {
           atendentes[index].senha = senha;
         }
@@ -580,6 +582,14 @@
       salvarAtendentes();
     }
     
+    function verificarSenhaAtendente(nome, senha) {
+      const atendente = atendentes.find(a => a.nome === nome && a.ativo === true);
+      if (atendente && atendente.senha === senha) {
+        return true;
+      }
+      return false;
+    }
+    
     const stepCards = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3'), document.getElementById('step4')];
     const stepItems = document.querySelectorAll('.step-item');
     const atendenteSelect = document.getElementById('atendenteSelect');
@@ -590,20 +600,24 @@
     const descontoGeralInput = document.getElementById('descontoGeralInput');
     let currentOrcamentoId = '';
     
+    // Carregar atendentes ao iniciar
     carregarAtendentes();
     
+    // Offline sync functions
     function updateOfflineIndicator() {
       const indicator = document.getElementById('offlineIndicator');
       const statusSpan = document.getElementById('offlineStatus');
       if (!navigator.onLine) {
         indicator.classList.add('show');
         indicator.classList.remove('online');
-        statusSpan.innerHTML = '<i class="fas fa-plug"></i> Offline';
+        statusSpan.innerHTML = '<i class="fas fa-plug"></i> Offline - Dados salvos localmente';
       } else {
         indicator.classList.add('show');
         indicator.classList.add('online');
-        statusSpan.innerHTML = '<i class="fas fa-check-circle"></i> Online';
-        setTimeout(() => indicator.classList.remove('show'), 3000);
+        statusSpan.innerHTML = '<i class="fas fa-check-circle"></i> Online - Sincronizado';
+        setTimeout(() => {
+          indicator.classList.remove('show');
+        }, 3000);
         syncPendingData();
       }
     }
@@ -611,52 +625,101 @@
     async function syncPendingData() {
       const pending = JSON.parse(localStorage.getItem('pendingSync') || '[]');
       if (pending.length === 0) return;
+      
       showLoading();
       let successCount = 0;
+      
       for (const data of pending) {
         try {
-          const { error } = await supabase.from('orcamentos').upsert({
-            id: data.id, cliente: data.cliente, idade: data.idade, telefone: data.telefone,
-            atendente: data.atendente, origem: data.origem, concorrente: data.concorrente || '',
-            itens: JSON.stringify(data.itens), subtotal: data.subtotal, desconto_geral: data.descontoGeral,
-            total_final: data.totalFinal, status: data.status, justificativa: data.justificativa || '',
-            data_raw: data.dataRaw, created_at: data.dataRaw
-          }, { onConflict: 'id' });
+          const { error } = await supabase
+            .from('orcamentos')
+            .upsert({
+              id: data.id,
+              cliente: data.cliente,
+              idade: data.idade,
+              telefone: data.telefone,
+              atendente: data.atendente,
+              origem: data.origem,
+              concorrente: data.concorrente || '',
+              itens: JSON.stringify(data.itens),
+              subtotal: data.subtotal,
+              desconto_geral: data.descontoGeral,
+              total_final: data.totalFinal,
+              status: data.status,
+              justificativa: data.justificativa || '',
+              data_raw: data.dataRaw,
+              created_at: data.dataRaw
+            }, { onConflict: 'id' });
+          
           if (!error) successCount++;
-        } catch(e) { console.error(e); }
+        } catch(e) {
+          console.error('Erro ao sincronizar:', e);
+        }
       }
-      if (successCount === pending.length) localStorage.removeItem('pendingSync');
-      await carregarHistoricoDoSupabase();
+      
+      if (successCount === pending.length) {
+        localStorage.removeItem('pendingSync');
+        await carregarHistoricoDoSupabase();
+      }
       hideLoading();
     }
     
     async function salvarComFallback(orcamentoData) {
       if (navigator.onLine) {
         try {
-          const { error } = await supabase.from('orcamentos').upsert({
-            id: orcamentoData.id, cliente: orcamentoData.cliente, idade: orcamentoData.idade,
-            telefone: orcamentoData.telefone, atendente: orcamentoData.atendente, origem: orcamentoData.origem,
-            concorrente: orcamentoData.concorrente || '', itens: JSON.stringify(orcamentoData.itens),
-            subtotal: orcamentoData.subtotal, desconto_geral: orcamentoData.descontoGeral,
-            total_final: orcamentoData.totalFinal, status: orcamentoData.status,
-            justificativa: orcamentoData.justificativa || '', data_raw: orcamentoData.dataRaw,
-            created_at: orcamentoData.dataRaw
-          }, { onConflict: 'id' });
-          if (!error) { await carregarHistoricoDoSupabase(); return true; }
-          else throw error;
-        } catch(error) { addToPendingSync(orcamentoData); return true; }
-      } else { addToPendingSync(orcamentoData); return true; }
+          const { error } = await supabase
+            .from('orcamentos')
+            .upsert({
+              id: orcamentoData.id,
+              cliente: orcamentoData.cliente,
+              idade: orcamentoData.idade,
+              telefone: orcamentoData.telefone,
+              atendente: orcamentoData.atendente,
+              origem: orcamentoData.origem,
+              concorrente: orcamentoData.concorrente || '',
+              itens: JSON.stringify(orcamentoData.itens),
+              subtotal: orcamentoData.subtotal,
+              desconto_geral: orcamentoData.descontoGeral,
+              total_final: orcamentoData.totalFinal,
+              status: orcamentoData.status,
+              justificativa: orcamentoData.justificativa || '',
+              data_raw: orcamentoData.dataRaw,
+              created_at: orcamentoData.dataRaw
+            }, { onConflict: 'id' });
+          
+          if (!error) {
+            await carregarHistoricoDoSupabase();
+            return true;
+          } else {
+            throw error;
+          }
+        } catch(error) {
+          console.error('Erro ao salvar no Supabase, salvando localmente:', error);
+          addToPendingSync(orcamentoData);
+          return true;
+        }
+      } else {
+        addToPendingSync(orcamentoData);
+        return true;
+      }
     }
     
     function addToPendingSync(orcamentoData) {
       const pending = JSON.parse(localStorage.getItem('pendingSync') || '[]');
       const existingIndex = pending.findIndex(p => p.id === orcamentoData.id);
-      if (existingIndex !== -1) pending[existingIndex] = orcamentoData;
-      else pending.push(orcamentoData);
+      if (existingIndex !== -1) {
+        pending[existingIndex] = orcamentoData;
+      } else {
+        pending.push(orcamentoData);
+      }
       localStorage.setItem('pendingSync', JSON.stringify(pending));
+      
       const localIndex = historicoOrcamentosGlobal.findIndex(h => h.id === orcamentoData.id);
-      if (localIndex !== -1) historicoOrcamentosGlobal[localIndex] = orcamentoData;
-      else historicoOrcamentosGlobal.unshift(orcamentoData);
+      if (localIndex !== -1) {
+        historicoOrcamentosGlobal[localIndex] = orcamentoData;
+      } else {
+        historicoOrcamentosGlobal.unshift(orcamentoData);
+      }
       localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
     }
     
@@ -685,112 +748,79 @@
           hideLoading();
           return;
         }
-        const { data, error } = await supabase.from('orcamentos').select('*').order('created_at', { ascending: false });
+        
+        const { data, error } = await supabase
+          .from('orcamentos')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
         if (error) throw error;
+        
         historicoOrcamentosGlobal = data.map(item => ({
-          ...item, itens: typeof item.itens === 'string' ? JSON.parse(item.itens) : item.itens,
-          dataRaw: item.data_raw || item.created_at, data: new Date(item.created_at).toLocaleString('pt-BR')
+          ...item,
+          itens: typeof item.itens === 'string' ? JSON.parse(item.itens) : item.itens,
+          dataRaw: item.data_raw || item.created_at,
+          data: new Date(item.created_at).toLocaleString('pt-BR')
         }));
+        
         localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
       } catch (error) {
         console.error('Erro ao carregar do Supabase:', error);
         const localData = localStorage.getItem('historicoOrcamentos');
         if (localData) historicoOrcamentosGlobal = JSON.parse(localData);
-      } finally { hideLoading(); }
+      } finally {
+        hideLoading();
+      }
     }
     
-    // ========== FUNÇÃO DE EXCLUSÃO COM VERIFICAÇÃO DE ADMIN ==========
     async function deletarOrcamentoDoSupabase(id) {
-      // Verificar se o usuário é administrador
-      if (!isCurrentUserAdmin()) {
-        alert('⚠️ Acesso negado! Apenas administradores (Jaúna Constante ou Jaciara Constante) podem excluir orçamentos.');
-        return false;
-      }
-      
       showLoading();
       try {
         if (navigator.onLine) {
-          const { error } = await supabase.from('orcamentos').delete().eq('id', id);
+          const { error } = await supabase
+            .from('orcamentos')
+            .delete()
+            .eq('id', id);
+          
           if (error) throw error;
           await carregarHistoricoDoSupabase();
         } else {
           historicoOrcamentosGlobal = historicoOrcamentosGlobal.filter(item => item.id !== id);
           localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
+          const pendingDeletes = JSON.parse(localStorage.getItem('pendingDeletes') || '[]');
+          if (!pendingDeletes.includes(id)) pendingDeletes.push(id);
+          localStorage.setItem('pendingDeletes', JSON.stringify(pendingDeletes));
         }
         return true;
       } catch (error) {
-        console.error('Erro ao excluir:', error);
-        alert('Erro ao excluir orçamento. Tente novamente.');
-        return false;
-      }
-      finally { hideLoading(); }
-    }
-    
-    // ========== FUNÇÃO PARA EXCLUSÃO EM MASSA ==========
-    async function deletarOrcamentosEmMassa(ids) {
-      // Verificar se o usuário é administrador
-      if (!isCurrentUserAdmin()) {
-        alert('⚠️ Acesso negado! Apenas administradores (Jaúna Constante ou Jaciara Constante) podem excluir orçamentos em massa.');
-        return false;
-      }
-      
-      if (!ids || ids.length === 0) {
-        alert('Nenhum orçamento selecionado para exclusão.');
-        return false;
-      }
-      
-      if (!confirm(`⚠️ ATENÇÃO: Você está prestes a excluir ${ids.length} orçamento(s) permanentemente. Esta ação não pode ser desfeita. Deseja continuar?`)) {
-        return false;
-      }
-      
-      showLoading();
-      let successCount = 0;
-      let errorCount = 0;
-      
-      try {
-        if (navigator.onLine) {
-          for (const id of ids) {
-            try {
-              const { error } = await supabase.from('orcamentos').delete().eq('id', id);
-              if (!error) {
-                successCount++;
-              } else {
-                errorCount++;
-                console.error(`Erro ao excluir ${id}:`, error);
-              }
-            } catch(e) {
-              errorCount++;
-              console.error(`Erro ao excluir ${id}:`, e);
-            }
-          }
-          await carregarHistoricoDoSupabase();
-        } else {
-          historicoOrcamentosGlobal = historicoOrcamentosGlobal.filter(item => !ids.includes(item.id));
-          localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
-          successCount = ids.length;
-        }
-        
-        if (successCount > 0) {
-          alert(`✅ ${successCount} orçamento(s) excluído(s) com sucesso!${errorCount > 0 ? `\n⚠️ ${errorCount} falha(s) na exclusão.` : ''}`);
-        }
-        return successCount > 0;
-      } catch (error) {
-        console.error('Erro na exclusão em massa:', error);
-        alert('Erro ao excluir orçamentos em massa. Tente novamente.');
+        console.error('Erro ao deletar:', error);
         return false;
       } finally {
         hideLoading();
       }
     }
     
-    window.addEventListener('online', () => { isOnline = true; updateOfflineIndicator(); syncPendingData(); carregarHistoricoDoSupabase(); });
-    window.addEventListener('offline', () => { isOnline = false; updateOfflineIndicator(); });
+    window.addEventListener('online', () => {
+      isOnline = true;
+      updateOfflineIndicator();
+      syncPendingData();
+      carregarHistoricoDoSupabase();
+    });
+    window.addEventListener('offline', () => {
+      isOnline = false;
+      updateOfflineIndicator();
+    });
+    
     updateOfflineIndicator();
     
     clientSource.addEventListener('change', function() {
       const concorrenteGroup = document.getElementById('concorrenteGroup');
-      if (this.value === 'Concorrente') concorrenteGroup.style.display = 'block';
-      else { concorrenteGroup.style.display = 'none'; document.getElementById('concorrenteNome').value = ''; }
+      if (this.value === 'Concorrente') {
+        concorrenteGroup.style.display = 'block';
+      } else {
+        concorrenteGroup.style.display = 'none';
+        document.getElementById('concorrenteNome').value = '';
+      }
       updateNavButtons();
     });
     
@@ -800,39 +830,91 @@
       localStorage.removeItem('nextIdTemp');
       window.location.href = 'index.html';
     }
+    
     document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
     
-    function generateOrcamentoId() { return 'ORC-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase(); }
-    function updateOrcamentoIdDisplay() { const span = document.getElementById('uniqueOrcamentoId'); if(span) span.textContent = currentOrcamentoId; }
+    function generateOrcamentoId() {
+      return 'ORC-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+    }
     
-    function formatMoneyWithThousand(value) { let num = typeof value === 'number' ? value : parseFloat(value); if (isNaN(num)) num = 0; return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-    function formatMoneyWithSymbol(value) { return `R$ ${formatMoneyWithThousand(value)}`; }
-    function parseCurrency(str) { if (!str || str === '') return 0; let cleaned = str.toString().replace(/R\$\s*/g, '').replace(/\./g, '').replace(',', '.'); let num = parseFloat(cleaned); return isNaN(num) ? 0 : num; }
+    function updateOrcamentoIdDisplay() {
+      const span = document.getElementById('uniqueOrcamentoId');
+      if(span) span.textContent = currentOrcamentoId;
+    }
+    
+    function formatMoneyWithThousand(value) {
+      let num = typeof value === 'number' ? value : parseFloat(value);
+      if (isNaN(num)) num = 0;
+      return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    
+    function formatMoneyWithSymbol(value) {
+      return `R$ ${formatMoneyWithThousand(value)}`;
+    }
+    
+    function parseCurrency(str) {
+      if (!str || str === '') return 0;
+      let cleaned = str.toString().replace(/R\$\s*/g, '').replace(/\./g, '').replace(',', '.');
+      let num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
+    }
     
     let orcamentos = [];
     let nextId = 1;
     
-    function updateDateTime() { const now = new Date(); document.getElementById('currentDateTime').textContent = now.toLocaleDateString('pt-BR') + ' às ' + now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}); }
-    updateDateTime(); setInterval(updateDateTime, 1000);
+    function updateDateTime() { 
+      const now = new Date(); 
+      document.getElementById('currentDateTime').textContent = now.toLocaleDateString('pt-BR') + ' às ' + now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}); 
+    }
+    updateDateTime(); 
+    setInterval(updateDateTime, 1000);
     
-    function goToStep(step) { if (step<1||step>4) return; currentStep=step; stepCards.forEach((c,i)=>c.classList.toggle('active-step',i+1===step)); stepItems.forEach((item,i)=>item.classList.toggle('active',i+1<=step)); if(step===4) renderResumoFinal(); if(step===3) renderOrcamentosForm(); }
+    function goToStep(step) { 
+      if (step<1||step>4) return; 
+      currentStep=step; 
+      stepCards.forEach((c,i)=>c.classList.toggle('active-step',i+1===step)); 
+      stepItems.forEach((item,i)=>item.classList.toggle('active',i+1<=step)); 
+      if(step===4) renderResumoFinal(); 
+      if(step===3) renderOrcamentosForm(); 
+    }
+    
     function validateStep1() { return atendenteSelect.value !== ''; }
     function validateStep2() { 
       const phoneValid = clientPhone.value.trim() !== '';
       const nameValid = clientName.value.trim() !== '';
       const sourceValid = clientSource.value !== '';
-      clientPhone.classList.toggle('required-error', !phoneValid);
-      clientName.classList.toggle('required-error', !nameValid);
-      clientSource.classList.toggle('required-error', !sourceValid);
+      
+      if (!phoneValid) {
+        clientPhone.classList.add('required-error');
+      } else {
+        clientPhone.classList.remove('required-error');
+      }
+      if (!nameValid) {
+        clientName.classList.add('required-error');
+      } else {
+        clientName.classList.remove('required-error');
+      }
+      if (!sourceValid) {
+        clientSource.classList.add('required-error');
+      } else {
+        clientSource.classList.remove('required-error');
+      }
+      
       return nameValid && phoneValid && sourceValid;
     }
-    function updateNavButtons() { document.getElementById('nextToStep2').disabled = !validateStep1(); document.getElementById('nextToStep3').disabled = !validateStep2(); }
+    function updateNavButtons() { 
+      document.getElementById('nextToStep2').disabled = !validateStep1(); 
+      document.getElementById('nextToStep3').disabled = !validateStep2(); 
+    }
     
     function toggleAdminButton() {
       const adminBtn = document.getElementById('adminAccessBtn');
       const atendente = atendenteSelect.value;
-      if (atendente === 'Jaúna Constante' || atendente === 'Jaciara Constante') adminBtn.classList.add('visible');
-      else adminBtn.classList.remove('visible');
+      if (atendente === 'Jaúna Constante' || atendente === 'Jaciara Constante') {
+        adminBtn.classList.add('visible');
+      } else {
+        adminBtn.classList.remove('visible');
+      }
     }
     
     function verificarUsuarioLogado() {
@@ -843,42 +925,114 @@
           const timestamp = new Date(user.loginTimestamp);
           const agora = new Date();
           const diffHoras = (agora - timestamp) / (1000 * 60 * 60);
-          if (diffHoras > 8) { localStorage.removeItem('usuarioLogado'); return false; }
+          
+          if (diffHoras > 8) {
+            localStorage.removeItem('usuarioLogado');
+            return false;
+          }
+          
           const nomeAtendente = user.nome;
           const atendenteAtivo = atendentes.find(a => a.nome === nomeAtendente && a.ativo === true);
+          
           if (atendenteAtivo) {
             atendenteSelect.value = nomeAtendente;
             const changeEvent = new Event('change', { bubbles: true });
             atendenteSelect.dispatchEvent(changeEvent);
-            if (validateStep1()) { jaPassouStep1 = true; setTimeout(() => goToStep(2), 50); }
+            
+            if (validateStep1()) {
+              jaPassouStep1 = true;
+              setTimeout(() => {
+                goToStep(2);
+              }, 50);
+            }
             return true;
           }
           return false;
-        } catch(e) { localStorage.removeItem('usuarioLogado'); return false; }
+        } catch(e) {
+          console.error('Erro ao ler usuário logado:', e);
+          localStorage.removeItem('usuarioLogado');
+          return false;
+        }
       }
       return false;
     }
     
-    document.getElementById('nextToStep2')?.addEventListener('click',()=>{ if(validateStep1()) { jaPassouStep1 = true; goToStep(2); } });
-    document.getElementById('backToStep1')?.addEventListener('click',()=>{ if(!jaPassouStep1) goToStep(1); else alert('⚠️ Você não pode voltar para a seleção de atendente. Clique em "Sair" para trocar de atendente.'); });
+    document.getElementById('nextToStep2')?.addEventListener('click',()=>{
+      if(validateStep1()) {
+        jaPassouStep1 = true;
+        goToStep(2);
+      }
+    });
+    
+    document.getElementById('backToStep1')?.addEventListener('click',()=>{
+      if(!jaPassouStep1) {
+        goToStep(1);
+      } else {
+        alert('⚠️ Você não pode voltar para a seleção de atendente. Clique em "Sair" para trocar de atendente.');
+      }
+    });
+    
     document.getElementById('nextToStep3')?.addEventListener('click',()=>{if(validateStep2()){goToStep(3);renderOrcamentosForm();}});
     document.getElementById('backToStep2_from3')?.addEventListener('click',()=>goToStep(2));
     document.getElementById('nextToStep4')?.addEventListener('click',()=>{goToStep(4);renderResumoFinal();});
     document.getElementById('backToStep3Edit')?.addEventListener('click',()=>goToStep(3));
     
-    atendenteSelect.addEventListener('change', () => { updateNavButtons(); toggleAdminButton(); });
+    atendenteSelect.addEventListener('change', () => {
+      updateNavButtons();
+      toggleAdminButton();
+    });
     clientName.addEventListener('input',updateNavButtons);
+    clientAge.addEventListener('input',updateNavButtons);
     clientPhone.addEventListener('input',updateNavButtons);
     clientSource.addEventListener('change',updateNavButtons);
     updateNavButtons();
     toggleAdminButton();
     
-    function getEmptyOrcamento() { return { id: nextId++, tipo: 'lente', produto: '', marca: '', materialLente: '', antirreflexo: false, filtroLuzAzul: false, lenteFotocromatica: false, valorLente: 0, valorLenteStr: '', nomeArmacao: '', referencia: '', materialArmacao: '', valorArmacao: 0, valorArmacaoStr: '', nomeRelogio: '', marcaRelogio: '', valorRelogio: 0, valorRelogioStr: '', descricaoJoia: '', tipoJoia: '', valorJoia: 0, valorJoiaStr: '', descontoItem: 0, descontoItemStr: '' }; }
-    function addOrcamento() { orcamentos.push(getEmptyOrcamento()); renderOrcamentosForm(); }
-    function removeOrcamento(id) { orcamentos = orcamentos.filter(o=>o.id!==id); if(orcamentos.length===0) orcamentos.push(getEmptyOrcamento()); renderOrcamentosForm(); }
+    function getEmptyOrcamento() { 
+      return { 
+        id: nextId++, 
+        tipo: 'lente', 
+        produto: '', 
+        marca: '', 
+        materialLente: '', 
+        antirreflexo: false, 
+        filtroLuzAzul: false,
+        lenteFotocromatica: false,
+        valorLente: 0, 
+        valorLenteStr: '', 
+        nomeArmacao: '', 
+        referencia: '', 
+        materialArmacao: '', 
+        valorArmacao: 0, 
+        valorArmacaoStr: '',
+        nomeRelogio: '',
+        marcaRelogio: '',
+        valorRelogio: 0,
+        valorRelogioStr: '',
+        descricaoJoia: '',
+        tipoJoia: '',
+        valorJoia: 0,
+        valorJoiaStr: '',
+        descontoItem: 0, 
+        descontoItemStr: '' 
+      }; 
+    }
+    
+    function addOrcamento() { 
+      orcamentos.push(getEmptyOrcamento()); 
+      renderOrcamentosForm(); 
+    }
+    
+    function removeOrcamento(id) { 
+      orcamentos = orcamentos.filter(o=>o.id!==id); 
+      if(orcamentos.length===0) orcamentos.push(getEmptyOrcamento()); 
+      renderOrcamentosForm(); 
+    }
     
     function updateOrcamentoField(id, field, value) {
-      const item = orcamentos.find(o=>o.id===id); if(!item) return;
+      const item = orcamentos.find(o=>o.id===id); 
+      if(!item) return;
+      
       if(field==='tipo') item.tipo=value;
       else if(field==='produto') item.produto=value;
       else if(field==='marca') item.marca=value;
@@ -887,27 +1041,54 @@
       else if(field==='antirreflexo') item.antirreflexo=value;
       else if(field==='filtroLuzAzul') item.filtroLuzAzul=value;
       else if(field==='lenteFotocromatica') item.lenteFotocromatica=value;
-      else if(field==='valorLente') { item.valorLenteStr = value; item.valorLente = parseCurrency(value); }
+      else if(field==='valorLente') { 
+        item.valorLenteStr = value; 
+        item.valorLente = parseCurrency(value); 
+      }
       else if(field==='nomeArmacao') item.nomeArmacao=value;
       else if(field==='materialArmacao') item.materialArmacao=value;
-      else if(field==='valorArmacao') { item.valorArmacaoStr = value; item.valorArmacao = parseCurrency(value); }
+      else if(field==='valorArmacao') { 
+        item.valorArmacaoStr = value; 
+        item.valorArmacao = parseCurrency(value); 
+      }
       else if(field==='nomeRelogio') item.nomeRelogio=value;
       else if(field==='marcaRelogio') item.marcaRelogio=value;
-      else if(field==='valorRelogio') { item.valorRelogioStr = value; item.valorRelogio = parseCurrency(value); }
+      else if(field==='valorRelogio') { 
+        item.valorRelogioStr = value; 
+        item.valorRelogio = parseCurrency(value); 
+      }
       else if(field==='descricaoJoia') item.descricaoJoia=value;
       else if(field==='tipoJoia') item.tipoJoia=value;
-      else if(field==='valorJoia') { item.valorJoiaStr = value; item.valorJoia = parseCurrency(value); }
-      else if(field==='descontoItem') { item.descontoItemStr = value; item.descontoItem = parseCurrency(value); }
+      else if(field==='valorJoia') { 
+        item.valorJoiaStr = value; 
+        item.valorJoia = parseCurrency(value); 
+      }
+      else if(field==='descontoItem') { 
+        item.descontoItemStr = value; 
+        item.descontoItem = parseCurrency(value); 
+      }
+      
       if(currentStep === 3) updateItemHint(item.id);
       if(currentStep === 4) renderResumoFinal();
       salvarOrcamentosTemporarios();
     }
     
-    function salvarOrcamentosTemporarios() { localStorage.setItem('orcamentosTemp', JSON.stringify(orcamentos)); localStorage.setItem('nextIdTemp', nextId); }
-    function carregarOrcamentosTemporarios() { const saved = localStorage.getItem('orcamentosTemp'); if(saved) { orcamentos = JSON.parse(saved); nextId = parseInt(localStorage.getItem('nextIdTemp')) || orcamentos.length + 1; } }
+    function salvarOrcamentosTemporarios() {
+      localStorage.setItem('orcamentosTemp', JSON.stringify(orcamentos));
+      localStorage.setItem('nextIdTemp', nextId);
+    }
+    
+    function carregarOrcamentosTemporarios() {
+      const saved = localStorage.getItem('orcamentosTemp');
+      if(saved) {
+        orcamentos = JSON.parse(saved);
+        nextId = parseInt(localStorage.getItem('nextIdTemp')) || orcamentos.length + 1;
+      }
+    }
     
     function updateItemHint(itemId) {
-      const item = orcamentos.find(o => o.id === itemId); if(!item) return;
+      const item = orcamentos.find(o => o.id === itemId);
+      if(!item) return;
       const hintSpan = document.querySelector(`.orcamento-item[data-item-id="${itemId}"] .valor-input-hint strong`);
       if(hintSpan) {
         let valorBase = 0;
@@ -920,20 +1101,32 @@
       }
     }
     
-    function escapeHtml(str) { if(!str) return ''; return String(str).replace(/[&<>]/g,function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
-    function getItemDisplayName(item, idx) { const tipoNome = item.tipo === 'lente' ? 'LENTE' : (item.tipo === 'armacao' ? 'ARMAÇÃO' : (item.tipo === 'relogio' ? 'RELÓGIO' : 'JOIAS')); return `${tipoNome} ${idx+1}`; }
+    function escapeHtml(str) { 
+      if(!str) return ''; 
+      return String(str).replace(/[&<>]/g,function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); 
+    }
+    
+    function getItemDisplayName(item, idx) {
+      const tipoNome = item.tipo === 'lente' ? 'LENTE' : (item.tipo === 'armacao' ? 'ARMAÇÃO' : (item.tipo === 'relogio' ? 'RELÓGIO' : 'JOIAS'));
+      return `${tipoNome} ${idx+1}`;
+    }
     
     function renderOrcamentosForm() {
-      const container = document.getElementById('orcamentosContainer'); if(!container) return;
+      const container = document.getElementById('orcamentosContainer'); 
+      if(!container) return;
       if(orcamentos.length===0) orcamentos.push(getEmptyOrcamento());
       container.innerHTML = '';
+      
       orcamentos.forEach((item, idx)=>{
-        const div = document.createElement('div'); div.className='orcamento-item'; div.setAttribute('data-item-id', item.id);
+        const div = document.createElement('div'); 
+        div.className='orcamento-item';
+        div.setAttribute('data-item-id', item.id);
         let valorBaseStr = '';
         if(item.tipo === 'lente') valorBaseStr = item.valorLenteStr || '';
         else if(item.tipo === 'armacao') valorBaseStr = item.valorArmacaoStr || '';
         else if(item.tipo === 'relogio') valorBaseStr = item.valorRelogioStr || '';
         else if(item.tipo === 'joias') valorBaseStr = item.valorJoiaStr || '';
+        
         const descontoItemStr = item.descontoItemStr || '';
         const displayName = getItemDisplayName(item, idx);
         let valorBaseNum = 0;
@@ -942,6 +1135,7 @@
         else if(item.tipo === 'relogio') valorBaseNum = item.valorRelogio || 0;
         else if(item.tipo === 'joias') valorBaseNum = item.valorJoia || 0;
         const valorLiq = valorBaseNum - (item.descontoItem||0);
+        
         let fieldsHtml = '';
         if(item.tipo === 'lente') {
           fieldsHtml = `
@@ -985,6 +1179,7 @@
             <div class="input-group"><label>✨ Tipo / Material</label><input type="text" class="text-input" value="${escapeHtml(item.tipoJoia)}" data-id="${item.id}" data-field="tipoJoia" placeholder="Ex: Ouro 18k, Prata, Aço Inox"></div>
           `;
         }
+        
         div.innerHTML = `
           <div class="orcamento-header"><span>${displayName}</span><button type="button" class="btn-remove-orc" data-id="${item.id}"><i class="fas fa-trash-alt"></i></button></div>
           <div class="double-col"><div class="input-group"><label>Tipo *</label><select class="select-tipo" data-id="${item.id}" data-field="tipo"><option value="lente" ${item.tipo==='lente'?'selected':''}>Lentes</option><option value="armacao" ${item.tipo==='armacao'?'selected':''}>Armação</option><option value="relogio" ${item.tipo==='relogio'?'selected':''}>Relógio</option><option value="joias" ${item.tipo==='joias'?'selected':''}>Jóias</option></select></div></div>
@@ -994,28 +1189,65 @@
         `;
         container.appendChild(div);
       });
+      
       document.querySelectorAll('.btn-remove-orc').forEach(btn=>btn.addEventListener('click',()=>removeOrcamento(parseInt(btn.dataset.id))));
       document.querySelectorAll('.select-tipo').forEach(sel=>sel.addEventListener('change',(e)=>{updateOrcamentoField(parseInt(sel.dataset.id),'tipo',sel.value); renderOrcamentosForm();}));
       document.querySelectorAll('.text-input').forEach(inp => inp.addEventListener('input', (e) => updateOrcamentoField(parseInt(inp.dataset.id), inp.dataset.field, inp.value)));
-      document.querySelectorAll('.valor-field, .desconto-field').forEach(inp => inp.addEventListener('blur', (e) => { let val = parseCurrency(inp.value); inp.value = formatMoneyWithThousand(val); updateOrcamentoField(parseInt(inp.dataset.id), inp.dataset.field, inp.value); }));
+      document.querySelectorAll('.valor-field, .desconto-field').forEach(inp => inp.addEventListener('blur', (e) => {
+        let val = parseCurrency(inp.value);
+        inp.value = formatMoneyWithThousand(val);
+        updateOrcamentoField(parseInt(inp.dataset.id), inp.dataset.field, inp.value);
+      }));
       document.querySelectorAll('.checkbox-ar, .checkbox-filtro, .checkbox-fotocromatica').forEach(chk => chk.addEventListener('change', (e) => updateOrcamentoField(parseInt(chk.dataset.id), chk.dataset.field, chk.checked)));
     }
     
-    function calcularSubtotalItens() { let total=0; for(let item of orcamentos){ let base=0; if(item.tipo==='lente') base = item.valorLente||0; else if(item.tipo==='armacao') base = item.valorArmacao||0; else if(item.tipo==='relogio') base = item.valorRelogio||0; else if(item.tipo==='joias') base = item.valorJoia||0; total+=Math.max(0,base-(item.descontoItem||0)); } return total; }
-    function calcularTotalFinal() { let desconto = parseCurrency(descontoGeralInput?.value || '0'); return Math.max(0, calcularSubtotalItens() - desconto); }
+    function calcularSubtotalItens() { 
+      let total=0; 
+      for(let item of orcamentos){ 
+        let base=0;
+        if(item.tipo==='lente') base = item.valorLente||0;
+        else if(item.tipo==='armacao') base = item.valorArmacao||0;
+        else if(item.tipo==='relogio') base = item.valorRelogio||0;
+        else if(item.tipo==='joias') base = item.valorJoia||0;
+        total+=Math.max(0,base-(item.descontoItem||0)); 
+      } 
+      return total; 
+    }
+    
+    function calcularTotalFinal() { 
+      let desconto = parseCurrency(descontoGeralInput?.value || '0');
+      return Math.max(0, calcularSubtotalItens() - desconto); 
+    }
     
     function renderResumoFinal() {
       document.getElementById('displayClientName').textContent = clientName.value.trim() || 'Cliente';
       document.getElementById('displayAtendente').innerHTML = `<i class="fas fa-user-check"></i> ${atendenteSelect.value}`;
-      const container = document.getElementById('resumoItensList'); if(!container) return;
+      const container = document.getElementById('resumoItensList'); 
+      if(!container) return;
       container.innerHTML = '';
       let idx=1;
       for(let item of orcamentos){
         let descricao='', valorBase=0, descontoItem=item.descontoItem||0;
-        if(item.tipo==='lente'){ let extras = []; if(item.antirreflexo) extras.push('AR'); if(item.filtroLuzAzul) extras.push('Filtro Azul'); if(item.lenteFotocromatica) extras.push('Fotocromática'); descricao=`👓 ${item.produto||'Lente'} ${item.marca?`·${item.marca}`:''} ${item.materialLente?`(${item.materialLente})`:''} ${extras.length?`[${extras.join(', ')}]`:''}`; valorBase=item.valorLente||0; }
-        else if(item.tipo==='armacao') { descricao=`🕶️ ${item.marca?`${item.marca}`:'Armação'} ${item.referencia?`Ref: ${item.referencia}`:''}`; valorBase=item.valorArmacao||0; }
-        else if(item.tipo==='relogio') { descricao=`⌚ ${item.nomeRelogio||'Relógio'} ${item.marcaRelogio?`(${item.marcaRelogio})`:''}`; valorBase=item.valorRelogio||0; }
-        else if(item.tipo==='joias') { descricao=`💎 ${item.descricaoJoia||'Joia'} ${item.tipoJoia?`(${item.tipoJoia})`:''}`; valorBase=item.valorJoia||0; }
+        if(item.tipo==='lente'){ 
+          let extras = [];
+          if(item.antirreflexo) extras.push('AR');
+          if(item.filtroLuzAzul) extras.push('Filtro Azul');
+          if(item.lenteFotocromatica) extras.push('Fotocromática');
+          descricao=`👓 ${item.produto||'Lente'} ${item.marca?`·${item.marca}`:''} ${item.materialLente?`(${item.materialLente})`:''} ${extras.length?`[${extras.join(', ')}]`:''}`; 
+          valorBase=item.valorLente||0; 
+        }
+        else if(item.tipo==='armacao') { 
+          descricao=`🕶️ ${item.marca?`${item.marca}`:'Armação'} ${item.referencia?`Ref: ${item.referencia}`:''}`; 
+          valorBase=item.valorArmacao||0; 
+        }
+        else if(item.tipo==='relogio') {
+          descricao=`⌚ ${item.nomeRelogio||'Relógio'} ${item.marcaRelogio?`(${item.marcaRelogio})`:''}`;
+          valorBase=item.valorRelogio||0;
+        }
+        else if(item.tipo==='joias') {
+          descricao=`💎 ${item.descricaoJoia||'Joia'} ${item.tipoJoia?`(${item.tipoJoia})`:''}`;
+          valorBase=item.valorJoia||0;
+        }
         let valorLiq = Math.max(0,valorBase-descontoItem);
         let div = document.createElement('div'); div.className='summary-item';
         div.innerHTML = `<span class="summary-label">${idx++}. ${descricao}${descontoItem>0?` <span style="color:#e74c3c;">(desc:R$ ${formatMoneyWithThousand(descontoItem)})</span>`:''}</span><span class="summary-value">${formatMoneyWithSymbol(valorLiq)}</span>`;
@@ -1023,60 +1255,150 @@
       }
       document.getElementById('subtotalDisplay').textContent = formatMoneyWithSymbol(calcularSubtotalItens());
       document.getElementById('finalTotalDisplay').textContent = formatMoneyWithSymbol(calcularTotalFinal());
+      
       updateOrcamentoIdDisplay();
     }
     
     if(descontoGeralInput) {
       descontoGeralInput.value = '';
-      descontoGeralInput.addEventListener('input', function(e) { let rawValue = this.value.replace(/[^\d,]/g, ''); this.value = rawValue; renderResumoFinal(); });
-      descontoGeralInput.addEventListener('blur', function() { let valorNumerico = parseCurrency(this.value); if (valorNumerico > 0) this.value = formatMoneyWithThousand(valorNumerico); else this.value = ''; renderResumoFinal(); });
+      descontoGeralInput.addEventListener('input', function(e) {
+        let rawValue = this.value.replace(/[^\d,]/g, '');
+        this.value = rawValue;
+        renderResumoFinal();
+      });
+      descontoGeralInput.addEventListener('blur', function() {
+        let valorNumerico = parseCurrency(this.value);
+        if (valorNumerico > 0) {
+          this.value = formatMoneyWithThousand(valorNumerico);
+        } else {
+          this.value = '';
+        }
+        renderResumoFinal();
+      });
     }
     
     async function salvarHistorico(status, justificativa='') {
       let orcamentoData = {
-        id: currentOrcamentoId, dataRaw: new Date().toISOString(), atendente: atendenteSelect.value,
-        cliente: clientName.value.trim(), idade: clientAge.value.trim(), telefone: clientPhone.value.trim(),
-        origem: clientSource.value, concorrente: clientSource.value === 'Concorrente' ? document.getElementById('concorrenteNome').value.trim() : '',
-        itens: JSON.parse(JSON.stringify(orcamentos)), subtotal: calcularSubtotalItens(),
-        descontoGeral: parseCurrency(descontoGeralInput?.value), totalFinal: calcularTotalFinal(),
-        status: status, justificativa: justificativa
+        id: currentOrcamentoId,
+        dataRaw: new Date().toISOString(),
+        atendente: atendenteSelect.value,
+        cliente: clientName.value.trim(),
+        idade: clientAge.value.trim(),
+        telefone: clientPhone.value.trim(),
+        origem: clientSource.value,
+        concorrente: clientSource.value === 'Concorrente' ? document.getElementById('concorrenteNome').value.trim() : '',
+        itens: JSON.parse(JSON.stringify(orcamentos)),
+        subtotal: calcularSubtotalItens(),
+        descontoGeral: parseCurrency(descontoGeralInput?.value),
+        totalFinal: calcularTotalFinal(),
+        status: status,
+        justificativa: justificativa
       };
+      
       const salvou = await salvarComFallback(orcamentoData);
-      if (salvou) { if (modoEdicao && orcamentoEditandoId) { modoEdicao = false; orcamentoEditandoId = null; } localStorage.removeItem('orcamentosTemp'); localStorage.removeItem('nextIdTemp'); return true; }
+      
+      if (salvou) {
+        if (modoEdicao && orcamentoEditandoId) {
+          modoEdicao = false;
+          orcamentoEditandoId = null;
+        }
+        localStorage.removeItem('orcamentosTemp');
+        localStorage.removeItem('nextIdTemp');
+        return true;
+      }
       return false;
     }
     
     function resetarFormularioParaNovoOrcamento() {
-      orcamentos = [getEmptyOrcamento()]; nextId = 2; clientName.value = ''; clientAge.value = ''; clientSource.value = ''; clientPhone.value = '';
-      document.getElementById('hasPrescription').value = 'Não'; document.getElementById('concorrenteNome').value = ''; document.getElementById('concorrenteGroup').style.display = 'none';
-      if(descontoGeralInput) descontoGeralInput.value = ''; updateNavButtons(); renderOrcamentosForm();
-      localStorage.removeItem('orcamentosTemp'); localStorage.removeItem('nextIdTemp');
-      currentOrcamentoId = generateOrcamentoId(); updateOrcamentoIdDisplay(); modoEdicao = false; orcamentoEditandoId = null;
+      orcamentos = [getEmptyOrcamento()];
+      nextId = 2;
+      clientName.value = '';
+      clientAge.value = '';
+      clientSource.value = '';
+      clientPhone.value = '';
+      document.getElementById('hasPrescription').value = 'Não';
+      document.getElementById('concorrenteNome').value = '';
+      document.getElementById('concorrenteGroup').style.display = 'none';
+      if(descontoGeralInput) descontoGeralInput.value = '';
+      updateNavButtons();
+      renderOrcamentosForm();
+      
+      localStorage.removeItem('orcamentosTemp');
+      localStorage.removeItem('nextIdTemp');
+      currentOrcamentoId = generateOrcamentoId();
+      updateOrcamentoIdDisplay();
+      modoEdicao = false;
+      orcamentoEditandoId = null;
+      
       goToStep(2);
     }
     
     function resetarFormularioCompleto() {
-      orcamentos = [getEmptyOrcamento()]; nextId = 2; atendenteSelect.value = ''; jaPassouStep1 = false;
-      clientName.value = ''; clientAge.value = ''; clientSource.value = ''; clientPhone.value = '';
-      document.getElementById('hasPrescription').value = 'Não'; document.getElementById('concorrenteNome').value = ''; document.getElementById('concorrenteGroup').style.display = 'none';
-      if(descontoGeralInput) descontoGeralInput.value = ''; updateNavButtons(); renderOrcamentosForm();
-      localStorage.removeItem('orcamentosTemp'); localStorage.removeItem('nextIdTemp');
-      currentOrcamentoId = generateOrcamentoId(); updateOrcamentoIdDisplay(); modoEdicao = false; orcamentoEditandoId = null; toggleAdminButton();
+      orcamentos = [getEmptyOrcamento()];
+      nextId = 2;
+      atendenteSelect.value = '';
+      jaPassouStep1 = false;
+      clientName.value = '';
+      clientAge.value = '';
+      clientSource.value = '';
+      clientPhone.value = '';
+      document.getElementById('hasPrescription').value = 'Não';
+      document.getElementById('concorrenteNome').value = '';
+      document.getElementById('concorrenteGroup').style.display = 'none';
+      if(descontoGeralInput) descontoGeralInput.value = '';
+      updateNavButtons();
+      renderOrcamentosForm();
+      
+      localStorage.removeItem('orcamentosTemp');
+      localStorage.removeItem('nextIdTemp');
+      currentOrcamentoId = generateOrcamentoId();
+      updateOrcamentoIdDisplay();
+      modoEdicao = false;
+      orcamentoEditandoId = null;
+      toggleAdminButton();
+      
       goToStep(1);
     }
     
     function carregarOrcamentoParaEdicao(orcamento) {
-      modoEdicao = true; orcamentoEditandoId = orcamento.id; currentOrcamentoId = orcamento.id; jaPassouStep1 = true;
-      atendenteSelect.value = orcamento.atendente; clientName.value = orcamento.cliente; clientAge.value = orcamento.idade || ''; clientPhone.value = orcamento.telefone || '';
+      modoEdicao = true;
+      orcamentoEditandoId = orcamento.id;
+      currentOrcamentoId = orcamento.id;
+      jaPassouStep1 = true;
+      
+      atendenteSelect.value = orcamento.atendente;
+      clientName.value = orcamento.cliente;
+      clientAge.value = orcamento.idade || '';
+      clientPhone.value = orcamento.telefone || '';
       clientSource.value = orcamento.origem || '';
-      if (clientSource.value === 'Concorrente' && orcamento.concorrente) { document.getElementById('concorrenteGroup').style.display = 'block'; document.getElementById('concorrenteNome').value = orcamento.concorrente; }
-      orcamentos = JSON.parse(JSON.stringify(orcamento.itens)); nextId = orcamentos.length + 1;
+      if (clientSource.value === 'Concorrente' && orcamento.concorrente) {
+        document.getElementById('concorrenteGroup').style.display = 'block';
+        document.getElementById('concorrenteNome').value = orcamento.concorrente;
+      }
+      
+      orcamentos = JSON.parse(JSON.stringify(orcamento.itens));
+      nextId = orcamentos.length + 1;
+      
       if(descontoGeralInput) descontoGeralInput.value = formatMoneyWithThousand(orcamento.descontoGeral || 0);
-      updateNavButtons(); renderOrcamentosForm(); updateOrcamentoIdDisplay(); goToStep(3);
-      alert(`Editando orçamento: ${orcamento.id}\nCliente: ${orcamento.cliente}\nStatus atual: ${orcamento.status === 'fechado' ? 'FECHADO' : 'NÃO FINALIZADO'}`);
+      
+      updateNavButtons();
+      renderOrcamentosForm();
+      updateOrcamentoIdDisplay();
+      goToStep(3);
+      
+      alert(`Editando orçamento: ${orcamento.id}\nCliente: ${orcamento.cliente}\nStatus atual: ${orcamento.status === 'fechado' ? 'FECHADO' : 'NÃO FINALIZADO'}\n\nVocê pode modificar os itens e finalizar novamente.`);
     }
     
-    function formatPhoneForWhatsApp(phone) { let cleaned = phone.replace(/\D/g, ''); if(cleaned.length === 0) return ''; if(cleaned.length === 10) cleaned = '55' + cleaned; else if(cleaned.length === 11) cleaned = '55' + cleaned; else if(cleaned.length === 12 && cleaned.startsWith('55')) cleaned = cleaned; else if(cleaned.length === 13 && cleaned.startsWith('55')) cleaned = cleaned; else cleaned = '55' + cleaned; return cleaned; }
+    function formatPhoneForWhatsApp(phone) {
+      let cleaned = phone.replace(/\D/g, '');
+      if(cleaned.length === 0) return '';
+      if(cleaned.length === 10) cleaned = '55' + cleaned;
+      else if(cleaned.length === 11) cleaned = '55' + cleaned;
+      else if(cleaned.length === 12 && cleaned.startsWith('55')) cleaned = cleaned;
+      else if(cleaned.length === 13 && cleaned.startsWith('55')) cleaned = cleaned;
+      else cleaned = '55' + cleaned;
+      return cleaned;
+    }
     
     function mostrarModalFinalizacao() {
       let modal = document.createElement('div'); modal.className = 'modal-overlay';
@@ -1102,13 +1424,40 @@
         </div>
       `;
       document.body.appendChild(modal);
-      const simBtn = modal.querySelector('#simFechouBtn'), naoBtn = modal.querySelector('#naoFechouBtn'), justArea = modal.querySelector('#justificativaArea');
-      const confirmarNao = modal.querySelector('#confirmarNaoFechouBtn'), cancelarJust = modal.querySelector('#cancelarJustificativaBtn');
-      const cancelar = modal.querySelector('#cancelarModalBtn'), botoesIniciais = modal.querySelector('#botoesIniciais');
-      simBtn.onclick = async () => { const salvou = await salvarHistorico('fechado', ''); if(salvou) alert('✅ Orçamento finalizado com VENDA!'); modal.remove(); resetarFormularioParaNovoOrcamento(); };
-      naoBtn.onclick = () => { justArea.style.display = 'block'; botoesIniciais.style.display = 'none'; naoBtn.disabled = true; simBtn.disabled = true; };
-      confirmarNao.onclick = async () => { let just = modal.querySelector('#justificativaTexto').value.trim(); if(!just) { alert('Por favor, informe uma justificativa'); return; } const salvou = await salvarHistorico('nao_fechado', just); if(salvou) alert('📋 Orçamento arquivado como NÃO FINALIZADO.'); modal.remove(); resetarFormularioParaNovoOrcamento(); };
-      cancelarJust.onclick = () => { justArea.style.display = 'none'; botoesIniciais.style.display = 'flex'; naoBtn.disabled = false; simBtn.disabled = false; };
+      const simBtn = modal.querySelector('#simFechouBtn');
+      const naoBtn = modal.querySelector('#naoFechouBtn');
+      const justArea = modal.querySelector('#justificativaArea');
+      const confirmarNao = modal.querySelector('#confirmarNaoFechouBtn');
+      const cancelarJust = modal.querySelector('#cancelarJustificativaBtn');
+      const cancelar = modal.querySelector('#cancelarModalBtn');
+      const botoesIniciais = modal.querySelector('#botoesIniciais');
+      
+      simBtn.onclick = async () => { 
+        const salvou = await salvarHistorico('fechado', ''); 
+        if(salvou) alert('✅ Orçamento finalizado com VENDA!'); 
+        modal.remove(); 
+        resetarFormularioParaNovoOrcamento();
+      };
+      naoBtn.onclick = () => { 
+        justArea.style.display = 'block'; 
+        botoesIniciais.style.display = 'none';
+        naoBtn.disabled = true; 
+        simBtn.disabled = true; 
+      };
+      confirmarNao.onclick = async () => { 
+        let just = modal.querySelector('#justificativaTexto').value.trim(); 
+        if(!just) { alert('Por favor, informe uma justificativa'); return; } 
+        const salvou = await salvarHistorico('nao_fechado', just); 
+        if(salvou) alert('📋 Orçamento arquivado como NÃO FINALIZADO.'); 
+        modal.remove(); 
+        resetarFormularioParaNovoOrcamento();
+      };
+      cancelarJust.onclick = () => {
+        justArea.style.display = 'none';
+        botoesIniciais.style.display = 'flex';
+        naoBtn.disabled = false;
+        simBtn.disabled = false;
+      };
       cancelar.onclick = () => modal.remove();
     }
     
@@ -1117,38 +1466,87 @@
     async function gerarPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
-      const pageWidth = 210, marginLeft = 15;
+      const pageWidth = 210;
+      const marginLeft = 15;
       let y = 25;
+      
       function addHeader() {
-        doc.setFillColor(252,84,4); doc.rect(0,0,pageWidth,35,'F');
-        try { doc.addImage(LOGO_BASE64, 'PNG', 175, 5, 20, 20); } catch(e) {}
-        doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.text('Ótica Grau Divino', marginLeft, 18);
-        doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.text(`Orçamento gerado em: ${new Date().toLocaleString('pt-BR')}`, marginLeft, 28);
-        doc.setTextColor(30,31,42); y = 45;
+        doc.setFillColor(252, 84, 4);
+        doc.rect(0, 0, pageWidth, 35, 'F');
+        
+        try {
+          doc.addImage(LOGO_BASE64, 'PNG', 175, 5, 20, 20);
+        } catch(e) {
+          console.warn("Erro ao adicionar logo:", e);
+        }
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(22);
+        doc.text('Ótica Grau Divino', marginLeft, 18);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text(`Orçamento gerado em: ${new Date().toLocaleString('pt-BR')}`, marginLeft, 28);
+        doc.setTextColor(30, 31, 42);
+        y = 45;
       }
-      function addFooter() { for (let i = 1; i <= doc.internal.getNumberOfPages(); i++) { doc.setPage(i); doc.setFontSize(9); doc.setTextColor(100,100,120); doc.text(currentOrcamentoId, pageWidth/2, 287, { align: 'center' }); } }
+      
+      function addFooter() {
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i);
+          doc.setFontSize(9);
+          doc.setTextColor(100, 100, 120);
+          doc.text(currentOrcamentoId, pageWidth / 2, 287, { align: 'center' });
+        }
+      }
+      
       addHeader();
-      doc.setFillColor(245,247,250); doc.rect(marginLeft, y, 180, 32, 'F');
-      doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(30,31,42);
+      
+      doc.setFillColor(245, 247, 250);
+      doc.rect(marginLeft, y, 180, 32, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 31, 42);
       doc.text(`Cliente: ${clientName.value.trim() || 'Cliente'}`, marginLeft+2, y+8);
       doc.text(`Idade: ${clientAge.value.trim() || '--'} anos`, marginLeft+2, y+16);
       doc.text(`Telefone: ${clientPhone.value.trim() || 'Não informado'}`, marginLeft+2, y+24);
       doc.text(`Atendente: ${atendenteSelect.value}`, marginLeft+120, y+8);
       y += 38;
-      doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(252,84,4); doc.text('ITENS DO ORÇAMENTO', marginLeft, y); y += 10;
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(252, 84, 4);
+      doc.text('ITENS DO ORÇAMENTO', marginLeft, y);
+      y += 10;
+      
       for(let idx = 0; idx < orcamentos.length; idx++) {
         const item = orcamentos[idx];
         const itemHeight = 28;
-        if(y + itemHeight > 270) { doc.addPage(); addHeader(); y = 45; }
-        doc.setFillColor(249,250,252); doc.rect(marginLeft, y-3, 180, itemHeight-2, 'F');
-        doc.setFont('helvetica','bold'); doc.setTextColor(252,84,4);
+        if(y + itemHeight > 270) {
+          doc.addPage();
+          addHeader();
+          y = 45;
+        }
+        
+        doc.setFillColor(249, 250, 252);
+        doc.rect(marginLeft, y-3, 180, itemHeight-2, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(252, 84, 4);
         doc.text(`${idx+1}. ${item.tipo === 'lente' ? 'LENTE' : (item.tipo === 'armacao' ? 'ARMAÇÃO' : (item.tipo === 'relogio' ? 'RELÓGIO' : 'JOIAS'))}`, marginLeft, y);
-        y += 6; doc.setFont('helvetica','normal'); doc.setTextColor(60,60,70); doc.setFontSize(9);
+        y += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(60, 60, 70);
+        doc.setFontSize(9);
+        
         if(item.tipo === 'lente') {
           doc.text(`   Produto: ${item.produto || '—'}`, marginLeft, y); y += 5;
           if(item.marca) { doc.text(`   Marca: ${item.marca}`, marginLeft, y); y += 5; }
           if(item.materialLente) { doc.text(`   Material: ${item.materialLente}`, marginLeft, y); y += 5; }
-          let extras = []; if(item.antirreflexo) extras.push('Antirreflexo'); if(item.filtroLuzAzul) extras.push('Filtro Luz Azul'); if(item.lenteFotocromatica) extras.push('Lente Fotocromática');
+          let extras = [];
+          if(item.antirreflexo) extras.push('Antirreflexo');
+          if(item.filtroLuzAzul) extras.push('Filtro Luz Azul');
+          if(item.lenteFotocromatica) extras.push('Lente Fotocromática');
           if(extras.length) { doc.text(`   Adicionais: ${extras.join(', ')}`, marginLeft, y); y += 5; }
           const valorLiq = (item.valorLente||0) - (item.descontoItem||0);
           doc.text(`   Valor líquido: ${formatMoneyWithSymbol(valorLiq)}`, marginLeft, y); y += 5;
@@ -1173,19 +1571,30 @@
           doc.text(`   Valor líquido: ${formatMoneyWithSymbol(valorLiq)}`, marginLeft, y); y += 5;
           if(item.descontoItem > 0) { doc.text(`   Desconto: ${formatMoneyWithSymbol(item.descontoItem)}`, marginLeft, y); y += 5; }
         }
-        y += 4; doc.setDrawColor(220,220,230); doc.line(marginLeft, y-2, marginLeft+180, y-2);
+        y += 4;
+        doc.setDrawColor(220, 220, 230);
+        doc.line(marginLeft, y-2, marginLeft+180, y-2);
       }
+      
       y += 10;
       if(y > 270) { doc.addPage(); addHeader(); y = 45; }
-      doc.setFillColor(254,243,232); doc.rect(marginLeft+100, y-5, 80, 35, 'F');
-      doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(30,31,42);
+      doc.setFillColor(254, 243, 232);
+      doc.rect(marginLeft+100, y-5, 80, 35, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 31, 42);
       doc.text(`Subtotal: ${formatMoneyWithSymbol(calcularSubtotalItens())}`, marginLeft+105, y); y += 7;
       const descontoGeral = parseCurrency(descontoGeralInput?.value);
       if(descontoGeral > 0) { doc.text(`Desconto geral: - ${formatMoneyWithSymbol(descontoGeral)}`, marginLeft+105, y); y += 7; }
-      doc.setFontSize(14); doc.setTextColor(252,84,4); doc.text(`TOTAL: ${formatMoneyWithSymbol(calcularTotalFinal())}`, marginLeft+105, y);
+      doc.setFontSize(14);
+      doc.setTextColor(252, 84, 4);
+      doc.text(`TOTAL: ${formatMoneyWithSymbol(calcularTotalFinal())}`, marginLeft+105, y);
+      
       addFooter();
+      
       let nomeCliente = clientName.value.trim() || 'cliente';
-      nomeCliente = nomeCliente.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+      nomeCliente = nomeCliente.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      nomeCliente = nomeCliente.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
       if (nomeCliente === '') nomeCliente = 'orcamento';
       doc.save(`orcamento_${nomeCliente}.pdf`);
     }
@@ -1194,33 +1603,84 @@
     document.getElementById('printBtn')?.addEventListener('click', () => { window.print(); });
     
     document.getElementById('whatsBtn')?.addEventListener('click', () => {
-      const nome = clientName.value.trim() || 'Cliente', idade = clientAge.value.trim() || '--', telefone = clientPhone.value.trim(), atendente = atendenteSelect.value, dataAtual = new Date().toLocaleDateString('pt-BR');
+      const nome = clientName.value.trim() || 'Cliente';
+      const idade = clientAge.value.trim() || '--';
+      let telefone = clientPhone.value.trim();
+      const atendente = atendenteSelect.value;
+      const dataAtual = new Date().toLocaleDateString('pt-BR');
+      
       let itensTexto = '';
       orcamentos.forEach((item, i) => {
-        let valorBase = 0, descLinhas = '';
+        let valorBase = 0;
+        let descLinhas = '';
         if(item.tipo === 'lente') {
           valorBase = item.valorLente||0;
-          const extras = []; if(item.antirreflexo) extras.push('Antirreflexo incluso'); if(item.filtroLuzAzul) extras.push('Filtro Luz Azul incluso'); if(item.lenteFotocromatica) extras.push('Lente Fotocromática');
-          descLinhas = `▸ Produto: ${item.produto || '—'}\n`; if(item.marca) descLinhas += `▸ Marca: ${item.marca}\n`; if(item.materialLente) descLinhas += `▸ Material: ${item.materialLente}\n`; if(extras.length) descLinhas += `▸ Adicionais: ${extras.join(', ')}\n`;
+          const extras = [];
+          if(item.antirreflexo) extras.push('Antirreflexo incluso');
+          if(item.filtroLuzAzul) extras.push('Filtro Luz Azul incluso');
+          if(item.lenteFotocromatica) extras.push('Lente Fotocromática');
+          descLinhas = `▸ Produto: ${item.produto || '—'}\n`;
+          if(item.marca) descLinhas += `▸ Marca: ${item.marca}\n`;
+          if(item.materialLente) descLinhas += `▸ Material: ${item.materialLente}\n`;
+          if(extras.length) descLinhas += `▸ Adicionais: ${extras.join(', ')}\n`;
           itensTexto += `\n\n📌 *LENTE ${i+1}*\n${descLinhas}`;
         } else if(item.tipo === 'armacao') {
-          valorBase = item.valorArmacao||0; descLinhas = ``; if(item.marca) descLinhas += `▸ Marca: ${item.marca}\n`; if(item.referencia) descLinhas += `▸ Referência: ${item.referencia}\n`; if(item.materialArmacao) descLinhas += `▸ Material: ${item.materialArmacao}\n`;
+          valorBase = item.valorArmacao||0;
+          descLinhas = ``;
+          if(item.marca) descLinhas += `▸ Marca: ${item.marca}\n`;
+          if(item.referencia) descLinhas += `▸ Referência: ${item.referencia}\n`;
+          if(item.materialArmacao) descLinhas += `▸ Material: ${item.materialArmacao}\n`;
           itensTexto += `\n\n🕶️ *ARMAÇÃO ${i+1}*\n${descLinhas}`;
         } else if(item.tipo === 'relogio') {
-          valorBase = item.valorRelogio||0; descLinhas = `▸ Nome: ${item.nomeRelogio || '—'}\n`; if(item.marcaRelogio) descLinhas += `▸ Marca: ${item.marcaRelogio}\n`;
+          valorBase = item.valorRelogio||0;
+          descLinhas = `▸ Nome: ${item.nomeRelogio || '—'}\n`;
+          if(item.marcaRelogio) descLinhas += `▸ Marca: ${item.marcaRelogio}\n`;
           itensTexto += `\n\n⌚ *RELÓGIO ${i+1}*\n${descLinhas}`;
         } else if(item.tipo === 'joias') {
-          valorBase = item.valorJoia||0; descLinhas = `▸ Descrição: ${item.descricaoJoia || '—'}\n`; if(item.tipoJoia) descLinhas += `▸ Tipo: ${item.tipoJoia}\n`;
+          valorBase = item.valorJoia||0;
+          descLinhas = `▸ Descrição: ${item.descricaoJoia || '—'}\n`;
+          if(item.tipoJoia) descLinhas += `▸ Tipo: ${item.tipoJoia}\n`;
           itensTexto += `\n\n💎 *JOIA ${i+1}*\n${descLinhas}`;
         }
         const valorLiq = valorBase - (item.descontoItem||0);
         if(item.descontoItem > 0) itensTexto += `▸ Desconto: R$ ${formatMoneyWithThousand(item.descontoItem)}\n`;
         itensTexto += `▸ *Valor: R$ ${formatMoneyWithThousand(valorLiq)}*`;
       });
-      const subtotal = calcularSubtotalItens(), descontoGeral = parseCurrency(descontoGeralInput?.value), totalFinal = calcularTotalFinal();
-      const msg = ` *ÓTICA GRAU DIVINO*\n━━━━━━━━━━━━━━━━━\n*ORÇAMENTO: ${nome.toUpperCase()}*\n*ID: ${currentOrcamentoId}*\n━━━━━━━━━━━━━━━━━\n\n*CLIENTE*\n▸ Nome: ${nome}\n▸ Idade: ${idade} anos\n▸ Telefone: ${telefone || 'Não informado'}\n\n*ITENS ORÇADOS*${itensTexto}\n\n━━━━━━━━━━━━━━━━━\n*RESUMO FINANCEIRO*\n▸ Subtotal: R$ ${formatMoneyWithThousand(subtotal)}\n${descontoGeral > 0 ? `▸ Desconto geral: - R$ ${formatMoneyWithThousand(descontoGeral)}\n` : ''}▸ *TOTAL: R$ ${formatMoneyWithThousand(totalFinal)}*\n━━━━━━━━━━━━━━━━━\n\nAtendente: ${atendente}\n${dataAtual}\n\n*Aguardamos sua visita!* `;
-      if(telefone) { const formattedPhone = formatPhoneForWhatsApp(telefone); window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`, '_blank'); }
-      else { alert('Por favor, informe o número de telefone do cliente na etapa 2 para enviar a mensagem!'); }
+      
+      const subtotal = calcularSubtotalItens();
+      const descontoGeral = parseCurrency(descontoGeralInput?.value);
+      const totalFinal = calcularTotalFinal();
+      
+      const msg = ` *ÓTICA GRAU DIVINO*
+━━━━━━━━━━━━━━━━━
+*ORÇAMENTO: ${nome.toUpperCase()}*
+*ID: ${currentOrcamentoId}*
+━━━━━━━━━━━━━━━━━
+
+*CLIENTE*
+▸ Nome: ${nome}
+▸ Idade: ${idade} anos
+▸ Telefone: ${telefone || 'Não informado'}
+
+*ITENS ORÇADOS*${itensTexto}
+
+━━━━━━━━━━━━━━━━━
+*RESUMO FINANCEIRO*
+▸ Subtotal: R$ ${formatMoneyWithThousand(subtotal)}
+${descontoGeral > 0 ? `▸ Desconto geral: - R$ ${formatMoneyWithThousand(descontoGeral)}\n` : ''}▸ *TOTAL: R$ ${formatMoneyWithThousand(totalFinal)}*
+━━━━━━━━━━━━━━━━━
+
+Atendente: ${atendente}
+${dataAtual}
+
+*Aguardamos sua visita!* `;
+      
+      if(telefone) {
+        const formattedPhone = formatPhoneForWhatsApp(telefone);
+        window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+      } else {
+        alert('Por favor, informe o número de telefone do cliente na etapa 2 para enviar a mensagem!');
+      }
     });
     
     document.getElementById('addOrcamentoBtn')?.addEventListener('click',()=>addOrcamento());
@@ -1230,371 +1690,782 @@
     currentOrcamentoId = generateOrcamentoId();
     updateOrcamentoIdDisplay();
     
-    carregarHistoricoDoSupabase().then(() => { if (!verificarUsuarioLogado()) goToStep(1); });
+    carregarHistoricoDoSupabase().then(() => {
+      const usuarioFoiPreenchido = verificarUsuarioLogado();
+      if (!usuarioFoiPreenchido) {
+        goToStep(1);
+      } else {
+        // Após login, garantir que o botão admin fique visível se aplicável
+        toggleAdminButton();
+      }
+    });
     
     // ========== DASHBOARD ADMIN ==========
     
     function renderizarGestaoAtendentes(container) {
-      const ativos = atendentes.filter(a => a.ativo === true), ocultos = atendentes.filter(a => a.ativo === false);
-      let html = `<div class="section-title" style="margin-top:0;"><i class="fas fa-users"></i> Gerenciar Atendentes<button id="btnNovoAtendente" class="btn btn-success btn-sm" style="margin-left:auto; padding:8px 16px;"><i class="fas fa-plus"></i> Novo Atendente</button></div>
-        <div style="margin-bottom:30px;"><h4 style="margin-bottom:15px; color:#1e293b;">📋 Atendentes Ativos</h4>
-        <table class="atendentes-table"><thead><tr><th>Nome</th><th>Login</th><th>E-mail</th><th>Senha</th><th>Status</th><th>Ações</th></tr></thead><tbody>`;
-      ativos.forEach(a => { html += `<tr data-id="${a.id}"><td><strong>${escapeHtml(a.nome)}</strong></td><td>${escapeHtml(a.login)}</td><td>${escapeHtml(a.email)}</td><td>••••••••</td><td><span class="status-ativo">● Ativo</span></td>
-        <td><button class="btn-edit-atendente btn btn-edit btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" data-email="${escapeHtml(a.email)}" data-login="${escapeHtml(a.login)}" style="padding:4px 10px; margin-right:5px;"><i class="fas fa-edit"></i> Editar</button>
-        <button class="btn-ocultar-atendente btn btn-warning btn-sm" data-id="${a.id}" style="padding:4px 10px; background:#f39c12; border-color:#f39c12;"><i class="fas fa-eye-slash"></i> Ocultar</button>
-        <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding:4px 10px;"><i class="fas fa-trash"></i> Excluir</button></td></tr>`; });
+      const ativos = atendentes.filter(a => a.ativo === true);
+      const ocultos = atendentes.filter(a => a.ativo === false);
+      
+      let html = `
+        <div class="section-title" style="margin-top: 0;">
+          <i class="fas fa-users"></i> Gerenciar Atendentes
+          <button id="btnNovoAtendente" class="btn btn-success btn-sm" style="margin-left: auto; padding: 8px 16px;"><i class="fas fa-plus"></i> Novo Atendente</button>
+        </div>
+        
+        <div style="margin-bottom: 30px;">
+          <h4 style="margin-bottom: 15px; color: #1e293b;">📋 Atendentes Ativos</h4>
+          <table class="atendentes-table">
+            <thead>
+              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Senha</th><th>Status</th><th>Ações</th>
+            </thead>
+            <tbody>
+      `;
+      
+      ativos.forEach(a => {
+        html += `
+          <tr data-id="${a.id}">
+            <td><strong>${escapeHtml(a.nome)}</strong></td>
+            <td>${escapeHtml(a.email)}</td>
+            <td>${escapeHtml(a.login || '')}</td>
+            <td>••••••••</td>
+            <td><span class="status-ativo">● Ativo</span></td>
+            <td>
+              <button class="btn-edit-atendente btn btn-edit btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" data-email="${escapeHtml(a.email)}" data-login="${escapeHtml(a.login || '')}" data-senha="${escapeHtml(a.senha)}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-edit"></i> Editar</button>
+              <button class="btn-ocultar-atendente btn btn-warning btn-sm" data-id="${a.id}" style="padding: 4px 10px; background: #f39c12; border-color: #f39c12;"><i class="fas fa-eye-slash"></i> Ocultar</button>
+              <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
+              </td>
+            </tr>
+        `;
+      });
+      
       if (ocultos.length > 0) {
-        html += `</tbody></table><h4 style="margin:25px 0 15px 0; color:#1e293b;">🔒 Atendentes Ocultos</h4>
-        <table class="atendentes-table"><thead><tr><th>Nome</th><th>Login</th><th>E-mail</th><th>Senha</th><th>Status</th><th>Ações</th></tr></thead><tbody>`;
-        ocultos.forEach(a => { html += `<tr data-id="${a.id}"><td><strong>${escapeHtml(a.nome)}</strong></td><td>${escapeHtml(a.login)}</td><td>${escapeHtml(a.email)}</td><td>••••••••</td><td><span class="status-oculto">● Oculto</span></td>
-          <td><button class="btn-reativar-atendente btn btn-success btn-sm" data-id="${a.id}" style="padding:4px 10px; margin-right:5px;"><i class="fas fa-eye"></i> Reativar</button>
-          <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding:4px 10px;"><i class="fas fa-trash"></i> Excluir</button></td></tr>`; });
+        html += `
+            </tbody>
+          </table>
+          
+          <h4 style="margin: 25px 0 15px 0; color: #1e293b;">🔒 Atendentes Ocultos</h4>
+          <table class="atendentes-table">
+            <thead>
+              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Senha</th><th>Status</th><th>Ações</th>
+            </thead>
+            <tbody>
+        `;
+        
+        ocultos.forEach(a => {
+          html += `
+            <tr data-id="${a.id}">
+              <td><strong>${escapeHtml(a.nome)}</strong></td>
+              <td>${escapeHtml(a.email)}</td>
+              <td>${escapeHtml(a.login || '')}</td>
+              <td>••••••••</td>
+              <td><span class="status-oculto">● Oculto</span></td>
+              <td>
+                <button class="btn-reativar-atendente btn btn-success btn-sm" data-id="${a.id}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-eye"></i> Reativar</button>
+                <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
+                </td>
+              </tr>
+          `;
+        });
       }
-      html += `</tbody></table></div>`;
+      
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+      
       container.innerHTML = html;
       
       document.getElementById('btnNovoAtendente')?.addEventListener('click', () => {
         const modal = document.createElement('div'); modal.className = 'modal-overlay';
-        modal.innerHTML = `<div class="modal-content" style="max-width:450px;"><h3><i class="fas fa-user-plus"></i> Novo Atendente</h3>
-          <div class="input-group"><label>Nome completo *</label><input type="text" id="novoNomeAtendente" placeholder="Ex: Maria Silva"></div>
-          <div class="input-group"><label>Login *</label><input type="text" id="novoLoginAtendente" placeholder="Ex: maria"></div>
-          <div class="input-group"><label>E-mail *</label><input type="email" id="novoEmailAtendente" placeholder="exemplo@email.com"></div>
-          <div class="input-group"><label>Senha *</label><input type="password" id="novaSenhaAtendente" placeholder="Digite uma senha"></div>
-          <div class="modal-buttons-row"><button id="confirmarNovoAtendente" class="btn btn-primary">Adicionar</button><button id="cancelarNovoAtendente" class="btn btn-outline">Cancelar</button></div></div>`;
+        modal.innerHTML = `
+          <div class="modal-content" style="max-width:450px;">
+            <h3><i class="fas fa-user-plus"></i> Novo Atendente</h3>
+            <div class="input-group"><label>Nome completo *</label><input type="text" id="novoNomeAtendente" placeholder="Ex: Maria Silva"></div>
+            <div class="input-group"><label>E-mail *</label><input type="email" id="novoEmailAtendente" placeholder="exemplo@email.com"></div>
+            <div class="input-group"><label>Login *</label><input type="text" id="novoLoginAtendente" placeholder="usuário para login"></div>
+            <div class="input-group"><label>Senha *</label><input type="password" id="novaSenhaAtendente" placeholder="Digite uma senha"></div>
+            <div class="modal-buttons-row">
+              <button id="confirmarNovoAtendente" class="btn btn-primary">Adicionar</button>
+              <button id="cancelarNovoAtendente" class="btn btn-outline">Cancelar</button>
+            </div>
+          </div>
+        `;
         document.body.appendChild(modal);
+        
         modal.querySelector('#confirmarNovoAtendente').onclick = () => {
           const nome = modal.querySelector('#novoNomeAtendente').value.trim();
-          const login = modal.querySelector('#novoLoginAtendente').value.trim();
           const email = modal.querySelector('#novoEmailAtendente').value.trim();
+          let login = modal.querySelector('#novoLoginAtendente').value.trim();
           const senha = modal.querySelector('#novaSenhaAtendente').value.trim();
-          if (!nome || !login || !email || !senha) { alert('Preencha todos os campos!'); return; }
-          const resultado = adicionarAtendente(nome, email, login, senha);
-          alert(`✅ Atendente adicionado!\n\nLogin: ${resultado.login}\nSenha: ${resultado.senha}`);
-          modal.remove(); renderizarGestaoAtendentes(container);
+          if (!nome || !email || !login || !senha) {
+            alert('Preencha todos os campos!');
+            return;
+          }
+          // Garantir que o login seja único
+          if (atendentes.some(a => a.login === login)) {
+            alert('Este login já existe! Escolha outro.');
+            return;
+          }
+          adicionarAtendenteComLogin(nome, email, login, senha);
+          modal.remove();
+          renderizarGestaoAtendentes(container);
         };
         modal.querySelector('#cancelarNovoAtendente').onclick = () => modal.remove();
       });
       
+      function adicionarAtendenteComLogin(nome, email, login, senha) {
+        const novoId = Math.max(...atendentes.map(a => a.id), 0) + 1;
+        atendentes.push({
+          id: novoId,
+          nome: nome,
+          email: email,
+          login: login,
+          senha: senha,
+          ativo: true,
+          criado_em: new Date().toISOString()
+        });
+        salvarAtendentes();
+      }
+      
       document.querySelectorAll('.btn-edit-atendente').forEach(btn => {
         btn.addEventListener('click', () => {
-          const id = parseInt(btn.dataset.id), nomeAtual = btn.dataset.nome, emailAtual = btn.dataset.email, loginAtual = btn.dataset.login;
+          const id = parseInt(btn.dataset.id);
+          const nomeAtual = btn.dataset.nome;
+          const emailAtual = btn.dataset.email;
+          const loginAtual = btn.dataset.login;
+          const senhaAtual = btn.dataset.senha;
           const modal = document.createElement('div'); modal.className = 'modal-overlay';
-          modal.innerHTML = `<div class="modal-content" style="max-width:450px;"><h3><i class="fas fa-edit"></i> Editar Atendente</h3>
-            <div class="input-group"><label>Nome completo *</label><input type="text" id="editarNomeAtendente" value="${escapeHtml(nomeAtual)}"></div>
-            <div class="input-group"><label>Login *</label><input type="text" id="editarLoginAtendente" value="${escapeHtml(loginAtual)}"></div>
-            <div class="input-group"><label>E-mail *</label><input type="email" id="editarEmailAtendente" value="${escapeHtml(emailAtual)}"></div>
-            <div class="input-group"><label>Nova Senha (deixe em branco para manter a atual)</label><input type="password" id="editarSenhaAtendente" placeholder="Digite uma nova senha"></div>
-            <div class="modal-buttons-row"><button id="confirmarEditarAtendente" class="btn btn-primary">Salvar</button><button id="cancelarEditarAtendente" class="btn btn-outline">Cancelar</button></div></div>`;
+          modal.innerHTML = `
+            <div class="modal-content" style="max-width:450px;">
+              <h3><i class="fas fa-edit"></i> Editar Atendente</h3>
+              <div class="input-group"><label>Nome completo *</label><input type="text" id="editarNomeAtendente" value="${escapeHtml(nomeAtual)}"></div>
+              <div class="input-group"><label>E-mail *</label><input type="email" id="editarEmailAtendente" value="${escapeHtml(emailAtual)}"></div>
+              <div class="input-group"><label>Login *</label><input type="text" id="editarLoginAtendente" value="${escapeHtml(loginAtual)}"></div>
+              <div class="input-group"><label>Nova Senha (deixe em branco para manter a atual)</label><input type="password" id="editarSenhaAtendente" placeholder="Digite uma nova senha"></div>
+              <div class="modal-buttons-row">
+                <button id="confirmarEditarAtendente" class="btn btn-primary">Salvar</button>
+                <button id="cancelarEditarAtendente" class="btn btn-outline">Cancelar</button>
+              </div>
+            </div>
+          `;
           document.body.appendChild(modal);
+          
           modal.querySelector('#confirmarEditarAtendente').onclick = () => {
             const nome = modal.querySelector('#editarNomeAtendente').value.trim();
-            const login = modal.querySelector('#editarLoginAtendente').value.trim();
             const email = modal.querySelector('#editarEmailAtendente').value.trim();
+            const login = modal.querySelector('#editarLoginAtendente').value.trim();
             const novaSenha = modal.querySelector('#editarSenhaAtendente').value.trim();
-            if (!nome || !login || !email) { alert('Preencha os campos obrigatórios!'); return; }
-            editarAtendente(id, nome, email, login, novaSenha);
-            alert(`✅ Atendente editado com sucesso!\n\nLogin: ${login}`);
-            modal.remove(); renderizarGestaoAtendentes(container);
+            if (!nome || !email || !login) {
+              alert('Preencha os campos obrigatórios!');
+              return;
+            }
+            // Verificar se o login já existe em outro atendente
+            if (atendentes.some(a => a.id !== id && a.login === login)) {
+              alert('Este login já existe em outro atendente!');
+              return;
+            }
+            editarAtendenteComLogin(id, nome, email, login, novaSenha);
+            modal.remove();
+            renderizarGestaoAtendentes(container);
           };
           modal.querySelector('#cancelarEditarAtendente').onclick = () => modal.remove();
         });
       });
       
-      document.querySelectorAll('.btn-ocultar-atendente').forEach(btn => {
-        btn.addEventListener('click', () => { if(confirm('Deseja ocultar este atendente?')) { ocultarAtendente(parseInt(btn.dataset.id)); renderizarGestaoAtendentes(container); } });
-      });
-      document.querySelectorAll('.btn-reativar-atendente').forEach(btn => {
-        btn.addEventListener('click', () => { if(confirm('Deseja reativar este atendente?')) { reativarAtendente(parseInt(btn.dataset.id)); renderizarGestaoAtendentes(container); } });
-      });
-      document.querySelectorAll('.btn-deletar-atendente').forEach(btn => {
-        btn.addEventListener('click', () => { if(confirm('⚠️ ATENÇÃO: Excluir este atendente permanentemente?')) { deletarAtendente(parseInt(btn.dataset.id)); renderizarGestaoAtendentes(container); } });
-      });
-    }
-    
-    function createSuggestionsDropdown(inputId, getSuggestionsFn, onSelectFn) {
-      const input = document.getElementById(inputId); if(!input) return;
-      const wrapper = input.parentElement; let dropdown = wrapper.querySelector('.suggestions-dropdown');
-      if(!dropdown) { dropdown = document.createElement('div'); dropdown.className = 'suggestions-dropdown'; wrapper.appendChild(dropdown); }
-      input.addEventListener('input', function() {
-        const value = this.value.toLowerCase();
-        if(value.length === 0) { dropdown.classList.remove('show'); return; }
-        const suggestions = getSuggestionsFn(value);
-        if(suggestions.length === 0) { dropdown.classList.remove('show'); return; }
-        dropdown.innerHTML = suggestions.map(s => `<div class="suggestion-item" data-value="${escapeHtml(s)}">${escapeHtml(s)}</div>`).join('');
-        dropdown.classList.add('show');
-        dropdown.querySelectorAll('.suggestion-item').forEach(item => { item.addEventListener('click', function() { input.value = this.dataset.value; dropdown.classList.remove('show'); if(onSelectFn) onSelectFn(this.dataset.value); }); });
-      });
-      document.addEventListener('click', function(e) { if(!wrapper.contains(e.target)) dropdown.classList.remove('show'); });
-    }
-    
-    // ========== FUNÇÃO DE EXCLUSÃO COM VERIFICAÇÃO (para uso global) ==========
-    window.deletarOrcamento = async function(id, nomeCliente) {
-      if (!isCurrentUserAdmin()) {
-        alert('⚠️ Acesso negado! Apenas administradores (Jaúna Constante ou Jaciara Constante) podem excluir orçamentos.');
-        return;
-      }
-      if(confirm(`Excluir orçamento de ${nomeCliente}?`)) {
-        const sucesso = await deletarOrcamentoDoSupabase(id);
-        if (sucesso && window.renderizarDashboardComFiltrosAtual) {
-          window.renderizarDashboardComFiltrosAtual();
+      function editarAtendenteComLogin(id, nome, email, login, senha) {
+        const index = atendentes.findIndex(a => a.id === id);
+        if (index !== -1) {
+          atendentes[index].nome = nome;
+          atendentes[index].email = email;
+          atendentes[index].login = login;
+          if (senha && senha.trim() !== "") {
+            atendentes[index].senha = senha;
+          }
+          salvarAtendentes();
         }
       }
-    };
+      
+      document.querySelectorAll('.btn-ocultar-atendente').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const atendente = atendentes.find(a => a.id === id);
+          if (confirm(`Deseja ocultar o atendente "${atendente?.nome}"? Ele não aparecerá mais na lista de seleção.`)) {
+            ocultarAtendente(id);
+            renderizarGestaoAtendentes(container);
+          }
+        });
+      });
+      
+      document.querySelectorAll('.btn-reativar-atendente').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const atendente = atendentes.find(a => a.id === id);
+          if (confirm(`Deseja reativar o atendente "${atendente?.nome}"?`)) {
+            reativarAtendente(id);
+            renderizarGestaoAtendentes(container);
+          }
+        });
+      });
+      
+      document.querySelectorAll('.btn-deletar-atendente').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const atendente = atendentes.find(a => a.id === id);
+          if (confirm(`⚠️ ATENÇÃO: Excluir o atendente "${atendente?.nome}" removerá permanentemente este registro. Deseja continuar?`)) {
+            deletarAtendente(id);
+            renderizarGestaoAtendentes(container);
+          }
+        });
+      });
+    }
     
-    window.deletarOrcamentosEmMassa = async function(ids) {
-      await deletarOrcamentosEmMassa(ids);
-      if (window.renderizarDashboardComFiltrosAtual) {
-        window.renderizarDashboardComFiltrosAtual();
+    // Redefinir a função adicionarAtendente original para usar a nova versão
+    window.adicionarAtendente = adicionarAtendenteComLogin;
+    
+    function createSuggestionsDropdown(inputId, getSuggestionsFn, onSelectFn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      
+      const wrapper = input.parentElement;
+      let dropdown = wrapper.querySelector('.suggestions-dropdown');
+      if (!dropdown) {
+        dropdown = document.createElement('div');
+        dropdown.className = 'suggestions-dropdown';
+        wrapper.appendChild(dropdown);
       }
+      
+      input.addEventListener('input', function() {
+        const value = this.value.toLowerCase();
+        if (value.length === 0) {
+          dropdown.classList.remove('show');
+          return;
+        }
+        
+        const suggestions = getSuggestionsFn(value);
+        if (suggestions.length === 0) {
+          dropdown.classList.remove('show');
+          return;
+        }
+        
+        dropdown.innerHTML = suggestions.map(s => `<div class="suggestion-item" data-value="${escapeHtml(s)}">${escapeHtml(s)}</div>`).join('');
+        dropdown.classList.add('show');
+        
+        dropdown.querySelectorAll('.suggestion-item').forEach(item => {
+          item.addEventListener('click', function() {
+            input.value = this.dataset.value;
+            dropdown.classList.remove('show');
+            if (onSelectFn) onSelectFn(this.dataset.value);
+          });
+        });
+      });
+      
+      document.addEventListener('click', function(e) {
+        if (!wrapper.contains(e.target)) {
+          dropdown.classList.remove('show');
+        }
+      });
+    }
+    
+    window.deletarOrcamento = async function(id, nomeCliente) {
+      const confirmModal = document.createElement('div'); confirmModal.className = 'modal-overlay';
+      confirmModal.innerHTML = `
+        <div class="modal-content" style="max-width:400px;">
+          <h3><i class="fas fa-trash-alt" style="color:#e74c3c;"></i> Confirmar exclusão</h3>
+          <p>Tem certeza que deseja excluir o orçamento de <strong>${escapeHtml(nomeCliente)}</strong>?</p>
+          <p style="font-size:0.8rem; color:#666; margin-top:8px;">ID: ${escapeHtml(id)}</p>
+          <div class="modal-buttons-row">
+            <button id="confirmDeleteBtn" class="btn btn-danger" style="flex:0 1 auto;">Sim, excluir</button>
+            <button id="cancelDeleteBtn" class="btn btn-outline" style="flex:0 1 auto;">Cancelar</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(confirmModal);
+      
+      confirmModal.querySelector('#confirmDeleteBtn').onclick = async () => {
+        await deletarOrcamentoDoSupabase(id);
+        confirmModal.remove();
+        if (window.renderizarDashboardComFiltrosAtual) {
+          window.renderizarDashboardComFiltrosAtual();
+        }
+      };
+      confirmModal.querySelector('#cancelDeleteBtn').onclick = () => confirmModal.remove();
     };
     
     window.marcarComoVendaRealizada = async function(id, nomeCliente) {
       const index = historicoOrcamentosGlobal.findIndex(item => item.id === id);
-      if(index !== -1 && historicoOrcamentosGlobal[index].status !== 'fechado') {
+      if (index !== -1 && historicoOrcamentosGlobal[index].status !== 'fechado') {
         const orcamentoData = historicoOrcamentosGlobal[index];
-        orcamentoData.status = 'fechado'; orcamentoData.justificativa = 'Convertido para venda via dashboard';
-        if(await salvarComFallback(orcamentoData)) alert(`✅ Orçamento de ${nomeCliente} marcado como VENDA REALIZADA!`);
-      } else if(index !== -1) alert(`ℹ️ Este orçamento já está marcado como VENDA REALIZADA.`);
-      else alert(`❌ Orçamento não encontrado.`);
+        orcamentoData.status = 'fechado';
+        orcamentoData.justificativa = 'Convertido para venda via dashboard';
+        const atualizado = await salvarComFallback(orcamentoData);
+        if(atualizado) alert(`✅ Orçamento de ${nomeCliente} marcado como VENDA REALIZADA!`);
+      } else if (index !== -1 && historicoOrcamentosGlobal[index].status === 'fechado') {
+        alert(`ℹ️ Este orçamento já está marcado como VENDA REALIZADA.`);
+      } else {
+        alert(`❌ Orçamento não encontrado.`);
+      }
     };
-    window.editarOrcamento = function(orcamento) { const adminModal = document.querySelector('.modal-overlay'); if(adminModal) adminModal.remove(); carregarOrcamentoParaEdicao(orcamento); };
+    
+    window.editarOrcamento = function(orcamento) {
+      const adminModal = document.querySelector('.modal-overlay');
+      if (adminModal) adminModal.remove();
+      carregarOrcamentoParaEdicao(orcamento);
+    };
     
     window.renderizarDashboardComFiltrosAtual = function() {
-      const container = document.getElementById('dashboardContent'); if(!container) return;
+      const container = document.getElementById('dashboardContent');
+      if (!container) return;
+      
       let data = [...historicoOrcamentosGlobal];
-      const filtroPeriodo = document.getElementById('filtroPeriodo')?.value || 'todos', filtroMes = document.getElementById('filtroMes')?.value, filtroAno = document.getElementById('filtroAno')?.value;
-      const filtroValorTipo = document.getElementById('filtroValorTipo')?.value || 'todos', filtroValorComp = parseCurrency(document.getElementById('filtroValorComp')?.value || '0');
-      const filtroIdade = document.getElementById('filtroIdade')?.value, filtroCliente = document.getElementById('filtroCliente')?.value?.toLowerCase() || '', filtroIdOrcamento = document.getElementById('filtroIdOrcamento')?.value?.toLowerCase() || '';
-      if(filtroPeriodo === 'mes' && filtroMes) { const [ano,mes]=filtroMes.split('-'); data = data.filter(item => { const d=new Date(item.dataRaw); return d.getFullYear()===parseInt(ano) && (d.getMonth()+1)===parseInt(mes); }); }
-      else if(filtroPeriodo === 'ano' && filtroAno) data = data.filter(item => new Date(item.dataRaw).getFullYear()===parseInt(filtroAno));
-      if(filtroValorTipo !== 'todos' && filtroValorComp > 0) data = data.filter(item => { const val=item.totalFinal||0; if(filtroValorTipo==='maior') return val>filtroValorComp; if(filtroValorTipo==='menor') return val<filtroValorComp; if(filtroValorTipo==='igual') return Math.abs(val-filtroValorComp)<0.01; return true; });
-      if(filtroIdade && filtroIdade!=='') data = data.filter(item => item.idade && item.idade.toString()===filtroIdade);
-      if(filtroCliente && filtroCliente!=='') data = data.filter(item => item.cliente && item.cliente.toLowerCase().includes(filtroCliente));
-      if(filtroIdOrcamento && filtroIdOrcamento!=='') data = data.filter(item => item.id && item.id.toLowerCase().includes(filtroIdOrcamento));
-      if(!data.length) { container.innerHTML = `<div class="empty-state"><i class="fas fa-chart-line"></i> Nenhum orçamento encontrado.</div>`; return; }
-      const totalOrcamentos = data.length, totalVendas = data.filter(i=>i.status==='fechado').length, totalPerdidos = data.filter(i=>i.status==='nao_fechado').length;
-      const valorTotalVendido = data.filter(i=>i.status==='fechado').reduce((acc,i)=>acc+(i.totalFinal||0),0), valorPerdidoTotal = data.filter(i=>i.status==='nao_fechado').reduce((acc,i)=>acc+(i.totalFinal||0),0);
-      const taxaConversaoGeral = totalOrcamentos ? ((totalVendas/totalOrcamentos)*100).toFixed(1) : 0;
-      const mesesMap = new Map();
-      data.forEach(item => { let dataObj = new Date(item.dataRaw); if(isNaN(dataObj)) dataObj = new Date(); const mesAno = dataObj.toLocaleString('pt-BR',{month:'short',year:'numeric'}); if(!mesesMap.has(mesAno)) mesesMap.set(mesAno,{vendas:0,perdidos:0,valorPerdido:0}); const grupo = mesesMap.get(mesAno); if(item.status==='fechado') grupo.vendas++; else if(item.status==='nao_fechado') { grupo.perdidos++; grupo.valorPerdido += (item.totalFinal||0); } });
-      const mesesLabels = Array.from(mesesMap.keys()), vendasCount = mesesLabels.map(m=>mesesMap.get(m).vendas), perdidosCount = mesesLabels.map(m=>mesesMap.get(m).perdidos), valorPerdidoMensal = mesesLabels.map(m=>mesesMap.get(m).valorPerdido);
-      const vendedoresMap = new Map();
-      data.forEach(item => { const vendedor = item.atendente||'Não definido'; if(!vendedoresMap.has(vendedor)) vendedoresMap.set(vendedor,{vendas:0,perdidos:0,valorVendido:0,valorPerdido:0,justificativas:[]}); const reg=vendedoresMap.get(vendedor); if(item.status==='fechado') { reg.vendas++; reg.valorVendido+= (item.totalFinal||0); } else if(item.status==='nao_fechado') { reg.perdidos++; reg.valorPerdido+= (item.totalFinal||0); if(item.justificativa) reg.justificativas.push({id:item.id,data:item.data,cliente:item.cliente,motivo:item.justificativa,valor:item.totalFinal}); } });
-      const vendedoresSorted = Array.from(vendedoresMap.entries()).sort((a,b)=>b[1].valorPerdido - a[1].valorPerdido);
       
-      const isAdmin = isCurrentUserAdmin();
+      const filtroPeriodo = document.getElementById('filtroPeriodo')?.value || 'todos';
+      const filtroMes = document.getElementById('filtroMes')?.value;
+      const filtroAno = document.getElementById('filtroAno')?.value;
+      const filtroValorTipo = document.getElementById('filtroValorTipo')?.value || 'todos';
+      const filtroValorComp = parseCurrency(document.getElementById('filtroValorComp')?.value || '0');
+      const filtroIdade = document.getElementById('filtroIdade')?.value;
+      const filtroCliente = document.getElementById('filtroCliente')?.value?.toLowerCase() || '';
+      const filtroIdOrcamento = document.getElementById('filtroIdOrcamento')?.value?.toLowerCase() || '';
       
-      let html = `<div class="dashboard-stats"><div class="stat-card"><div class="stat-label">📋 TOTAL ORÇAMENTOS</div><div class="stat-value">${totalOrcamentos}</div></div>
-        <div class="stat-card"><div class="stat-label">✅ VENDAS FECHADAS</div><div class="stat-value">${totalVendas}</div><div class="stat-sub">conversão ${taxaConversaoGeral}%</div></div>
-        <div class="stat-card"><div class="stat-label">❌ NÃO FINALIZADOS</div><div class="stat-value">${totalPerdidos}</div></div>
-        <div class="stat-card"><div class="stat-label">💰 FATURAMENTO</div><div class="stat-value">${formatMoneyWithSymbol(valorTotalVendido)}</div></div>
-        <div class="stat-card"><div class="stat-label">💸 VALOR PERDIDO</div><div class="stat-value" style="color:#e74c3c;">${formatMoneyWithSymbol(valorPerdidoTotal)}</div></div></div>`;
-      if(mesesLabels.length>0) html += `<div class="charts-row"><div class="chart-card"><h4><i class="fas fa-chart-line"></i> Evolução Mensal</h4><canvas id="monthlyCompareChart"></canvas></div><div class="chart-card"><h4><i class="fas fa-money-bill-wave"></i> Valor Perdido por Mês</h4><canvas id="lostValueChart"></canvas></div></div>`;
-      html += `<div class="section-title"><i class="fas fa-users"></i> Performance por Atendente</div><table class="performer-table"><thead><tr><th>Vendedor(a)</th><th>Vendas</th><th>Não Finalizados</th><th>Valor Vendido</th><th>VALOR PERDIDO</th><th>Taxa</th></tr></thead><tbody>`;
-      for(const[nome,d] of vendedoresSorted){ const totalAtendimentos=d.vendas+d.perdidos, taxa=totalAtendimentos>0?((d.vendas/totalAtendimentos)*100).toFixed(1):0; html+=`<tr><td><strong>${escapeHtml(nome)}</strong></td><td>${d.vendas}</td><td>${d.perdidos}</td><td>${formatMoneyWithSymbol(d.valorVendido)}</td><td class="lost-amount">${formatMoneyWithSymbol(d.valorPerdido)}</td><td><span class="badge ${taxa>=50?'badge-success':'badge-danger'}">${taxa}%</span></td></tr>`; }
-      html+=`</tbody></table>`;
-      
-      // Lista de orçamentos com opção de exclusão apenas para admin
-      html += `<div class="section-title"><i class="fas fa-list"></i> Lista de Orçamentos</div>`;
-      
-      // Barra de seleção em massa (apenas para admin)
-      if (isAdmin) {
-        html += `<div class="mass-delete-bar" id="massDeleteBar">
-          <div>
-            <input type="checkbox" id="selectAllCheckbox" class="checkbox-select-all">
-            <label for="selectAllCheckbox" class="selected-count">Selecionar todos</label>
-            <span id="selectedCountDisplay" class="selected-count" style="margin-left: 15px;">0 selecionado(s)</span>
-          </div>
-          <button id="deleteSelectedBtn" class="btn btn-danger btn-sm" style="display: none;">
-            <i class="fas fa-trash-alt"></i> Excluir Selecionados
-          </button>
-        </div>`;
+      if (filtroPeriodo === 'mes' && filtroMes) {
+        const [ano, mes] = filtroMes.split('-');
+        data = data.filter(item => {
+          const d = new Date(item.dataRaw);
+          return d.getFullYear() === parseInt(ano) && (d.getMonth() + 1) === parseInt(mes);
+        });
+      } else if (filtroPeriodo === 'ano' && filtroAno) {
+        data = data.filter(item => new Date(item.dataRaw).getFullYear() === parseInt(filtroAno));
       }
       
-      html += `<div class="orcamentos-list" id="orcamentosListContainer">`;
+      if (filtroValorTipo !== 'todos' && filtroValorComp > 0) {
+        data = data.filter(item => {
+          const val = item.totalFinal || 0;
+          if (filtroValorTipo === 'maior') return val > filtroValorComp;
+          if (filtroValorTipo === 'menor') return val < filtroValorComp;
+          if (filtroValorTipo === 'igual') return Math.abs(val - filtroValorComp) < 0.01;
+          return true;
+        });
+      }
+      
+      if (filtroIdade && filtroIdade !== '') {
+        data = data.filter(item => item.idade && item.idade.toString() === filtroIdade);
+      }
+      
+      if (filtroCliente && filtroCliente !== '') {
+        data = data.filter(item => item.cliente && item.cliente.toLowerCase().includes(filtroCliente));
+      }
+      
+      if (filtroIdOrcamento && filtroIdOrcamento !== '') {
+        data = data.filter(item => item.id && item.id.toLowerCase().includes(filtroIdOrcamento));
+      }
+      
+      if (!data || !data.length) {
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-chart-line"></i> Nenhum orçamento encontrado com os filtros aplicados.</div>`;
+        return;
+      }
+      
+      const totalOrcamentos = data.length;
+      const totalVendas = data.filter(i => i.status === 'fechado').length;
+      const totalPerdidos = data.filter(i => i.status === 'nao_fechado').length;
+      const valorTotalVendido = data.filter(i => i.status === 'fechado').reduce((acc, i) => acc + (i.totalFinal || 0), 0);
+      const valorPerdidoTotal = data.filter(i => i.status === 'nao_fechado').reduce((acc, i) => acc + (i.totalFinal || 0), 0);
+      const taxaConversaoGeral = totalOrcamentos ? ((totalVendas / totalOrcamentos) * 100).toFixed(1) : 0;
+      
+      const mesesMap = new Map();
+      data.forEach(item => {
+        let dataObj = new Date(item.dataRaw);
+        if (isNaN(dataObj)) dataObj = new Date();
+        const mesAno = dataObj.toLocaleString('pt-BR', { month: 'short', year: 'numeric' });
+        if (!mesesMap.has(mesAno)) {
+          mesesMap.set(mesAno, { vendas: 0, perdidos: 0, valorPerdido: 0 });
+        }
+        const grupo = mesesMap.get(mesAno);
+        if (item.status === 'fechado') {
+          grupo.vendas++;
+        } else if (item.status === 'nao_fechado') {
+          grupo.perdidos++;
+          grupo.valorPerdido += (item.totalFinal || 0);
+        }
+      });
+      const mesesLabels = Array.from(mesesMap.keys());
+      const vendasCount = mesesLabels.map(m => mesesMap.get(m).vendas);
+      const perdidosCount = mesesLabels.map(m => mesesMap.get(m).perdidos);
+      const valorPerdidoMensal = mesesLabels.map(m => mesesMap.get(m).valorPerdido);
+      
+      const vendedoresMap = new Map();
+      data.forEach(item => {
+        const vendedor = item.atendente || 'Não definido';
+        if (!vendedoresMap.has(vendedor)) {
+          vendedoresMap.set(vendedor, {
+            vendas: 0,
+            perdidos: 0,
+            valorVendido: 0,
+            valorPerdido: 0,
+            justificativas: []
+          });
+        }
+        const reg = vendedoresMap.get(vendedor);
+        if (item.status === 'fechado') {
+          reg.vendas++;
+          reg.valorVendido += (item.totalFinal || 0);
+        } else if (item.status === 'nao_fechado') {
+          reg.perdidos++;
+          reg.valorPerdido += (item.totalFinal || 0);
+          if (item.justificativa) {
+            reg.justificativas.push({
+              id: item.id,
+              data: item.data,
+              cliente: item.cliente,
+              motivo: item.justificativa,
+              valor: item.totalFinal
+            });
+          }
+        }
+      });
+      
+      const vendedoresSorted = Array.from(vendedoresMap.entries()).sort((a, b) => b[1].valorPerdido - a[1].valorPerdido);
+      
+      let html = `
+        <div class="dashboard-stats">
+          <div class="stat-card"><div class="stat-label">📋 TOTAL ORÇAMENTOS</div><div class="stat-value">${totalOrcamentos}</div><div class="stat-sub">registros no sistema</div></div>
+          <div class="stat-card"><div class="stat-label">✅ VENDAS FECHADAS</div><div class="stat-value">${totalVendas}</div><div class="stat-sub">conversão ${taxaConversaoGeral}%</div></div>
+          <div class="stat-card"><div class="stat-label">❌ NÃO FINALIZADOS</div><div class="stat-value">${totalPerdidos}</div><div class="stat-sub">taxa de perda ${totalOrcamentos ? ((totalPerdidos/totalOrcamentos)*100).toFixed(1) : 0}%</div></div>
+          <div class="stat-card"><div class="stat-label">💰 FATURAMENTO (VENDAS)</div><div class="stat-value">${formatMoneyWithSymbol(valorTotalVendido)}</div><div class="stat-sub">receita líquida</div></div>
+          <div class="stat-card"><div class="stat-label">💸 VALOR PERDIDO (OPORTUNIDADE)</div><div class="stat-value" style="color:#e74c3c;">${formatMoneyWithSymbol(valorPerdidoTotal)}</div><div class="stat-sub">orçamentos não realizados</div></div>
+        </div>
+      `;
+      
+      if (mesesLabels.length > 0) {
+        html += `
+          <div class="charts-row">
+            <div class="chart-card"><h4><i class="fas fa-chart-line"></i> Evolução Mensal: Vendas vs. Não Finalizados</h4><canvas id="monthlyCompareChart" width="400" height="250"></canvas></div>
+            <div class="chart-card"><h4><i class="fas fa-money-bill-wave"></i> Valor Perdido por Mês (R$)</h4><canvas id="lostValueChart" width="400" height="250"></canvas></div>
+          </div>
+        `;
+      }
+      
+      html += `
+        <div class="section-title"><i class="fas fa-users"></i> Performance por Atendente</div>
+        <table class="performer-table"><thead><tr><th>Vendedor(a)</th><th>Vendas</th><th>Não Finalizados</th><th>Valor Vendido</th><th>VALOR PERDIDO (R$)</th><th>Taxa Conversão</th></tr></thead><tbody>
+      `;
+      for (const [nome, d] of vendedoresSorted) {
+        const totalAtendimentos = d.vendas + d.perdidos;
+        const taxa = totalAtendimentos > 0 ? ((d.vendas / totalAtendimentos) * 100).toFixed(1) : 0;
+        html += `<tr><td><strong>${escapeHtml(nome)}</strong></td><td>${d.vendas}</td><td>${d.perdidos}</td><td>${formatMoneyWithSymbol(d.valorVendido)}</td><td class="lost-amount">${formatMoneyWithSymbol(d.valorPerdido)}</td><td><span class="badge ${taxa >= 50 ? 'badge-success' : 'badge-danger'}">${taxa}%</span></td></tr>`;
+      }
+      html += `</tbody></table>`;
+      
+      html += `<div class="section-title"><i class="fas fa-list"></i> Lista de Orçamentos <button id="btnExcluirSelecionados" class="btn btn-danger" style="padding:6px 12px; font-size:0.75rem; margin-left:10px;"><i class="fas fa-trash-alt"></i> Excluir Selecionados</button></div>`;
+      html += `<div class="orcamentos-list" id="listaOrcamentos">`;
       
       data.forEach(item => {
-        const statusClass = item.status==='fechado'?'status-fechado':'status-nao-fechado';
-        const statusText = item.status==='fechado'?'✅ VENDA REALIZADA':'❌ NÃO FINALIZADO';
-        const origemTexto = item.origem||'Não informado';
-        const concorrenteTexto = item.concorrente?` (${item.concorrente})`:'';
-        
-        if (isAdmin) {
-          // Admin vê com checkbox e todos os botões
-          html += `<div class="orcamento-card orcamento-card-with-checkbox" data-orcamento-id="${escapeHtml(item.id)}">
-            <input type="checkbox" class="orcamento-checkbox" data-id="${escapeHtml(item.id)}" style="margin-right: 12px;">
+        const statusClass = item.status === 'fechado' ? 'status-fechado' : 'status-nao-fechado';
+        const statusText = item.status === 'fechado' ? '✅ VENDA REALIZADA' : '❌ NÃO FINALIZADO';
+        const origemTexto = item.origem || 'Não informado';
+        const concorrenteTexto = item.concorrente ? ` (${item.concorrente})` : '';
+        html += `
+          <div class="orcamento-card" data-id="${escapeHtml(item.id)}">
+            <input type="checkbox" class="checkbox-delete" data-id="${escapeHtml(item.id)}" style="width:20px; height:20px; margin-right:10px;">
             <div class="orcamento-info">
               <strong>${escapeHtml(item.id)}</strong><br>
-              <span>👤 ${escapeHtml(item.cliente)}</span> | <span>📅 ${escapeHtml(item.data)}</span> | <span>💰 ${formatMoneyWithSymbol(item.totalFinal)}</span> | 
-              <span>👨‍💼 ${escapeHtml(item.atendente)}</span> | <span>📍 ${escapeHtml(origemTexto)}${escapeHtml(concorrenteTexto)}</span>${item.idade?` | 🎂 ${escapeHtml(item.idade)} anos`:''}
+              <span>👤 ${escapeHtml(item.cliente)}</span> | 
+              <span>📅 ${escapeHtml(item.data)}</span> | 
+              <span>💰 ${formatMoneyWithSymbol(item.totalFinal)}</span> | 
+              <span>👨‍💼 ${escapeHtml(item.atendente)}</span> |
+              <span>📍 ${escapeHtml(origemTexto)}${escapeHtml(concorrenteTexto)}</span>
+              ${item.idade ? `<span> | 🎂 ${escapeHtml(item.idade)} anos</span>` : ''}
             </div>
             <div class="btn-group">
               <span class="orcamento-status ${statusClass}">${statusText}</span>
-              <button class="btn-delete-single btn btn-delete" data-id="${escapeHtml(item.id)}" data-cliente="${escapeHtml(item.cliente)}">
-                <i class="fas fa-trash"></i> Excluir
-              </button>
-              <button class="btn-edit-single btn btn-edit" data-id="${escapeHtml(item.id)}">
-                <i class="fas fa-edit"></i> Editar
-              </button>
-              ${item.status!=='fechado' ? `<button class="btn-sale-single btn btn-sale" data-id="${escapeHtml(item.id)}" data-cliente="${escapeHtml(item.cliente)}">
-                <i class="fas fa-check-circle"></i> Venda Realizada
-              </button>` : ''}
+              <button class="btn-delete-single btn btn-delete" data-id="${escapeHtml(item.id)}" data-cliente="${escapeHtml(item.cliente)}"><i class="fas fa-trash"></i> Excluir</button>
+              <button class="btn-edit-single btn btn-edit" data-id="${escapeHtml(item.id)}"><i class="fas fa-edit"></i> Editar</button>
+              ${item.status !== 'fechado' ? `<button class="btn-sale-single btn btn-sale" data-id="${escapeHtml(item.id)}" data-cliente="${escapeHtml(item.cliente)}"><i class="fas fa-check-circle"></i> Venda Realizada</button>` : ''}
             </div>
-          </div>`;
-        } else {
-          // Usuário normal (não admin) NÃO vê os botões de excluir
-          html += `<div class="orcamento-card">
-            <div class="orcamento-info">
-              <strong>${escapeHtml(item.id)}</strong><br>
-              <span>👤 ${escapeHtml(item.cliente)}</span> | <span>📅 ${escapeHtml(item.data)}</span> | <span>💰 ${formatMoneyWithSymbol(item.totalFinal)}</span> | 
-              <span>👨‍💼 ${escapeHtml(item.atendente)}</span> | <span>📍 ${escapeHtml(origemTexto)}${escapeHtml(concorrenteTexto)}</span>${item.idade?` | 🎂 ${escapeHtml(item.idade)} anos`:''}
-            </div>
-            <div class="btn-group">
-              <span class="orcamento-status ${statusClass}">${statusText}</span>
-              <button class="btn-edit-single btn btn-edit" data-id="${escapeHtml(item.id)}">
-                <i class="fas fa-edit"></i> Editar
-              </button>
-              ${item.status!=='fechado' ? `<button class="btn-sale-single btn btn-sale" data-id="${escapeHtml(item.id)}" data-cliente="${escapeHtml(item.cliente)}">
-                <i class="fas fa-check-circle"></i> Venda Realizada
-              </button>` : ''}
-            </div>
-          </div>`;
-        }
+          </div>
+        `;
       });
       html += `</div>`;
       
       html += `<div class="section-title"><i class="fas fa-comment-dots"></i> Principais Motivos de Perda</div>`;
-      let hasJustificativas=false;
-      for(const[nome,d] of vendedoresSorted){ if(d.justificativas.length>0){ hasJustificativas=true; html+=`<div style="margin-top:20px;"><strong><i class="fas fa-user-tie"></i> ${escapeHtml(nome)}</strong> — Perdeu ${formatMoneyWithSymbol(d.valorPerdido)} em ${d.perdidos} orçamento(s)</div>`; for(const j of d.justificativas) html+=`<div class="justificativa-list"><i class="fas fa-times-circle" style="color:#e74c3c"></i> <strong>${escapeHtml(j.cliente)}</strong> (${j.data}) — ${formatMoneyWithSymbol(j.valor)}<br>📌 Motivo: ${escapeHtml(j.motivo)}</div>`; } }
-      if(!hasJustificativas) html+=`<div class="justificativa-list">Nenhuma justificativa registrada.</div>`;
+      let hasJustificativas = false;
+      for (const [nome, d] of vendedoresSorted) {
+        if (d.justificativas.length > 0) {
+          hasJustificativas = true;
+          html += `<div style="margin-top: 20px;"><strong><i class="fas fa-user-tie"></i> ${escapeHtml(nome)}</strong> — Perdeu R$ ${formatMoneyWithThousand(d.valorPerdido)} em ${d.perdidos} orçamento(s)</div>`;
+          for (const j of d.justificativas) {
+            html += `<div class="justificativa-list"><i class="fas fa-times-circle" style="color:#e74c3c"></i> <strong>${escapeHtml(j.cliente)}</strong> (${j.data}) — Valor: ${formatMoneyWithSymbol(j.valor)}<br>📌 Motivo: ${escapeHtml(j.motivo)}<br>🆔 ID: ${j.id}</div>`;
+          }
+        }
+      }
+      if (!hasJustificativas) {
+        html += `<div class="justificativa-list" style="background:#f1f5f9;">Nenhum orçamento não finalizado com justificativa registrada até o momento.</div>`;
+      }
       
       container.innerHTML = html;
       
-      if(mesesLabels.length>0){ setTimeout(()=>{ const ctxLine=document.getElementById('monthlyCompareChart')?.getContext('2d'), ctxBar=document.getElementById('lostValueChart')?.getContext('2d'); if(ctxLine) new Chart(ctxLine,{type:'line',data:{labels:mesesLabels,datasets:[{label:'Vendas',data:vendasCount,borderColor:'#25d366',backgroundColor:'rgba(37,211,102,0.1)',tension:0.3,fill:true},{label:'Não finalizados',data:perdidosCount,borderColor:'#e74c3c',backgroundColor:'rgba(231,76,60,0.05)',tension:0.3,fill:true}]},options:{responsive:true}}); if(ctxBar) new Chart(ctxBar,{type:'bar',data:{labels:mesesLabels,datasets:[{label:'Valor perdido (R$)',data:valorPerdidoMensal,backgroundColor:'#fc5404',borderRadius:10}]},options:{responsive:true}}); },100); }
-      
-      // Configurar eventos de exclusão individual (apenas para admin)
-      if (isAdmin) {
-        document.querySelectorAll('.btn-delete-single').forEach(btn=>btn.addEventListener('click',()=>window.deletarOrcamento(btn.dataset.id,btn.dataset.cliente)));
-        
-        // Configurar seleção em massa
-        setupMassSelection();
+      if (mesesLabels.length > 0) {
+        setTimeout(() => {
+          const ctxLine = document.getElementById('monthlyCompareChart')?.getContext('2d');
+          const ctxBar = document.getElementById('lostValueChart')?.getContext('2d');
+          if (ctxLine) {
+            new Chart(ctxLine, {
+              type: 'line',
+              data: { labels: mesesLabels, datasets: [{ label: 'Vendas fechadas', data: vendasCount, borderColor: '#25d366', backgroundColor: 'rgba(37,211,102,0.1)', tension: 0.3, fill: true }, { label: 'Orçamentos não finalizados', data: perdidosCount, borderColor: '#e74c3c', backgroundColor: 'rgba(231,76,60,0.05)', tension: 0.3, fill: true }] },
+              options: { responsive: true, maintainAspectRatio: true }
+            });
+          }
+          if (ctxBar) {
+            new Chart(ctxBar, {
+              type: 'bar',
+              data: { labels: mesesLabels, datasets: [{ label: 'Valor perdido (R$)', data: valorPerdidoMensal, backgroundColor: '#fc5404', borderRadius: 10 }] },
+              options: { responsive: true, maintainAspectRatio: true, plugins: { tooltip: { callbacks: { label: (ctx) => `R$ ${ctx.raw.toFixed(2)}` } } } }
+            });
+          }
+        }, 100);
       }
       
-      document.querySelectorAll('.btn-edit-single').forEach(btn=>btn.addEventListener('click',()=>{ const orcamento=historicoOrcamentosGlobal.find(i=>i.id===btn.dataset.id); if(orcamento) window.editarOrcamento(orcamento); }));
-      document.querySelectorAll('.btn-sale-single').forEach(btn=>btn.addEventListener('click',()=>window.marcarComoVendaRealizada(btn.dataset.id,btn.dataset.cliente)));
-    };
-    
-    // Função para configurar a seleção em massa
-    function setupMassSelection() {
-      const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-      const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
-      const selectedCountDisplay = document.getElementById('selectedCountDisplay');
-      const checkboxes = () => document.querySelectorAll('.orcamento-checkbox');
-      
-      function updateSelectedCount() {
-        const checked = document.querySelectorAll('.orcamento-checkbox:checked');
-        const count = checked.length;
-        if (selectedCountDisplay) {
-          selectedCountDisplay.textContent = `${count} selecionado(s)`;
-        }
-        if (deleteSelectedBtn) {
-          deleteSelectedBtn.style.display = count > 0 ? 'flex' : 'none';
-        }
-        if (selectAllCheckbox) {
-          const allCheckboxes = checkboxes();
-          const allChecked = allCheckboxes.length > 0 && allCheckboxes.length === count;
-          selectAllCheckbox.checked = allChecked;
-          selectAllCheckbox.indeterminate = count > 0 && count < allCheckboxes.length;
-        }
-      }
-      
-      if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener('change', function() {
-          const isChecked = this.checked;
-          checkboxes().forEach(cb => cb.checked = isChecked);
-          updateSelectedCount();
-        });
-      }
-      
-      if (deleteSelectedBtn) {
-        deleteSelectedBtn.addEventListener('click', async () => {
-          const selectedIds = Array.from(document.querySelectorAll('.orcamento-checkbox:checked'))
-            .map(cb => cb.dataset.id);
-          
-          if (selectedIds.length === 0) {
-            alert('Nenhum orçamento selecionado.');
+      const btnExcluirSelecionados = document.getElementById('btnExcluirSelecionados');
+      if (btnExcluirSelecionados) {
+        btnExcluirSelecionados.onclick = async () => {
+          const checkboxes = document.querySelectorAll('.checkbox-delete:checked');
+          if (checkboxes.length === 0) {
+            alert('Selecione pelo menos um orçamento para excluir.');
             return;
           }
           
-          if (!isCurrentUserAdmin()) {
-            alert('⚠️ Acesso negado! Apenas administradores podem excluir orçamentos em massa.');
-            return;
-          }
+          const idsSelecionados = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
           
-          if (confirm(`⚠️ ATENÇÃO: Você está prestes a excluir ${selectedIds.length} orçamento(s) permanentemente. Esta ação não pode ser desfeita. Deseja continuar?`)) {
-            await deletarOrcamentosEmMassa(selectedIds);
-            if (window.renderizarDashboardComFiltrosAtual) {
-              window.renderizarDashboardComFiltrosAtual();
+          const confirmModal = document.createElement('div'); confirmModal.className = 'modal-overlay';
+          confirmModal.innerHTML = `
+            <div class="modal-content" style="max-width:450px;">
+              <h3><i class="fas fa-trash-alt" style="color:#e74c3c;"></i> Confirmar exclusão em massa</h3>
+              <p>Tem certeza que deseja excluir <strong>${checkboxes.length} orçamento(s)</strong>?</p>
+              <div class="modal-buttons-row">
+                <button id="confirmMassDeleteBtn" class="btn btn-danger" style="flex:0 1 auto;">Sim, excluir todos</button>
+                <button id="cancelMassDeleteBtn" class="btn btn-outline" style="flex:0 1 auto;">Cancelar</button>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(confirmModal);
+          
+          confirmModal.querySelector('#confirmMassDeleteBtn').onclick = async () => {
+            showLoading();
+            for (const id of idsSelecionados) {
+              await deletarOrcamentoDoSupabase(id);
             }
-          }
-        });
+            await carregarHistoricoDoSupabase();
+            hideLoading();
+            alert(`✅ ${idsSelecionados.length} orçamento(s) excluído(s) com sucesso!`);
+            confirmModal.remove();
+            window.renderizarDashboardComFiltrosAtual();
+          };
+          confirmModal.querySelector('#cancelMassDeleteBtn').onclick = () => confirmModal.remove();
+        };
       }
-      
-      // Adicionar evento para cada checkbox
-      const addCheckboxEvents = () => {
-        checkboxes().forEach(cb => {
-          cb.removeEventListener('change', updateSelectedCount);
-          cb.addEventListener('change', updateSelectedCount);
-        });
-      };
-      
-      addCheckboxEvents();
-      
-      // Observer para quando a lista for atualizada
-      const observer = new MutationObserver(() => {
-        addCheckboxEvents();
-        updateSelectedCount();
-      });
-      
-      const orcamentosList = document.getElementById('orcamentosListContainer');
-      if (orcamentosList) {
-        observer.observe(orcamentosList, { childList: true, subtree: true });
-      }
-      
-      updateSelectedCount();
-    }
+    };
     
     document.getElementById('adminAccessBtn').addEventListener('click', async () => {
       const atendenteAtual = atendenteSelect.value;
-      if(atendenteAtual !== 'Jaúna Constante' && atendenteAtual !== 'Jaciara Constante') { alert('⚠️ Acesso negado! Apenas para atendentes Jaúna Constante e Jaciara Constante.'); return; }
+      if (atendenteAtual !== 'Jaúna Constante' && atendenteAtual !== 'Jaciara Constante') {
+        alert('⚠️ Acesso negado! O Dashboard Avançado está disponível apenas para as atendentes Jaúna Constante e Jaciara Constante.');
+        return;
+      }
+      
       await carregarHistoricoDoSupabase();
-      const mesesOptions=[], anosSet=new Set();
-      historicoOrcamentosGlobal.forEach(item=>{ if(item.dataRaw){ const d=new Date(item.dataRaw); if(!isNaN(d)){ const key=`${d.getFullYear()}-${d.getMonth()+1}`, label=d.toLocaleString('pt-BR',{month:'long',year:'numeric'}); if(!mesesOptions.find(m=>m.value===key)) mesesOptions.push({value:key,label:label}); anosSet.add(d.getFullYear()); } } });
-      mesesOptions.sort((a,b)=>b.value.localeCompare(a.value)); const anosOptions=Array.from(anosSet).sort((a,b)=>b-a);
-      let adminModal=document.createElement('div'); adminModal.className='modal-overlay';
-      adminModal.innerHTML=`<div class="modal-content" style="max-width:1300px;"><div class="dashboard-container"><div class="dashboard-header"><h1><i class="fas fa-chart-pie"></i> Dashboard Avançado</h1><p>Bem-vinda, ${escapeHtml(atendenteAtual)}!</p><button class="refresh-btn" id="refreshDashboardBtnAdmin"><i class="fas fa-sync-alt"></i> Atualizar</button></div><div class="dashboard-tabs"><button class="tab-btn active" data-tab="analytics"><i class="fas fa-chart-line"></i> Análises</button><button class="tab-btn" data-tab="atendentes"><i class="fas fa-users"></i> Gerenciar Atendentes</button></div><div class="tab-pane active" id="tab-analytics"><div class="filter-bar"><div class="filter-group"><label>📅 Período:</label><select id="filtroPeriodo"><option value="todos">Todos</option><option value="mes">Mês específico</option><option value="ano">Ano específico</option></select></div><div class="filter-group" id="grupoFiltroMes" style="display:none;"><label>📆 Mês/Ano:</label><select id="filtroMes"><option value="">Selecione...</option>${mesesOptions.map(m=>`<option value="${m.value}">${m.label}</option>`).join('')}</select></div><div class="filter-group" id="grupoFiltroAno" style="display:none;"><label>📆 Ano:</label><select id="filtroAno"><option value="">Selecione...</option>${anosOptions.map(a=>`<option value="${a}">${a}</option>`).join('')}</select></div><div class="filter-group"><label>💰 Valor:</label><select id="filtroValorTipo"><option value="todos">Todos</option><option value="maior">Maior que</option><option value="menor">Menor que</option><option value="igual">Igual a</option></select></div><div class="filter-group"><label>&nbsp;</label><input type="text" id="filtroValorComp" placeholder="R$ 0,00"></div><div class="filter-group"><label>🎂 Idade:</label><input type="text" id="filtroIdade" placeholder="Idade exata"></div><div class="filter-group"><label>👤 Cliente:</label><input type="text" id="filtroCliente" placeholder="Buscar nome"></div><div class="filter-group"><label>🆔 ID:</label><input type="text" id="filtroIdOrcamento" placeholder="Buscar ID"></div></div><div id="dashboardContent"><div class="empty-state"><i class="fas fa-spinner fa-pulse"></i> Carregando...</div></div></div><div class="tab-pane" id="tab-atendentes"><div id="gestaoAtendentesContainer"></div></div></div><div class="modal-buttons-row"><button id="closeAdminBtn" class="btn btn-primary">Fechar</button></div></div>`;
+      
+      const mesesOptions = [];
+      const anosSet = new Set();
+      historicoOrcamentosGlobal.forEach(item => {
+        if (item.dataRaw) {
+          const d = new Date(item.dataRaw);
+          if (!isNaN(d)) {
+            const key = `${d.getFullYear()}-${d.getMonth()+1}`;
+            const label = d.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+            if (!mesesOptions.find(m => m.value === key)) {
+              mesesOptions.push({ value: key, label: label });
+            }
+            anosSet.add(d.getFullYear());
+          }
+        }
+      });
+      mesesOptions.sort((a,b) => b.value.localeCompare(a.value));
+      const anosOptions = Array.from(anosSet).sort((a,b) => b - a);
+      
+      let adminModal = document.createElement('div'); adminModal.className = 'modal-overlay';
+      adminModal.innerHTML = `
+        <div class="modal-content" style="max-width:1300px;">
+          <div class="dashboard-container" style="width:100%;">
+            <div class="dashboard-header">
+              <h1><i class="fas fa-chart-pie"></i> Dashboard Avançado</h1>
+              <p style="color:#666; margin-top:8px;">Bem-vinda, ${escapeHtml(atendenteAtual)}!</p>
+              <button class="refresh-btn" id="refreshDashboardBtnAdmin"><i class="fas fa-sync-alt"></i> Atualizar Dados</button>
+            </div>
+            
+            <div class="dashboard-tabs">
+              <button class="tab-btn active" data-tab="analytics"><i class="fas fa-chart-line"></i> Análises</button>
+              <button class="tab-btn" data-tab="atendentes"><i class="fas fa-users"></i> Gerenciar Atendentes</button>
+            </div>
+            
+            <div class="tab-pane active" id="tab-analytics">
+              <div class="filter-bar">
+                <div class="filter-group">
+                  <label>📅 Período:</label>
+                  <select id="filtroPeriodo">
+                    <option value="todos">Todos os períodos</option>
+                    <option value="mes">Mês específico</option>
+                    <option value="ano">Ano específico</option>
+                  </select>
+                </div>
+                <div class="filter-group" id="grupoFiltroMes" style="display:none;">
+                  <label>📆 Selecionar Mês/Ano:</label>
+                  <select id="filtroMes">
+                    <option value="">Selecione...</option>
+                    ${mesesOptions.map(m => `<option value="${m.value}">${m.label}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="filter-group" id="grupoFiltroAno" style="display:none;">
+                  <label>📆 Selecionar Ano:</label>
+                  <select id="filtroAno">
+                    <option value="">Selecione...</option>
+                    ${anosOptions.map(a => `<option value="${a}">${a}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>💰 Filtrar por valor:</label>
+                  <select id="filtroValorTipo">
+                    <option value="todos">Todos</option>
+                    <option value="maior">Maior que</option>
+                    <option value="menor">Menor que</option>
+                    <option value="igual">Igual a</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>&nbsp;</label>
+                  <input type="text" id="filtroValorComp" placeholder="R$ 0,00">
+                </div>
+                <div class="filter-group">
+                  <label>🎂 Idade exata:</label>
+                  <input type="text" id="filtroIdade" placeholder="Digite a idade">
+                </div>
+                <div class="filter-group">
+                  <label>👤 Nome do cliente:</label>
+                  <input type="text" id="filtroCliente" placeholder="Buscar por nome">
+                </div>
+                <div class="filter-group">
+                  <label>🆔 ID do Orçamento:</label>
+                  <input type="text" id="filtroIdOrcamento" placeholder="Buscar por ID">
+                </div>
+              </div>
+              
+              <div id="dashboardContent"><div class="empty-state"><i class="fas fa-spinner fa-pulse"></i> Carregando...</div></div>
+            </div>
+            
+            <div class="tab-pane" id="tab-atendentes">
+              <div id="gestaoAtendentesContainer"></div>
+            </div>
+          </div>
+          <div class="modal-buttons-row"><button id="closeAdminBtn" class="btn btn-primary">Fechar</button></div>
+        </div>
+      `;
       document.body.appendChild(adminModal);
-      const tabs=adminModal.querySelectorAll('.tab-btn'), panes=adminModal.querySelectorAll('.tab-pane');
-      tabs.forEach(tab=>{ tab.addEventListener('click',()=>{ const targetTab=tab.dataset.tab; tabs.forEach(t=>t.classList.remove('active')); panes.forEach(p=>p.classList.remove('active')); tab.classList.add('active'); adminModal.querySelector(`#tab-${targetTab}`).classList.add('active'); }); });
-      const periodoSelect=adminModal.querySelector('#filtroPeriodo'), grupoMes=adminModal.querySelector('#grupoFiltroMes'), grupoAno=adminModal.querySelector('#grupoFiltroAno');
-      periodoSelect.addEventListener('change',()=>{ const val=periodoSelect.value; grupoMes.style.display=val==='mes'?'block':'none'; grupoAno.style.display=val==='ano'?'block':'none'; window.renderizarDashboardComFiltrosAtual(); });
-      adminModal.querySelector('#filtroMes')?.addEventListener('change',()=>window.renderizarDashboardComFiltrosAtual());
-      adminModal.querySelector('#filtroAno')?.addEventListener('change',()=>window.renderizarDashboardComFiltrosAtual());
-      adminModal.querySelector('#filtroValorTipo')?.addEventListener('change',()=>window.renderizarDashboardComFiltrosAtual());
-      adminModal.querySelector('#filtroValorComp')?.addEventListener('blur',function(){ this.value=formatMoneyWithThousand(parseCurrency(this.value)); window.renderizarDashboardComFiltrosAtual(); });
-      adminModal.querySelector('#filtroIdade')?.addEventListener('input',()=>window.renderizarDashboardComFiltrosAtual());
-      adminModal.querySelector('#filtroCliente')?.addEventListener('input',()=>window.renderizarDashboardComFiltrosAtual());
-      adminModal.querySelector('#filtroIdOrcamento')?.addEventListener('input',()=>window.renderizarDashboardComFiltrosAtual());
-      const idsUnicos=[...new Set(historicoOrcamentosGlobal.map(i=>i.id))];
-      createSuggestionsDropdown('filtroIdOrcamento',(v)=>idsUnicos.filter(id=>id.toLowerCase().includes(v)).slice(0,10),(s)=>window.renderizarDashboardComFiltrosAtual());
-      const clientesUnicos=[...new Set(historicoOrcamentosGlobal.map(i=>i.cliente))];
-      createSuggestionsDropdown('filtroCliente',(v)=>clientesUnicos.filter(n=>n&&n.toLowerCase().includes(v)).slice(0,10),(s)=>window.renderizarDashboardComFiltrosAtual());
-      adminModal.querySelector('#refreshDashboardBtnAdmin').onclick=async()=>{ await carregarHistoricoDoSupabase(); window.renderizarDashboardComFiltrosAtual(); renderizarGestaoAtendentes(adminModal.querySelector('#gestaoAtendentesContainer')); };
-      const dashboardContent=adminModal.querySelector('#dashboardContent');
-      dashboardContent.addEventListener('click',(e)=>{ const deleteBtn=e.target.closest('.btn-delete-single'); if(deleteBtn){ e.preventDefault(); const id=deleteBtn.dataset.id, cliente=deleteBtn.dataset.cliente; if(id&&cliente) window.deletarOrcamento(id,cliente); return; } const editBtn=e.target.closest('.btn-edit-single'); if(editBtn){ e.preventDefault(); const id=editBtn.dataset.id, orcamento=historicoOrcamentosGlobal.find(i=>i.id===id); if(orcamento){ adminModal.remove(); window.editarOrcamento(orcamento); } return; } const saleBtn=e.target.closest('.btn-sale-single'); if(saleBtn){ e.preventDefault(); const id=saleBtn.dataset.id, cliente=saleBtn.dataset.cliente; if(id&&cliente) window.marcarComoVendaRealizada(id,cliente); return; } });
+      
+      const tabs = adminModal.querySelectorAll('.tab-btn');
+      const panes = adminModal.querySelectorAll('.tab-pane');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetTab = tab.dataset.tab;
+          tabs.forEach(t => t.classList.remove('active'));
+          panes.forEach(p => p.classList.remove('active'));
+          tab.classList.add('active');
+          adminModal.querySelector(`#tab-${targetTab}`).classList.add('active');
+        });
+      });
+      
+      const periodoSelect = adminModal.querySelector('#filtroPeriodo');
+      const grupoMes = adminModal.querySelector('#grupoFiltroMes');
+      const grupoAno = adminModal.querySelector('#grupoFiltroAno');
+      
+      periodoSelect.addEventListener('change', () => {
+        const val = periodoSelect.value;
+        grupoMes.style.display = val === 'mes' ? 'block' : 'none';
+        grupoAno.style.display = val === 'ano' ? 'block' : 'none';
+        window.renderizarDashboardComFiltrosAtual();
+      });
+      
+      adminModal.querySelector('#filtroMes')?.addEventListener('change', () => window.renderizarDashboardComFiltrosAtual());
+      adminModal.querySelector('#filtroAno')?.addEventListener('change', () => window.renderizarDashboardComFiltrosAtual());
+      adminModal.querySelector('#filtroValorTipo')?.addEventListener('change', () => window.renderizarDashboardComFiltrosAtual());
+      adminModal.querySelector('#filtroValorComp')?.addEventListener('blur', function() {
+        this.value = formatMoneyWithThousand(parseCurrency(this.value));
+        window.renderizarDashboardComFiltrosAtual();
+      });
+      adminModal.querySelector('#filtroIdade')?.addEventListener('input', () => window.renderizarDashboardComFiltrosAtual());
+      adminModal.querySelector('#filtroCliente')?.addEventListener('input', () => window.renderizarDashboardComFiltrosAtual());
+      adminModal.querySelector('#filtroIdOrcamento')?.addEventListener('input', () => window.renderizarDashboardComFiltrosAtual());
+      
+      const idsUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.id))];
+      createSuggestionsDropdown('filtroIdOrcamento', 
+        (value) => idsUnicos.filter(id => id.toLowerCase().includes(value)).slice(0, 10),
+        (selected) => window.renderizarDashboardComFiltrosAtual()
+      );
+      
+      const clientesUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.cliente))];
+      createSuggestionsDropdown('filtroCliente',
+        (value) => clientesUnicos.filter(nome => nome && nome.toLowerCase().includes(value)).slice(0, 10),
+        (selected) => window.renderizarDashboardComFiltrosAtual()
+      );
+      
+      adminModal.querySelector('#refreshDashboardBtnAdmin').onclick = async () => {
+        await carregarHistoricoDoSupabase();
+        window.renderizarDashboardComFiltrosAtual();
+        renderizarGestaoAtendentes(adminModal.querySelector('#gestaoAtendentesContainer'));
+      };
+      
+      const dashboardContent = adminModal.querySelector('#dashboardContent');
+      dashboardContent.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('.btn-delete-single');
+        if (deleteBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = deleteBtn.getAttribute('data-id');
+          const cliente = deleteBtn.getAttribute('data-cliente');
+          if (id && cliente) window.deletarOrcamento(id, cliente);
+          return;
+        }
+        
+        const editBtn = e.target.closest('.btn-edit-single');
+        if (editBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = editBtn.getAttribute('data-id');
+          const orcamento = historicoOrcamentosGlobal.find(item => item.id === id);
+          if (orcamento) {
+            adminModal.remove();
+            window.editarOrcamento(orcamento);
+          }
+          return;
+        }
+        
+        const saleBtn = e.target.closest('.btn-sale-single');
+        if (saleBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = saleBtn.getAttribute('data-id');
+          const cliente = saleBtn.getAttribute('data-cliente');
+          if (id && cliente) window.marcarComoVendaRealizada(id, cliente);
+          return;
+        }
+      });
+      
       window.renderizarDashboardComFiltrosAtual();
       renderizarGestaoAtendentes(adminModal.querySelector('#gestaoAtendentesContainer'));
-      adminModal.querySelector('#closeAdminBtn').onclick=()=>adminModal.remove();
+      adminModal.querySelector('#closeAdminBtn').onclick = () => adminModal.remove();
+    });
+    
+    window.addEventListener('beforeunload', (e) => {
+      e.preventDefault();
+      e.returnValue = '';
     });
   })();
 </script>
