@@ -342,7 +342,28 @@
   ];
 
   let atendentes = [];
-  let continueButton = null;
+
+  // Função para gerar login a partir do nome
+  function gerarLoginFromNome(nome) {
+    return nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/\s/g, '');
+  }
+
+  // Função para sincronizar atendentes (garantindo que todos tenham login e senha)
+  function sincronizarAtendentes(atendentesFromStorage) {
+    return atendentesFromStorage.map(a => {
+      // Se não tiver login, gerar a partir do nome
+      if (!a.login) {
+        a.login = gerarLoginFromNome(a.nome);
+      }
+      // Se não tiver senha, criar uma padrão baseada no nome
+      if (!a.senha) {
+        a.senha = gerarLoginFromNome(a.nome) + "123";
+      }
+      return a;
+    });
+  }
 
   // Função para carregar atendentes do localStorage (sincronizado com orcamento.html)
   function carregarAtendentes() {
@@ -351,29 +372,24 @@
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          atendentes = parsed;
+          atendentes = sincronizarAtendentes(parsed);
           console.log('Atendentes carregados do localStorage:', atendentes.length);
           document.getElementById('syncStatus').innerHTML = '<i class="fas fa-check-circle"></i> Atendentes sincronizados com o sistema';
           setTimeout(() => {
             const statusDiv = document.getElementById('syncStatus');
             if (statusDiv) statusDiv.style.opacity = '0.5';
           }, 3000);
-        } else {
-          atendentes = [...DEFAULT_ATENDENTES];
-          localStorage.setItem('atendentes', JSON.stringify(atendentes));
-          document.getElementById('syncStatus').innerHTML = '<i class="fas fa-info-circle"></i> Configuração inicial carregada';
+          return;
         }
       } catch(e) {
         console.error('Erro ao parser atendentes:', e);
-        atendentes = [...DEFAULT_ATENDENTES];
-        localStorage.setItem('atendentes', JSON.stringify(atendentes));
       }
-    } else {
-      // Inicializar com os atendentes padrão
-      atendentes = [...DEFAULT_ATENDENTES];
-      localStorage.setItem('atendentes', JSON.stringify(atendentes));
-      document.getElementById('syncStatus').innerHTML = '<i class="fas fa-info-circle"></i> Configuração inicial carregada';
     }
+    
+    // Se não houver dados salvos ou estiverem corrompidos, usar padrão
+    atendentes = [...DEFAULT_ATENDENTES];
+    localStorage.setItem('atendentes', JSON.stringify(atendentes));
+    document.getElementById('syncStatus').innerHTML = '<i class="fas fa-info-circle"></i> Configuração inicial carregada';
   }
 
   // Função para validar login (usando os campos corretos: login e senha)
@@ -424,9 +440,9 @@
   }
 
   function removeContinueButton() {
-    if (continueButton && continueButton.parentNode) {
-      continueButton.parentNode.removeChild(continueButton);
-      continueButton = null;
+    const continueBtn = document.getElementById('goToOrcamentoBtn');
+    if (continueBtn && continueBtn.parentNode) {
+      continueBtn.parentNode.removeChild(continueBtn);
     }
   }
 
@@ -460,8 +476,8 @@
         if (activeUserName) activeUserName.textContent = user.nome;
         
         const loginCard = document.getElementById('loginCard');
-        if (loginCard && !continueButton) {
-          continueButton = document.createElement('button');
+        if (loginCard && !document.getElementById('goToOrcamentoBtn')) {
+          const continueButton = document.createElement('button');
           continueButton.id = 'goToOrcamentoBtn';
           continueButton.className = 'btn-continue';
           continueButton.innerHTML = '<i class="fas fa-arrow-right"></i> Continuar no Sistema de Orçamentos';
