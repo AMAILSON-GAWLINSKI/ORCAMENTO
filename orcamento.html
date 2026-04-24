@@ -418,7 +418,6 @@
     let jaPassouStep1 = false;
     let isOnline = navigator.onLine;
     
-    // ========== GERENCIAMENTO DE ATENDENTES ==========
     let atendentes = [
       { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
       { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
@@ -434,7 +433,6 @@
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) {
             atendentes = parsed;
-            console.log('Atendentes carregados:', atendentes);
           } else {
             atendentes = JSON.parse(JSON.stringify([
               { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
@@ -1126,7 +1124,176 @@
     
     carregarHistoricoDoSupabase().then(() => { if (!verificarUsuarioLogado()) goToStep(1); });
     
-    // ========== DASHBOARD ADMIN ==========
+    // ========== FUNÇÃO DE DELETAR ORÇAMENTOS APENAS PARA ADMINISTRADORES ==========
+    // Função para verificar se o usuário atual é administrador
+    function isCurrentUserAdmin() {
+      const usuarioSalvo = localStorage.getItem('usuarioLogado');
+      if (!usuarioSalvo) return false;
+      try {
+        const user = JSON.parse(usuarioSalvo);
+        // Apenas Jaúna Constante e Jaciara Constante são administradoras
+        return user.nome === 'Jaúna Constante' || user.nome === 'Jaciara Constante';
+      } catch(e) {
+        return false;
+      }
+    }
+    
+    // Sobrescrever a função deletarOrcamentoDoSupabase para verificar permissão de admin
+    const originalDeletarOrcamento = deletarOrcamentoDoSupabase;
+    window.deletarOrcamento = async function(id, nomeCliente) {
+      // Verificar se o usuário atual é administrador
+      if (!isCurrentUserAdmin()) {
+        alert('⚠️ Acesso negado! Apenas administradoras (Jaúna Constante e Jaciara Constante) podem excluir orçamentos.');
+        return;
+      }
+      
+      const confirmModal = document.createElement('div'); confirmModal.className = 'modal-overlay';
+      confirmModal.innerHTML = `
+        <div class="modal-content" style="max-width:400px;">
+          <h3><i class="fas fa-trash-alt" style="color:#e74c3c;"></i> Confirmar exclusão</h3>
+          <p>Tem certeza que deseja excluir o orçamento de <strong>${escapeHtml(nomeCliente)}</strong>?</p>
+          <p style="font-size:0.8rem; color:#666; margin-top:8px;">ID: ${escapeHtml(id)}</p>
+          <div class="modal-buttons-row">
+            <button id="confirmDeleteBtn" class="btn btn-danger" style="flex:0 1 auto;">Sim, excluir</button>
+            <button id="cancelDeleteBtn" class="btn btn-outline" style="flex:0 1 auto;">Cancelar</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(confirmModal);
+      
+      confirmModal.querySelector('#confirmDeleteBtn').onclick = async () => {
+        await originalDeletarOrcamento(id);
+        confirmModal.remove();
+        if (window.renderizarDashboardComFiltrosAtual) {
+          window.renderizarDashboardComFiltrosAtual();
+        }
+      };
+      confirmModal.querySelector('#cancelDeleteBtn').onclick = () => confirmModal.remove();
+    };
+    
+    // Também sobrescrever a função de exclusão em massa
+    window.deletarOrcamentosEmMassa = async function(ids, clientes) {
+      if (!isCurrentUserAdmin()) {
+        alert('⚠️ Acesso negado! Apenas administradoras (Jaúna Constante e Jaciara Constante) podem excluir orçamentos.');
+        return false;
+      }
+      
+      const confirmModal = document.createElement('div'); confirmModal.className = 'modal-overlay';
+      confirmModal.innerHTML = `
+        <div class="modal-content" style="max-width:450px;">
+          <h3><i class="fas fa-trash-alt" style="color:#e74c3c;"></i> Confirmar exclusão em massa</h3>
+          <p>Tem certeza que deseja excluir <strong>${ids.length} orçamento(s)</strong>?</p>
+          <div class="modal-buttons-row">
+            <button id="confirmMassDeleteBtn" class="btn btn-danger" style="flex:0 1 auto;">Sim, excluir todos</button>
+            <button id="cancelMassDeleteBtn" class="btn btn-outline" style="flex:0 1 auto;">Cancelar</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(confirmModal);
+      
+      return new Promise((resolve) => {
+        confirmModal.querySelector('#confirmMassDeleteBtn').onclick = async () => {
+          showLoading();
+          for (const id of ids) {
+            await originalDeletarOrcamento(id);
+          }
+          await carregarHistoricoDoSupabase();
+          hideLoading();
+          alert(`✅ ${ids.length} orçamento(s) excluído(s) com sucesso!`);
+          confirmModal.remove();
+          if (window.renderizarDashboardComFiltrosAtual) {
+            window.renderizarDashboardComFiltrosAtual();
+          }
+          resolve(true);
+        };
+        confirmModal.querySelector('#cancelMassDeleteBtn').onclick = () => {
+          confirmModal.remove();
+          resolve(false);
+        };
+      });
+    };
+    
+    // Sobrescrever a função de exclusão do dashboard
+    window.marcarComoVendaRealizada = async function(id, nomeCliente) {
+      const index = historicoOrcamentosGlobal.findIndex(item => item.id === id);
+      if(index !== -1 && historicoOrcamentosGlobal[index].status !== 'fechado') {
+        const orcamentoData = historicoOrcamentosGlobal[index];
+        orcamentoData.status = 'fechado'; orcamentoData.justificativa = 'Convertido para venda via dashboard';
+        if(await salvarComFallback(orcamentoData)) alert(`✅ Orçamento de ${nomeCliente} marcado como VENDA REALIZADA!`);
+      } else if(index !== -1) alert(`ℹ️ Este orçamento já está marcado como VENDA REALIZADA.`);
+      else alert(`❌ Orçamento não encontrado.`);
+    };
+    
+    window.editarOrcamento = function(orcamento) { const adminModal = document.querySelector('.modal-overlay'); if(adminModal) adminModal.remove(); carregarOrcamentoParaEdicao(orcamento); };
+    
+    // Modificar a função do dashboard para usar a exclusão com permissão
+    window.renderizarDashboardComFiltrosAtual = function() {
+      const container = document.getElementById('dashboardContent'); if(!container) return;
+      let data = [...historicoOrcamentosGlobal];
+      const filtroPeriodo = document.getElementById('filtroPeriodo')?.value || 'todos', filtroMes = document.getElementById('filtroMes')?.value, filtroAno = document.getElementById('filtroAno')?.value;
+      const filtroValorTipo = document.getElementById('filtroValorTipo')?.value || 'todos', filtroValorComp = parseCurrency(document.getElementById('filtroValorComp')?.value || '0');
+      const filtroIdade = document.getElementById('filtroIdade')?.value, filtroCliente = document.getElementById('filtroCliente')?.value?.toLowerCase() || '', filtroIdOrcamento = document.getElementById('filtroIdOrcamento')?.value?.toLowerCase() || '';
+      if(filtroPeriodo === 'mes' && filtroMes) { const [ano,mes]=filtroMes.split('-'); data = data.filter(item => { const d=new Date(item.dataRaw); return d.getFullYear()===parseInt(ano) && (d.getMonth()+1)===parseInt(mes); }); }
+      else if(filtroPeriodo === 'ano' && filtroAno) data = data.filter(item => new Date(item.dataRaw).getFullYear()===parseInt(filtroAno));
+      if(filtroValorTipo !== 'todos' && filtroValorComp > 0) data = data.filter(item => { const val=item.totalFinal||0; if(filtroValorTipo==='maior') return val>filtroValorComp; if(filtroValorTipo==='menor') return val<filtroValorComp; if(filtroValorTipo==='igual') return Math.abs(val-filtroValorComp)<0.01; return true; });
+      if(filtroIdade && filtroIdade!=='') data = data.filter(item => item.idade && item.idade.toString()===filtroIdade);
+      if(filtroCliente && filtroCliente!=='') data = data.filter(item => item.cliente && item.cliente.toLowerCase().includes(filtroCliente));
+      if(filtroIdOrcamento && filtroIdOrcamento!=='') data = data.filter(item => item.id && item.id.toLowerCase().includes(filtroIdOrcamento));
+      if(!data.length) { container.innerHTML = `<div class="empty-state"><i class="fas fa-chart-line"></i> Nenhum orçamento encontrado.</div>`; return; }
+      const totalOrcamentos = data.length, totalVendas = data.filter(i=>i.status==='fechado').length, totalPerdidos = data.filter(i=>i.status==='nao_fechado').length;
+      const valorTotalVendido = data.filter(i=>i.status==='fechado').reduce((acc,i)=>acc+(i.totalFinal||0),0), valorPerdidoTotal = data.filter(i=>i.status==='nao_fechado').reduce((acc,i)=>acc+(i.totalFinal||0),0);
+      const taxaConversaoGeral = totalOrcamentos ? ((totalVendas/totalOrcamentos)*100).toFixed(1) : 0;
+      const mesesMap = new Map();
+      data.forEach(item => { let dataObj = new Date(item.dataRaw); if(isNaN(dataObj)) dataObj = new Date(); const mesAno = dataObj.toLocaleString('pt-BR',{month:'short',year:'numeric'}); if(!mesesMap.has(mesAno)) mesesMap.set(mesAno,{vendas:0,perdidos:0,valorPerdido:0}); const grupo = mesesMap.get(mesAno); if(item.status==='fechado') grupo.vendas++; else if(item.status==='nao_fechado') { grupo.perdidos++; grupo.valorPerdido += (item.totalFinal||0); } });
+      const mesesLabels = Array.from(mesesMap.keys()), vendasCount = mesesLabels.map(m=>mesesMap.get(m).vendas), perdidosCount = mesesLabels.map(m=>mesesMap.get(m).perdidos), valorPerdidoMensal = mesesLabels.map(m=>mesesMap.get(m).valorPerdido);
+      const vendedoresMap = new Map();
+      data.forEach(item => { const vendedor = item.atendente||'Não definido'; if(!vendedoresMap.has(vendedor)) vendedoresMap.set(vendedor,{vendas:0,perdidos:0,valorVendido:0,valorPerdido:0,justificativas:[]}); const reg=vendedoresMap.get(vendedor); if(item.status==='fechado') { reg.vendas++; reg.valorVendido+= (item.totalFinal||0); } else if(item.status==='nao_fechado') { reg.perdidos++; reg.valorPerdido+= (item.totalFinal||0); if(item.justificativa) reg.justificativas.push({id:item.id,data:item.data,cliente:item.cliente,motivo:item.justificativa,valor:item.totalFinal}); } });
+      const vendedoresSorted = Array.from(vendedoresMap.entries()).sort((a,b)=>b[1].valorPerdido - a[1].valorPerdido);
+      let html = `<div class="dashboard-stats"><div class="stat-card"><div class="stat-label">📋 TOTAL ORÇAMENTOS</div><div class="stat-value">${totalOrcamentos}</div></div>
+        <div class="stat-card"><div class="stat-label">✅ VENDAS FECHADAS</div><div class="stat-value">${totalVendas}</div><div class="stat-sub">conversão ${taxaConversaoGeral}%</div></div>
+        <div class="stat-card"><div class="stat-label">❌ NÃO FINALIZADOS</div><div class="stat-value">${totalPerdidos}</div></div>
+        <div class="stat-card"><div class="stat-label">💰 FATURAMENTO</div><div class="stat-value">${formatMoneyWithSymbol(valorTotalVendido)}</div></div>
+        <div class="stat-card"><div class="stat-label">💸 VALOR PERDIDO</div><div class="stat-value" style="color:#e74c3c;">${formatMoneyWithSymbol(valorPerdidoTotal)}</div></div></div>`;
+      if(mesesLabels.length>0) html += `<div class="charts-row"><div class="chart-card"><h4><i class="fas fa-chart-line"></i> Evolução Mensal</h4><canvas id="monthlyCompareChart"></canvas></div><div class="chart-card"><h4><i class="fas fa-money-bill-wave"></i> Valor Perdido por Mês</h4><canvas id="lostValueChart"></canvas></div></div>`;
+      html += `<div class="section-title"><i class="fas fa-users"></i> Performance por Atendente</div><table class="performer-table"><thead><tr><th>Vendedor(a)</th><th>Vendas</th><th>Não Finalizados</th><th>Valor Vendido</th><th>VALOR PERDIDO</th><th>Taxa</th></tr></thead><tbody>`;
+      for(const[nome,d] of vendedoresSorted){ const totalAtendimentos=d.vendas+d.perdidos, taxa=totalAtendimentos>0?((d.vendas/totalAtendimentos)*100).toFixed(1):0; html+=`<tr><td><strong>${escapeHtml(nome)}</strong></td><td>${d.vendas}</td><td>${d.perdidos}</td><td>${formatMoneyWithSymbol(d.valorVendido)}</td><td class="lost-amount">${formatMoneyWithSymbol(d.valorPerdido)}</td><td><span class="badge ${taxa>=50?'badge-success':'badge-danger'}">${taxa}%</span></td></tr>`; }
+      html+=`</tbody></table><div class="section-title"><i class="fas fa-list"></i> Lista de Orçamentos ${isCurrentUserAdmin() ? '<button id="btnExcluirSelecionados" class="btn btn-danger" style="padding:6px 12px; font-size:0.75rem; margin-left:10px;"><i class="fas fa-trash-alt"></i> Excluir Selecionados</button>' : ''}</div><div class="orcamentos-list">`;
+      data.forEach(item=>{ const statusClass=item.status==='fechado'?'status-fechado':'status-nao-fechado', statusText=item.status==='fechado'?'✅ VENDA REALIZADA':'❌ NÃO FINALIZADO', origemTexto=item.origem||'Não informado', concorrenteTexto=item.concorrente?` (${item.concorrente})`:''; html+=`<div class="orcamento-card"><div class="orcamento-info"><strong>${escapeHtml(item.id)}</strong><br><span>👤 ${escapeHtml(item.cliente)}</span> | <span>📅 ${escapeHtml(item.data)}</span> | <span>💰 ${formatMoneyWithSymbol(item.totalFinal)}</span> | <span>👨‍💼 ${escapeHtml(item.atendente)}</span> | <span>📍 ${escapeHtml(origemTexto)}${escapeHtml(concorrenteTexto)}</span>${item.idade?` | 🎂 ${escapeHtml(item.idade)} anos`:''}</div><div class="btn-group"><span class="orcamento-status ${statusClass}">${statusText}</span>${isCurrentUserAdmin() ? `<button class="btn-delete-single btn btn-delete" data-id="${escapeHtml(item.id)}" data-cliente="${escapeHtml(item.cliente)}"><i class="fas fa-trash"></i> Excluir</button>` : ''}<button class="btn-edit-single btn btn-edit" data-id="${escapeHtml(item.id)}"><i class="fas fa-edit"></i> Editar</button>${item.status!=='fechado'?`<button class="btn-sale-single btn btn-sale" data-id="${escapeHtml(item.id)}" data-cliente="${escapeHtml(item.cliente)}"><i class="fas fa-check-circle"></i> Venda Realizada</button>`:''}</div></div>`; });
+      html+=`</div><div class="section-title"><i class="fas fa-comment-dots"></i> Principais Motivos de Perda</div>`;
+      let hasJustificativas=false;
+      for(const[nome,d] of vendedoresSorted){ if(d.justificativas.length>0){ hasJustificativas=true; html+=`<div style="margin-top:20px;"><strong><i class="fas fa-user-tie"></i> ${escapeHtml(nome)}</strong> — Perdeu ${formatMoneyWithSymbol(d.valorPerdido)} em ${d.perdidos} orçamento(s)</div>`; for(const j of d.justificativas) html+=`<div class="justificativa-list"><i class="fas fa-times-circle" style="color:#e74c3c"></i> <strong>${escapeHtml(j.cliente)}</strong> (${j.data}) — ${formatMoneyWithSymbol(j.valor)}<br>📌 Motivo: ${escapeHtml(j.motivo)}</div>`; } }
+      if(!hasJustificativas) html+=`<div class="justificativa-list">Nenhuma justificativa registrada.</div>`;
+      container.innerHTML=html;
+      if(mesesLabels.length>0){ setTimeout(()=>{ const ctxLine=document.getElementById('monthlyCompareChart')?.getContext('2d'), ctxBar=document.getElementById('lostValueChart')?.getContext('2d'); if(ctxLine) new Chart(ctxLine,{type:'line',data:{labels:mesesLabels,datasets:[{label:'Vendas',data:vendasCount,borderColor:'#25d366',backgroundColor:'rgba(37,211,102,0.1)',tension:0.3,fill:true},{label:'Não finalizados',data:perdidosCount,borderColor:'#e74c3c',backgroundColor:'rgba(231,76,60,0.05)',tension:0.3,fill:true}]},options:{responsive:true}}); if(ctxBar) new Chart(ctxBar,{type:'bar',data:{labels:mesesLabels,datasets:[{label:'Valor perdido (R$)',data:valorPerdidoMensal,backgroundColor:'#fc5404',borderRadius:10}]},options:{responsive:true}}); },100); }
+      document.querySelectorAll('.btn-delete-single').forEach(btn=>btn.addEventListener('click',()=>window.deletarOrcamento(btn.dataset.id,btn.dataset.cliente)));
+      document.querySelectorAll('.btn-edit-single').forEach(btn=>btn.addEventListener('click',()=>{ const orcamento=historicoOrcamentosGlobal.find(i=>i.id===btn.dataset.id); if(orcamento) window.editarOrcamento(orcamento); }));
+      document.querySelectorAll('.btn-sale-single').forEach(btn=>btn.addEventListener('click',()=>window.marcarComoVendaRealizada(btn.dataset.id,btn.dataset.cliente)));
+      const btnExcluirSelecionados = document.getElementById('btnExcluirSelecionados');
+      if (btnExcluirSelecionados && isCurrentUserAdmin()) {
+        btnExcluirSelecionados.onclick = async () => {
+          const checkboxes = document.querySelectorAll('.checkbox-delete:checked');
+          if (checkboxes.length === 0) { alert('Selecione pelo menos um orçamento para excluir.'); return; }
+          const idsSelecionados = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+          await window.deletarOrcamentosEmMassa(idsSelecionados, []);
+        };
+      }
+    };
+    
+    function createSuggestionsDropdown(inputId, getSuggestionsFn, onSelectFn) {
+      const input = document.getElementById(inputId); if(!input) return;
+      const wrapper = input.parentElement; let dropdown = wrapper.querySelector('.suggestions-dropdown');
+      if(!dropdown) { dropdown = document.createElement('div'); dropdown.className = 'suggestions-dropdown'; wrapper.appendChild(dropdown); }
+      input.addEventListener('input', function() {
+        const value = this.value.toLowerCase();
+        if(value.length === 0) { dropdown.classList.remove('show'); return; }
+        const suggestions = getSuggestionsFn(value);
+        if(suggestions.length === 0) { dropdown.classList.remove('show'); return; }
+        dropdown.innerHTML = suggestions.map(s => `<div class="suggestion-item" data-value="${escapeHtml(s)}">${escapeHtml(s)}</div>`).join('');
+        dropdown.classList.add('show');
+        dropdown.querySelectorAll('.suggestion-item').forEach(item => { item.addEventListener('click', function() { input.value = this.dataset.value; dropdown.classList.remove('show'); if(onSelectFn) onSelectFn(this.dataset.value); }); });
+      });
+      document.addEventListener('click', function(e) { if(!wrapper.contains(e.target)) dropdown.classList.remove('show'); });
+    }
     
     function renderizarGestaoAtendentes(container) {
       const ativos = atendentes.filter(a => a.ativo === true), ocultos = atendentes.filter(a => a.ativo === false);
@@ -1139,7 +1306,7 @@
         <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding:4px 10px;"><i class="fas fa-trash"></i> Excluir</button></td></tr>`; });
       if (ocultos.length > 0) {
         html += `</tbody></table><h4 style="margin:25px 0 15px 0; color:#1e293b;">🔒 Atendentes Ocultos</h4>
-        <table class="atendentes-table"><thead><tr><th>Nome</th><th>Login</th><th>E-mail</th><th>Senha</th><th>Status</th><th>Ações</th></tr></thead><tbody>`;
+        <table class="atendentes-table"><thead><td><th>Nome</th><th>Login</th><th>E-mail</th><th>Senha</th><th>Status</th><th>Ações</th></tr></thead><tbody>`;
         ocultos.forEach(a => { html += `<tr data-id="${a.id}"><td><strong>${escapeHtml(a.nome)}</strong></td><td>${escapeHtml(a.login)}</td><td>${escapeHtml(a.email)}</td><td>••••••••</td><td><span class="status-oculto">● Oculto</span></td>
           <td><button class="btn-reativar-atendente btn btn-success btn-sm" data-id="${a.id}" style="padding:4px 10px; margin-right:5px;"><i class="fas fa-eye"></i> Reativar</button>
           <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding:4px 10px;"><i class="fas fa-trash"></i> Excluir</button></td></tr>`; });
@@ -1204,79 +1371,6 @@
         btn.addEventListener('click', () => { if(confirm('⚠️ ATENÇÃO: Excluir este atendente permanentemente?')) { deletarAtendente(parseInt(btn.dataset.id)); renderizarGestaoAtendentes(container); } });
       });
     }
-    
-    function createSuggestionsDropdown(inputId, getSuggestionsFn, onSelectFn) {
-      const input = document.getElementById(inputId); if(!input) return;
-      const wrapper = input.parentElement; let dropdown = wrapper.querySelector('.suggestions-dropdown');
-      if(!dropdown) { dropdown = document.createElement('div'); dropdown.className = 'suggestions-dropdown'; wrapper.appendChild(dropdown); }
-      input.addEventListener('input', function() {
-        const value = this.value.toLowerCase();
-        if(value.length === 0) { dropdown.classList.remove('show'); return; }
-        const suggestions = getSuggestionsFn(value);
-        if(suggestions.length === 0) { dropdown.classList.remove('show'); return; }
-        dropdown.innerHTML = suggestions.map(s => `<div class="suggestion-item" data-value="${escapeHtml(s)}">${escapeHtml(s)}</div>`).join('');
-        dropdown.classList.add('show');
-        dropdown.querySelectorAll('.suggestion-item').forEach(item => { item.addEventListener('click', function() { input.value = this.dataset.value; dropdown.classList.remove('show'); if(onSelectFn) onSelectFn(this.dataset.value); }); });
-      });
-      document.addEventListener('click', function(e) { if(!wrapper.contains(e.target)) dropdown.classList.remove('show'); });
-    }
-    
-    window.deletarOrcamento = async function(id, nomeCliente) {
-      if(confirm(`Excluir orçamento de ${nomeCliente}?`)) { await deletarOrcamentoDoSupabase(id); if(window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual(); }
-    };
-    window.marcarComoVendaRealizada = async function(id, nomeCliente) {
-      const index = historicoOrcamentosGlobal.findIndex(item => item.id === id);
-      if(index !== -1 && historicoOrcamentosGlobal[index].status !== 'fechado') {
-        const orcamentoData = historicoOrcamentosGlobal[index];
-        orcamentoData.status = 'fechado'; orcamentoData.justificativa = 'Convertido para venda via dashboard';
-        if(await salvarComFallback(orcamentoData)) alert(`✅ Orçamento de ${nomeCliente} marcado como VENDA REALIZADA!`);
-      } else if(index !== -1) alert(`ℹ️ Este orçamento já está marcado como VENDA REALIZADA.`);
-      else alert(`❌ Orçamento não encontrado.`);
-    };
-    window.editarOrcamento = function(orcamento) { const adminModal = document.querySelector('.modal-overlay'); if(adminModal) adminModal.remove(); carregarOrcamentoParaEdicao(orcamento); };
-    
-    window.renderizarDashboardComFiltrosAtual = function() {
-      const container = document.getElementById('dashboardContent'); if(!container) return;
-      let data = [...historicoOrcamentosGlobal];
-      const filtroPeriodo = document.getElementById('filtroPeriodo')?.value || 'todos', filtroMes = document.getElementById('filtroMes')?.value, filtroAno = document.getElementById('filtroAno')?.value;
-      const filtroValorTipo = document.getElementById('filtroValorTipo')?.value || 'todos', filtroValorComp = parseCurrency(document.getElementById('filtroValorComp')?.value || '0');
-      const filtroIdade = document.getElementById('filtroIdade')?.value, filtroCliente = document.getElementById('filtroCliente')?.value?.toLowerCase() || '', filtroIdOrcamento = document.getElementById('filtroIdOrcamento')?.value?.toLowerCase() || '';
-      if(filtroPeriodo === 'mes' && filtroMes) { const [ano,mes]=filtroMes.split('-'); data = data.filter(item => { const d=new Date(item.dataRaw); return d.getFullYear()===parseInt(ano) && (d.getMonth()+1)===parseInt(mes); }); }
-      else if(filtroPeriodo === 'ano' && filtroAno) data = data.filter(item => new Date(item.dataRaw).getFullYear()===parseInt(filtroAno));
-      if(filtroValorTipo !== 'todos' && filtroValorComp > 0) data = data.filter(item => { const val=item.totalFinal||0; if(filtroValorTipo==='maior') return val>filtroValorComp; if(filtroValorTipo==='menor') return val<filtroValorComp; if(filtroValorTipo==='igual') return Math.abs(val-filtroValorComp)<0.01; return true; });
-      if(filtroIdade && filtroIdade!=='') data = data.filter(item => item.idade && item.idade.toString()===filtroIdade);
-      if(filtroCliente && filtroCliente!=='') data = data.filter(item => item.cliente && item.cliente.toLowerCase().includes(filtroCliente));
-      if(filtroIdOrcamento && filtroIdOrcamento!=='') data = data.filter(item => item.id && item.id.toLowerCase().includes(filtroIdOrcamento));
-      if(!data.length) { container.innerHTML = `<div class="empty-state"><i class="fas fa-chart-line"></i> Nenhum orçamento encontrado.</div>`; return; }
-      const totalOrcamentos = data.length, totalVendas = data.filter(i=>i.status==='fechado').length, totalPerdidos = data.filter(i=>i.status==='nao_fechado').length;
-      const valorTotalVendido = data.filter(i=>i.status==='fechado').reduce((acc,i)=>acc+(i.totalFinal||0),0), valorPerdidoTotal = data.filter(i=>i.status==='nao_fechado').reduce((acc,i)=>acc+(i.totalFinal||0),0);
-      const taxaConversaoGeral = totalOrcamentos ? ((totalVendas/totalOrcamentos)*100).toFixed(1) : 0;
-      const mesesMap = new Map();
-      data.forEach(item => { let dataObj = new Date(item.dataRaw); if(isNaN(dataObj)) dataObj = new Date(); const mesAno = dataObj.toLocaleString('pt-BR',{month:'short',year:'numeric'}); if(!mesesMap.has(mesAno)) mesesMap.set(mesAno,{vendas:0,perdidos:0,valorPerdido:0}); const grupo = mesesMap.get(mesAno); if(item.status==='fechado') grupo.vendas++; else if(item.status==='nao_fechado') { grupo.perdidos++; grupo.valorPerdido += (item.totalFinal||0); } });
-      const mesesLabels = Array.from(mesesMap.keys()), vendasCount = mesesLabels.map(m=>mesesMap.get(m).vendas), perdidosCount = mesesLabels.map(m=>mesesMap.get(m).perdidos), valorPerdidoMensal = mesesLabels.map(m=>mesesMap.get(m).valorPerdido);
-      const vendedoresMap = new Map();
-      data.forEach(item => { const vendedor = item.atendente||'Não definido'; if(!vendedoresMap.has(vendedor)) vendedoresMap.set(vendedor,{vendas:0,perdidos:0,valorVendido:0,valorPerdido:0,justificativas:[]}); const reg=vendedoresMap.get(vendedor); if(item.status==='fechado') { reg.vendas++; reg.valorVendido+= (item.totalFinal||0); } else if(item.status==='nao_fechado') { reg.perdidos++; reg.valorPerdido+= (item.totalFinal||0); if(item.justificativa) reg.justificativas.push({id:item.id,data:item.data,cliente:item.cliente,motivo:item.justificativa,valor:item.totalFinal}); } });
-      const vendedoresSorted = Array.from(vendedoresMap.entries()).sort((a,b)=>b[1].valorPerdido - a[1].valorPerdido);
-      let html = `<div class="dashboard-stats"><div class="stat-card"><div class="stat-label">📋 TOTAL ORÇAMENTOS</div><div class="stat-value">${totalOrcamentos}</div></div>
-        <div class="stat-card"><div class="stat-label">✅ VENDAS FECHADAS</div><div class="stat-value">${totalVendas}</div><div class="stat-sub">conversão ${taxaConversaoGeral}%</div></div>
-        <div class="stat-card"><div class="stat-label">❌ NÃO FINALIZADOS</div><div class="stat-value">${totalPerdidos}</div></div>
-        <div class="stat-card"><div class="stat-label">💰 FATURAMENTO</div><div class="stat-value">${formatMoneyWithSymbol(valorTotalVendido)}</div></div>
-        <div class="stat-card"><div class="stat-label">💸 VALOR PERDIDO</div><div class="stat-value" style="color:#e74c3c;">${formatMoneyWithSymbol(valorPerdidoTotal)}</div></div></div>`;
-      if(mesesLabels.length>0) html += `<div class="charts-row"><div class="chart-card"><h4><i class="fas fa-chart-line"></i> Evolução Mensal</h4><canvas id="monthlyCompareChart"></canvas></div><div class="chart-card"><h4><i class="fas fa-money-bill-wave"></i> Valor Perdido por Mês</h4><canvas id="lostValueChart"></canvas></div></div>`;
-      html += `<div class="section-title"><i class="fas fa-users"></i> Performance por Atendente</div><table class="performer-table"><thead><tr><th>Vendedor(a)</th><th>Vendas</th><th>Não Finalizados</th><th>Valor Vendido</th><th>VALOR PERDIDO</th><th>Taxa</th></tr></thead><tbody>`;
-      for(const[nome,d] of vendedoresSorted){ const totalAtendimentos=d.vendas+d.perdidos, taxa=totalAtendimentos>0?((d.vendas/totalAtendimentos)*100).toFixed(1):0; html+=`<tr><td><strong>${escapeHtml(nome)}</strong></td><td>${d.vendas}</td><td>${d.perdidos}</td><td>${formatMoneyWithSymbol(d.valorVendido)}</td><td class="lost-amount">${formatMoneyWithSymbol(d.valorPerdido)}</td><td><span class="badge ${taxa>=50?'badge-success':'badge-danger'}">${taxa}%</span></td></tr>`; }
-      html+=`</tbody></table><div class="section-title"><i class="fas fa-list"></i> Lista de Orçamentos</div><div class="orcamentos-list">`;
-      data.forEach(item=>{ const statusClass=item.status==='fechado'?'status-fechado':'status-nao-fechado', statusText=item.status==='fechado'?'✅ VENDA REALIZADA':'❌ NÃO FINALIZADO', origemTexto=item.origem||'Não informado', concorrenteTexto=item.concorrente?` (${item.concorrente})`:''; html+=`<div class="orcamento-card"><div class="orcamento-info"><strong>${escapeHtml(item.id)}</strong><br><span>👤 ${escapeHtml(item.cliente)}</span> | <span>📅 ${escapeHtml(item.data)}</span> | <span>💰 ${formatMoneyWithSymbol(item.totalFinal)}</span> | <span>👨‍💼 ${escapeHtml(item.atendente)}</span> | <span>📍 ${escapeHtml(origemTexto)}${escapeHtml(concorrenteTexto)}</span>${item.idade?` | 🎂 ${escapeHtml(item.idade)} anos`:''}</div><div class="btn-group"><span class="orcamento-status ${statusClass}">${statusText}</span><button class="btn-delete-single btn btn-delete" data-id="${escapeHtml(item.id)}" data-cliente="${escapeHtml(item.cliente)}"><i class="fas fa-trash"></i> Excluir</button><button class="btn-edit-single btn btn-edit" data-id="${escapeHtml(item.id)}"><i class="fas fa-edit"></i> Editar</button>${item.status!=='fechado'?`<button class="btn-sale-single btn btn-sale" data-id="${escapeHtml(item.id)}" data-cliente="${escapeHtml(item.cliente)}"><i class="fas fa-check-circle"></i> Venda Realizada</button>`:''}</div></div>`; });
-      html+=`</div><div class="section-title"><i class="fas fa-comment-dots"></i> Principais Motivos de Perda</div>`;
-      let hasJustificativas=false;
-      for(const[nome,d] of vendedoresSorted){ if(d.justificativas.length>0){ hasJustificativas=true; html+=`<div style="margin-top:20px;"><strong><i class="fas fa-user-tie"></i> ${escapeHtml(nome)}</strong> — Perdeu ${formatMoneyWithSymbol(d.valorPerdido)} em ${d.perdidos} orçamento(s)</div>`; for(const j of d.justificativas) html+=`<div class="justificativa-list"><i class="fas fa-times-circle" style="color:#e74c3c"></i> <strong>${escapeHtml(j.cliente)}</strong> (${j.data}) — ${formatMoneyWithSymbol(j.valor)}<br>📌 Motivo: ${escapeHtml(j.motivo)}</div>`; } }
-      if(!hasJustificativas) html+=`<div class="justificativa-list">Nenhuma justificativa registrada.</div>`;
-      container.innerHTML=html;
-      if(mesesLabels.length>0){ setTimeout(()=>{ const ctxLine=document.getElementById('monthlyCompareChart')?.getContext('2d'), ctxBar=document.getElementById('lostValueChart')?.getContext('2d'); if(ctxLine) new Chart(ctxLine,{type:'line',data:{labels:mesesLabels,datasets:[{label:'Vendas',data:vendasCount,borderColor:'#25d366',backgroundColor:'rgba(37,211,102,0.1)',tension:0.3,fill:true},{label:'Não finalizados',data:perdidosCount,borderColor:'#e74c3c',backgroundColor:'rgba(231,76,60,0.05)',tension:0.3,fill:true}]},options:{responsive:true}}); if(ctxBar) new Chart(ctxBar,{type:'bar',data:{labels:mesesLabels,datasets:[{label:'Valor perdido (R$)',data:valorPerdidoMensal,backgroundColor:'#fc5404',borderRadius:10}]},options:{responsive:true}}); },100); }
-      document.querySelectorAll('.btn-delete-single').forEach(btn=>btn.addEventListener('click',()=>window.deletarOrcamento(btn.dataset.id,btn.dataset.cliente)));
-      document.querySelectorAll('.btn-edit-single').forEach(btn=>btn.addEventListener('click',()=>{ const orcamento=historicoOrcamentosGlobal.find(i=>i.id===btn.dataset.id); if(orcamento) window.editarOrcamento(orcamento); }));
-      document.querySelectorAll('.btn-sale-single').forEach(btn=>btn.addEventListener('click',()=>window.marcarComoVendaRealizada(btn.dataset.id,btn.dataset.cliente)));
-    };
     
     document.getElementById('adminAccessBtn').addEventListener('click', async () => {
       const atendenteAtual = atendenteSelect.value;
