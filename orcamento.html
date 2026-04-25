@@ -1289,19 +1289,19 @@
           if(item.antirreflexo) extras.push('AR');
           if(item.filtroLuzAzul) extras.push('Filtro Azul');
           if(item.lenteFotocromatica) extras.push('Fotocromática');
-          descricao=`👓 ${item.produto||'Lente'} ${item.marca?`·${item.marca}`:''} ${item.materialLente?`(${item.materialLente})`:''} ${extras.length?`[${extras.join(', ')}]`:''}`; 
+          descricao=`${item.produto||'Lente'} ${item.marca?`·${item.marca}`:''} ${item.materialLente?`(${item.materialLente})`:''} ${extras.length?`[${extras.join(', ')}]`:''}`; 
           valorBase=item.valorLente||0; 
         }
         else if(item.tipo==='armacao') { 
-          descricao=`🕶️ ${item.marca?`${item.marca}`:'Armação'} ${item.referencia?`Ref: ${item.referencia}`:''}`; 
+          descricao=`${item.marca?`${item.marca}`:'Armação'} ${item.referencia?`Ref: ${item.referencia}`:''}`; 
           valorBase=item.valorArmacao||0; 
         }
         else if(item.tipo==='relogio') {
-          descricao=`⌚ ${item.nomeRelogio||'Relógio'} ${item.marcaRelogio?`(${item.marcaRelogio})`:''}`;
+          descricao=`${item.nomeRelogio||'Relógio'} ${item.marcaRelogio?`(${item.marcaRelogio})`:''}`;
           valorBase=item.valorRelogio||0;
         }
         else if(item.tipo==='joias') {
-          descricao=`💎 ${item.descricaoJoia||'Joia'} ${item.tipoJoia?`(${item.tipoJoia})`:''}`;
+          descricao=`${item.descricaoJoia||'Joia'} ${item.tipoJoia?`(${item.tipoJoia})`:''}`;
           valorBase=item.valorJoia||0;
         }
         let valorLiq = Math.max(0,valorBase-descontoItem);
