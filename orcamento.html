@@ -1721,10 +1721,10 @@
       const totalFinal = calcularTotalFinal();
       
       const msg = ` *ÓTICA GRAU DIVINO*
-━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━
 *ORÇAMENTO: ${nome.toUpperCase()}*
 *ID: ${currentOrcamentoId}*
-━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━
 
 *CLIENTE*
 ▸ Nome: ${nome}
@@ -1733,11 +1733,11 @@
 
 *ITENS ORÇADOS*${itensTexto}
 
-━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━
 *RESUMO FINANCEIRO*
 ▸ Subtotal: R$ ${formatMoneyWithThousand(subtotal)}
 ${descontoGeral > 0 ? `▸ Desconto geral: - R$ ${formatMoneyWithThousand(descontoGeral)}\n` : ''}▸ *TOTAL: R$ ${formatMoneyWithThousand(totalFinal)}*
-━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━
 
 Atendente: ${atendente}
 ${dataAtual}
