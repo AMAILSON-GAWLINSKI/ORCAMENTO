@@ -195,7 +195,7 @@
     .field-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
     
     /* Botões de acesso */
-    .admin-btn, .consulta-btn, .pesquisa-btn {
+    .admin-btn, .pesquisa-btn {
       position: fixed;
       bottom: 20px;
       right: 20px;
@@ -218,14 +218,9 @@
       bottom: 20px;
       right: 20px;
     }
-    .consulta-btn {
-      background: #3498db;
-      bottom: 90px;
-      right: 20px;
-    }
-    .admin-btn.visible, .consulta-btn.visible, .pesquisa-btn.visible { display: flex; }
+    .admin-btn.visible, .pesquisa-btn.visible { display: flex; }
     .admin-btn:hover { transform: scale(1.05); background: #e04a02; }
-    .consulta-btn:hover, .pesquisa-btn:hover { transform: scale(1.05); background: #2980b9; }
+    .pesquisa-btn:hover { transform: scale(1.05); background: #2980b9; }
     
     /* Dashboard Admin Styles */
     .dashboard-container { max-width: 1400px; margin: 0 auto; }
@@ -250,7 +245,6 @@
     .badge { display: inline-block; padding: 4px 12px; border-radius: 40px; font-size: 0.75rem; font-weight: 700; }
     .badge-success { background: #25d366; color: white; }
     .badge-danger { background: #e74c3c; color: white; }
-    .badge-warning { background: #f39c12; color: white; }
     .justificativa-list { background: #fff6e5; border-left: 4px solid #f39c12; padding: 12px 16px; margin: 12px 0; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
     .refresh-btn { background: #fc5404; color: white; border: none; border-radius: 40px; padding: 10px 24px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; transition: transform 0.2s; }
     .refresh-btn:hover { transform: scale(1.02); background: #e04a02; }
@@ -347,7 +341,7 @@
     
     @media print {
       body { background: white; padding: 0; margin: 0; }
-      .stepper, .nav-buttons, .action-buttons, .admin-btn, .consulta-btn, .pesquisa-btn, .btn, .add-orc-btn, .btn-remove-orc, .module-header, #backToStep3Edit, #finalizarOrcamentoBtn, #adminAccessBtn, #consultaAccessBtn, #pesquisaAccessBtn, .logout-btn-container, .loading-overlay, .offline-indicator { display: none !important; }
+      .stepper, .nav-buttons, .action-buttons, .admin-btn, .pesquisa-btn, .btn, .add-orc-btn, .btn-remove-orc, .module-header, #backToStep3Edit, #finalizarOrcamentoBtn, #adminAccessBtn, #pesquisaAccessBtn, .logout-btn-container, .loading-overlay, .offline-indicator { display: none !important; }
       .module-card { display: block !important; box-shadow: none; padding: 0; margin: 0; }
       .module-card.active-step { display: block !important; }
       .summary-title { background: #fc5404; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -1749,7 +1743,7 @@ ${dataAtual}
               <button class="btn-edit-atendente btn btn-edit btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" data-email="${escapeHtml(a.email)}" data-login="${escapeHtml(a.login || '')}" data-senha="${escapeHtml(a.senha)}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-edit"></i> Editar</button>
               <button class="btn-ocultar-atendente btn btn-warning btn-sm" data-id="${a.id}" style="padding: 4px 10px; background: #f39c12; border-color: #f39c12;"><i class="fas fa-eye-slash"></i> Ocultar</button>
               <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
-            </td>
+             </td>
             </tr>
         `;
       });
@@ -1757,7 +1751,7 @@ ${dataAtual}
       if (ocultos.length > 0) {
         html += `
             </tbody>
-           </table>
+          </table>
           
           <h4 style="margin: 25px 0 15px 0; color: #1e293b;">🔒 Atendentes Ocultos</h4>
           <table class="atendentes-table">
@@ -1778,15 +1772,15 @@ ${dataAtual}
               <td>
                 <button class="btn-reativar-atendente btn btn-success btn-sm" data-id="${a.id}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-eye"></i> Reativar</button>
                 <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
-               </td>
-              </tr>
+              </td>
+             </tr>
           `;
         });
       }
       
       html += `
             </tbody>
-           </table>
+          </table>
         </div>
       `;
       
@@ -1950,6 +1944,7 @@ ${dataAtual}
       });
     }
     
+    // Função global de exclusão com confirmação (usada tanto no admin quanto na pesquisa)
     window.deletarOrcamento = async function(id, nomeCliente) {
       const confirmModal = document.createElement('div'); confirmModal.className = 'modal-overlay';
       confirmModal.innerHTML = `
@@ -1966,10 +1961,21 @@ ${dataAtual}
       document.body.appendChild(confirmModal);
       
       confirmModal.querySelector('#confirmDeleteBtn').onclick = async () => {
-        await deletarOrcamentoDoSupabase(id);
+        const sucesso = await deletarOrcamentoDoSupabase(id);
         confirmModal.remove();
-        if (window.renderizarDashboardAdmin) {
-          window.renderizarDashboardAdmin();
+        if (sucesso) {
+          // Após excluir, recarrega os dados e re-renderiza a tela ativa (admin ou pesquisa)
+          await carregarHistoricoDoSupabase();
+          if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#dashboardContent')) {
+            // Se o modal admin estiver aberto, atualiza ele
+            if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
+          } else if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#pesquisaContent')) {
+            // Se o modal de pesquisa estiver aberto, atualiza ele
+            renderizarPesquisaOrcamentos();
+          } else {
+            // Se nenhum modal aberto, apenas garantir que ambos possam ser atualizados depois
+            if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
+          }
         }
       };
       confirmModal.querySelector('#cancelDeleteBtn').onclick = () => confirmModal.remove();
@@ -1982,7 +1988,16 @@ ${dataAtual}
         orcamentoData.status = 'fechado';
         orcamentoData.justificativa = 'Convertido para venda via dashboard';
         const atualizado = await salvarComFallback(orcamentoData);
-        if(atualizado) alert(`✅ Orçamento de ${nomeCliente} marcado como VENDA REALIZADA!`);
+        if(atualizado) {
+          alert(`✅ Orçamento de ${nomeCliente} marcado como VENDA REALIZADA!`);
+          await carregarHistoricoDoSupabase();
+          // Atualiza a tela ativa
+          if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#dashboardContent')) {
+            if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
+          } else if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#pesquisaContent')) {
+            renderizarPesquisaOrcamentos();
+          }
+        }
       } else if (index !== -1 && historicoOrcamentosGlobal[index].status === 'fechado') {
         alert(`ℹ️ Este orçamento já está marcado como VENDA REALIZADA.`);
       } else {
@@ -2081,17 +2096,13 @@ ${dataAtual}
       
       container.innerHTML = html;
       
-      // Event listeners para os botões da lista de pesquisa
+      // Delegação de eventos para os botões da pesquisa (evita problemas com re-renderização)
       container.querySelectorAll('.btn-delete-single-pesquisa').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
+        btn.addEventListener('click', (e) => {
           e.preventDefault();
           const id = btn.getAttribute('data-id');
           const cliente = btn.getAttribute('data-cliente');
-          if (id && cliente && confirm(`Excluir orçamento de ${cliente}?`)) {
-            await deletarOrcamentoDoSupabase(id);
-            await carregarHistoricoDoSupabase();
-            renderizarPesquisaOrcamentos();
-          }
+          if (id && cliente) window.deletarOrcamento(id, cliente);
         });
       });
       
@@ -2115,8 +2126,6 @@ ${dataAtual}
           const cliente = btn.getAttribute('data-cliente');
           if (id && cliente) {
             await window.marcarComoVendaRealizada(id, cliente);
-            await carregarHistoricoDoSupabase();
-            renderizarPesquisaOrcamentos();
           }
         });
       });
@@ -2375,16 +2384,13 @@ ${dataAtual}
         };
       }
       
+      // Eventos para os botões individuais (delegação via listeners diretos)
       document.querySelectorAll('.btn-delete-single').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
+        btn.addEventListener('click', (e) => {
           e.preventDefault();
           const id = btn.getAttribute('data-id');
           const cliente = btn.getAttribute('data-cliente');
-          if (id && cliente && confirm(`Excluir orçamento de ${cliente}?`)) {
-            await deletarOrcamentoDoSupabase(id);
-            await carregarHistoricoDoSupabase();
-            window.renderizarDashboardAdmin();
-          }
+          if (id && cliente) window.deletarOrcamento(id, cliente);
         });
       });
       
@@ -2408,8 +2414,6 @@ ${dataAtual}
           const cliente = btn.getAttribute('data-cliente');
           if (id && cliente) {
             await window.marcarComoVendaRealizada(id, cliente);
-            await carregarHistoricoDoSupabase();
-            window.renderizarDashboardAdmin();
           }
         });
       });
@@ -2603,6 +2607,7 @@ ${dataAtual}
       };
       
       const dashboardContent = adminModal.querySelector('#dashboardContent');
+      // Usamos delegação de eventos no container para evitar problemas de eventos perdidos
       dashboardContent.addEventListener('click', (e) => {
         const deleteBtn = e.target.closest('.btn-delete-single');
         if (deleteBtn) {
