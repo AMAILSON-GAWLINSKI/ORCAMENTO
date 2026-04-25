@@ -193,14 +193,39 @@
     .add-orc-btn:hover { background: #fde5d4; border-color: #fc5404; }
     .valor-input-hint { font-size: 0.8rem; color: #1e4620; background: #e8f5e9; padding: 8px 14px; border-radius: 20px; margin-top: 12px; font-weight: 600; }
     .field-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
-    .admin-btn { 
-      position: fixed; bottom: 20px; right: 20px; background: #fc5404; color: white; 
-      border: none; border-radius: 50px; padding: 12px 20px; cursor: pointer; 
-      font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 99; 
-      transition: transform 0.2s; display: none;
+    
+    /* Botões de acesso */
+    .admin-btn, .consulta-btn, .pesquisa-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #fc5404;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 99;
+      transition: transform 0.2s;
+      display: none;
+      align-items: center;
+      gap: 8px;
     }
-    .admin-btn.visible { display: flex; align-items: center; gap: 8px; }
+    .pesquisa-btn {
+      background: #3498db;
+      bottom: 20px;
+      right: 20px;
+    }
+    .consulta-btn {
+      background: #3498db;
+      bottom: 90px;
+      right: 20px;
+    }
+    .admin-btn.visible, .consulta-btn.visible, .pesquisa-btn.visible { display: flex; }
     .admin-btn:hover { transform: scale(1.05); background: #e04a02; }
+    .consulta-btn:hover, .pesquisa-btn:hover { transform: scale(1.05); background: #2980b9; }
     
     /* Dashboard Admin Styles */
     .dashboard-container { max-width: 1400px; margin: 0 auto; }
@@ -226,7 +251,6 @@
     .badge-success { background: #25d366; color: white; }
     .badge-danger { background: #e74c3c; color: white; }
     .badge-warning { background: #f39c12; color: white; }
-    .badge-hidden { background: #95a5a6; color: white; }
     .justificativa-list { background: #fff6e5; border-left: 4px solid #f39c12; padding: 12px 16px; margin: 12px 0; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
     .refresh-btn { background: #fc5404; color: white; border: none; border-radius: 40px; padding: 10px 24px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; transition: transform 0.2s; }
     .refresh-btn:hover { transform: scale(1.02); background: #e04a02; }
@@ -246,7 +270,6 @@
     .filter-group label { font-size: 0.7rem; margin-bottom: 4px; display: block; font-weight: 600; color: #475569; }
     .filter-group input, .filter-group select { padding: 10px 12px; font-size: 0.85rem; }
     
-    /* Sugestões dropdown */
     .suggestions-dropdown {
       position: absolute;
       top: 100%;
@@ -272,11 +295,9 @@
     .suggestion-item:hover { background: #fef3e8; }
     .suggestion-item:last-child { border-bottom: none; }
     
-    /* Campo concorrente */
     .concorrente-group { margin-top: 8px; }
     .concorrente-group input { margin-top: 4px; }
     
-    /* Lista de orçamentos no dashboard */
     .orcamentos-list { margin-top: 20px; }
     .orcamento-card { background: white; border-radius: 20px; padding: 16px; margin-bottom: 12px; border: 1px solid #eef2f8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; transition: all 0.2s; }
     .orcamento-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
@@ -287,7 +308,6 @@
     .status-nao-fechado { background: #e74c3c20; color: #c0392b; }
     .btn-group { display: flex; gap: 8px; }
     
-    /* Tabela de atendentes */
     .atendentes-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     .atendentes-table th, .atendentes-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eef2f8; }
     .atendentes-table th { background: #fc5404; color: white; font-weight: 600; }
@@ -295,7 +315,6 @@
     .status-ativo { color: #25d366; font-weight: 600; }
     .status-oculto { color: #e74c3c; font-weight: 600; }
     
-    /* Abas do Dashboard Admin */
     .dashboard-tabs {
       display: flex;
       gap: 8px;
@@ -328,7 +347,7 @@
     
     @media print {
       body { background: white; padding: 0; margin: 0; }
-      .stepper, .nav-buttons, .action-buttons, .admin-btn, .btn, .add-orc-btn, .btn-remove-orc, .module-header, #backToStep3Edit, #finalizarOrcamentoBtn, #adminAccessBtn, .logout-btn-container, .loading-overlay, .offline-indicator { display: none !important; }
+      .stepper, .nav-buttons, .action-buttons, .admin-btn, .consulta-btn, .pesquisa-btn, .btn, .add-orc-btn, .btn-remove-orc, .module-header, #backToStep3Edit, #finalizarOrcamentoBtn, #adminAccessBtn, #consultaAccessBtn, #pesquisaAccessBtn, .logout-btn-container, .loading-overlay, .offline-indicator { display: none !important; }
       .module-card { display: block !important; box-shadow: none; padding: 0; margin: 0; }
       .module-card.active-step { display: block !important; }
       .summary-title { background: #fc5404; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -410,6 +429,7 @@
   </div>
 </div>
 <button class="admin-btn" id="adminAccessBtn"><i class="fas fa-chart-line"></i> Área Admin</button>
+<button class="pesquisa-btn" id="pesquisaAccessBtn"><i class="fas fa-search"></i> Pesquisa de Orçamento</button>
 
 <script>
   (function() {
@@ -490,7 +510,7 @@
       }
       
       updateNavButtons();
-      toggleAdminButton();
+      toggleAccessButtons();
     }
     
     function salvarAtendentes() {
@@ -887,11 +907,11 @@
       document.getElementById('nextToStep3').disabled = !validateStep2(); 
     }
     
-    function toggleAdminButton() {
+    function toggleAccessButtons() {
       const adminBtn = document.getElementById('adminAccessBtn');
+      const pesquisaBtn = document.getElementById('pesquisaAccessBtn');
       let atendente = atendenteSelect.value;
       
-      // Se o select estiver vazio, tentar recuperar do localStorage
       if (!atendente || atendente === '') {
         const usuarioSalvo = localStorage.getItem('usuarioLogado');
         if (usuarioSalvo) {
@@ -904,8 +924,13 @@
       
       if (atendente === 'Jaúna Constante' || atendente === 'Jaciara Constante') {
         adminBtn.classList.add('visible');
+        pesquisaBtn.classList.remove('visible');
+      } else if (atendente && atendente !== '') {
+        adminBtn.classList.remove('visible');
+        pesquisaBtn.classList.add('visible');
       } else {
         adminBtn.classList.remove('visible');
+        pesquisaBtn.classList.remove('visible');
       }
     }
     
@@ -971,14 +996,14 @@
     
     atendenteSelect.addEventListener('change', () => {
       updateNavButtons();
-      toggleAdminButton();
+      toggleAccessButtons();
     });
     clientName.addEventListener('input',updateNavButtons);
     clientAge.addEventListener('input',updateNavButtons);
     clientPhone.addEventListener('input',updateNavButtons);
     clientSource.addEventListener('change',updateNavButtons);
     updateNavButtons();
-    toggleAdminButton();
+    toggleAccessButtons();
     
     function getEmptyOrcamento() { 
       return { 
@@ -1347,7 +1372,7 @@
       updateOrcamentoIdDisplay();
       modoEdicao = false;
       orcamentoEditandoId = null;
-      toggleAdminButton();
+      toggleAccessButtons();
       
       goToStep(1);
     }
@@ -1687,11 +1712,11 @@ ${dataAtual}
       if (!usuarioFoiPreenchido) {
         goToStep(1);
       } else {
-        toggleAdminButton();
+        toggleAccessButtons();
       }
     });
     
-    // ========== FUNÇÕES DO DASHBOARD ADMIN ==========
+    // ========== FUNÇÕES DO DASHBOARD ADMIN (COMPLETO COM GRÁFICOS E ESTATÍSTICAS) ==========
     
     function renderizarGestaoAtendentes(container) {
       const ativos = atendentes.filter(a => a.ativo === true);
@@ -1718,14 +1743,14 @@ ${dataAtual}
             <td><strong>${escapeHtml(a.nome)}</strong></td>
             <td>${escapeHtml(a.email)}</td>
             <td>${escapeHtml(a.login || '')}</td>
-            <td>••••••••</td>
+            <td>••••••••</span></td>
             <td><span class="status-ativo">● Ativo</span></td>
             <td>
               <button class="btn-edit-atendente btn btn-edit btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" data-email="${escapeHtml(a.email)}" data-login="${escapeHtml(a.login || '')}" data-senha="${escapeHtml(a.senha)}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-edit"></i> Editar</button>
               <button class="btn-ocultar-atendente btn btn-warning btn-sm" data-id="${a.id}" style="padding: 4px 10px; background: #f39c12; border-color: #f39c12;"><i class="fas fa-eye-slash"></i> Ocultar</button>
               <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
             </td>
-           </tr>
+            </tr>
         `;
       });
       
@@ -1748,13 +1773,13 @@ ${dataAtual}
               <td><strong>${escapeHtml(a.nome)}</strong></td>
               <td>${escapeHtml(a.email)}</td>
               <td>${escapeHtml(a.login || '')}</td>
-              <td>••••••••</td>
+              <td>••••••••</span></td>
               <td><span class="status-oculto">● Oculto</span></td>
               <td>
                 <button class="btn-reativar-atendente btn btn-success btn-sm" data-id="${a.id}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-eye"></i> Reativar</button>
                 <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
-              </td>
-             </tr>
+               </td>
+              </tr>
           `;
         });
       }
@@ -1943,8 +1968,8 @@ ${dataAtual}
       confirmModal.querySelector('#confirmDeleteBtn').onclick = async () => {
         await deletarOrcamentoDoSupabase(id);
         confirmModal.remove();
-        if (window.renderizarDashboardComFiltrosAtual) {
-          window.renderizarDashboardComFiltrosAtual();
+        if (window.renderizarDashboardAdmin) {
+          window.renderizarDashboardAdmin();
         }
       };
       confirmModal.querySelector('#cancelDeleteBtn').onclick = () => confirmModal.remove();
@@ -1971,7 +1996,134 @@ ${dataAtual}
       carregarOrcamentoParaEdicao(orcamento);
     };
     
-    window.renderizarDashboardComFiltrosAtual = function() {
+    // Função para renderizar a PESQUISA DE ORÇAMENTOS (apenas listagem com filtros, sem estatísticas e gráficos)
+    function renderizarPesquisaOrcamentos() {
+      const container = document.getElementById('pesquisaContent');
+      if (!container) return;
+      
+      let data = [...historicoOrcamentosGlobal];
+      
+      const filtroPeriodo = document.getElementById('pesquisaFiltroPeriodo')?.value || 'todos';
+      const filtroMes = document.getElementById('pesquisaFiltroMes')?.value;
+      const filtroAno = document.getElementById('pesquisaFiltroAno')?.value;
+      const filtroValorTipo = document.getElementById('pesquisaFiltroValorTipo')?.value || 'todos';
+      const filtroValorComp = parseCurrency(document.getElementById('pesquisaFiltroValorComp')?.value || '0');
+      const filtroIdade = document.getElementById('pesquisaFiltroIdade')?.value;
+      const filtroCliente = document.getElementById('pesquisaFiltroCliente')?.value?.toLowerCase() || '';
+      const filtroIdOrcamento = document.getElementById('pesquisaFiltroIdOrcamento')?.value?.toLowerCase() || '';
+      
+      if (filtroPeriodo === 'mes' && filtroMes) {
+        const [ano, mes] = filtroMes.split('-');
+        data = data.filter(item => {
+          const d = new Date(item.dataRaw);
+          return d.getFullYear() === parseInt(ano) && (d.getMonth() + 1) === parseInt(mes);
+        });
+      } else if (filtroPeriodo === 'ano' && filtroAno) {
+        data = data.filter(item => new Date(item.dataRaw).getFullYear() === parseInt(filtroAno));
+      }
+      
+      if (filtroValorTipo !== 'todos' && filtroValorComp > 0) {
+        data = data.filter(item => {
+          const val = item.totalFinal || 0;
+          if (filtroValorTipo === 'maior') return val > filtroValorComp;
+          if (filtroValorTipo === 'menor') return val < filtroValorComp;
+          if (filtroValorTipo === 'igual') return Math.abs(val - filtroValorComp) < 0.01;
+          return true;
+        });
+      }
+      
+      if (filtroIdade && filtroIdade !== '') {
+        data = data.filter(item => item.idade && item.idade.toString() === filtroIdade);
+      }
+      
+      if (filtroCliente && filtroCliente !== '') {
+        data = data.filter(item => item.cliente && item.cliente.toLowerCase().includes(filtroCliente));
+      }
+      
+      if (filtroIdOrcamento && filtroIdOrcamento !== '') {
+        data = data.filter(item => item.id && item.id.toLowerCase().includes(filtroIdOrcamento));
+      }
+      
+      if (!data || !data.length) {
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-search"></i> Nenhum orçamento encontrado com os filtros aplicados.</div>`;
+        return;
+      }
+      
+      let html = `<div class="orcamentos-list" id="listaOrcamentosPesquisa">`;
+      
+      data.forEach(item => {
+        const statusClass = item.status === 'fechado' ? 'status-fechado' : 'status-nao-fechado';
+        const statusText = item.status === 'fechado' ? '✅ VENDA REALIZADA' : '❌ NÃO FINALIZADO';
+        const origemTexto = item.origem || 'Não informado';
+        const concorrenteTexto = item.concorrente ? ` (${item.concorrente})` : '';
+        const dataExibicao = item.data || (item.dataRaw ? new Date(item.dataRaw).toLocaleString('pt-BR') : 'Data não registrada');
+        html += `
+          <div class="orcamento-card" data-id="${escapeHtml(item.id)}">
+            <div class="orcamento-info">
+              <strong>${escapeHtml(item.id)}</strong><br>
+              <span>👤 ${escapeHtml(item.cliente)}</span> | 
+              <span>📅 ${escapeHtml(dataExibicao)}</span> | 
+              <span>💰 ${formatMoneyWithSymbol(item.totalFinal)}</span> | 
+              <span>👨‍💼 ${escapeHtml(item.atendente)}</span> |
+              <span>📍 ${escapeHtml(origemTexto)}${escapeHtml(concorrenteTexto)}</span>
+              ${item.idade ? `<span> | 🎂 ${escapeHtml(item.idade)} anos</span>` : ''}
+            </div>
+            <div class="btn-group">
+              <span class="orcamento-status ${statusClass}">${statusText}</span>
+              <button class="btn-delete-single-pesquisa btn btn-delete" data-id="${escapeHtml(item.id)}" data-cliente="${escapeHtml(item.cliente)}"><i class="fas fa-trash"></i> Excluir</button>
+              <button class="btn-edit-single-pesquisa btn btn-edit" data-id="${escapeHtml(item.id)}"><i class="fas fa-edit"></i> Editar</button>
+              ${item.status !== 'fechado' ? `<button class="btn-sale-single-pesquisa btn btn-sale" data-id="${escapeHtml(item.id)}" data-cliente="${escapeHtml(item.cliente)}"><i class="fas fa-check-circle"></i> Venda Realizada</button>` : ''}
+            </div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+      
+      container.innerHTML = html;
+      
+      // Event listeners para os botões da lista de pesquisa
+      container.querySelectorAll('.btn-delete-single-pesquisa').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const id = btn.getAttribute('data-id');
+          const cliente = btn.getAttribute('data-cliente');
+          if (id && cliente && confirm(`Excluir orçamento de ${cliente}?`)) {
+            await deletarOrcamentoDoSupabase(id);
+            await carregarHistoricoDoSupabase();
+            renderizarPesquisaOrcamentos();
+          }
+        });
+      });
+      
+      container.querySelectorAll('.btn-edit-single-pesquisa').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const id = btn.getAttribute('data-id');
+          const orcamento = historicoOrcamentosGlobal.find(item => item.id === id);
+          if (orcamento) {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) modal.remove();
+            window.editarOrcamento(orcamento);
+          }
+        });
+      });
+      
+      container.querySelectorAll('.btn-sale-single-pesquisa').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const id = btn.getAttribute('data-id');
+          const cliente = btn.getAttribute('data-cliente');
+          if (id && cliente) {
+            await window.marcarComoVendaRealizada(id, cliente);
+            await carregarHistoricoDoSupabase();
+            renderizarPesquisaOrcamentos();
+          }
+        });
+      });
+    }
+    
+    // Função para renderizar o dashboard ADMIN completo (com todas as estatísticas)
+    window.renderizarDashboardAdmin = function() {
       const container = document.getElementById('dashboardContent');
       if (!container) return;
       
@@ -2122,7 +2274,6 @@ ${dataAtual}
         const statusText = item.status === 'fechado' ? '✅ VENDA REALIZADA' : '❌ NÃO FINALIZADO';
         const origemTexto = item.origem || 'Não informado';
         const concorrenteTexto = item.concorrente ? ` (${item.concorrente})` : '';
-        // CORREÇÃO: Garantir que a data seja exibida corretamente
         const dataExibicao = item.data || (item.dataRaw ? new Date(item.dataRaw).toLocaleString('pt-BR') : 'Data não registrada');
         html += `
           <div class="orcamento-card" data-id="${escapeHtml(item.id)}">
@@ -2218,47 +2369,79 @@ ${dataAtual}
             hideLoading();
             alert(`✅ ${idsSelecionados.length} orçamento(s) excluído(s) com sucesso!`);
             confirmModal.remove();
-            window.renderizarDashboardComFiltrosAtual();
+            window.renderizarDashboardAdmin();
           };
           confirmModal.querySelector('#cancelMassDeleteBtn').onclick = () => confirmModal.remove();
         };
       }
+      
+      document.querySelectorAll('.btn-delete-single').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const id = btn.getAttribute('data-id');
+          const cliente = btn.getAttribute('data-cliente');
+          if (id && cliente && confirm(`Excluir orçamento de ${cliente}?`)) {
+            await deletarOrcamentoDoSupabase(id);
+            await carregarHistoricoDoSupabase();
+            window.renderizarDashboardAdmin();
+          }
+        });
+      });
+      
+      document.querySelectorAll('.btn-edit-single').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const id = btn.getAttribute('data-id');
+          const orcamento = historicoOrcamentosGlobal.find(item => item.id === id);
+          if (orcamento) {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) modal.remove();
+            window.editarOrcamento(orcamento);
+          }
+        });
+      });
+      
+      document.querySelectorAll('.btn-sale-single').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const id = btn.getAttribute('data-id');
+          const cliente = btn.getAttribute('data-cliente');
+          if (id && cliente) {
+            await window.marcarComoVendaRealizada(id, cliente);
+            await carregarHistoricoDoSupabase();
+            window.renderizarDashboardAdmin();
+          }
+        });
+      });
     };
     
-    // ========== BOTÃO ADMIN CORRIGIDO ==========
+    // ========== BOTÃO ADMIN (para Jaúna e Jaciara - acesso total) ==========
     document.getElementById('adminAccessBtn').addEventListener('click', async () => {
-      // CORREÇÃO: Verificação robusta do atendente
       let atendenteAtual = atendenteSelect?.value;
       
-      // Se o select estiver vazio, tentar recuperar do localStorage
       if (!atendenteAtual || atendenteAtual === '') {
         const usuarioSalvo = localStorage.getItem('usuarioLogado');
         if (usuarioSalvo) {
           try {
             const user = JSON.parse(usuarioSalvo);
             atendenteAtual = user.nome;
-            // Sincronizar o select
             if (atendenteSelect) {
               const optionExists = Array.from(atendenteSelect.options).some(opt => opt.value === atendenteAtual);
               if (optionExists) {
                 atendenteSelect.value = atendenteAtual;
               }
             }
-          } catch(e) {
-            console.error('Erro ao recuperar usuário logado:', e);
-          }
+          } catch(e) {}
         }
       }
       
-      // Verificação final
       if (atendenteAtual !== 'Jaúna Constante' && atendenteAtual !== 'Jaciara Constante') {
-        alert('⚠️ Acesso negado! O Dashboard Avançado está disponível apenas para as atendentes Jaúna Constante e Jaciara Constante.\n\nAtendente atual: ' + (atendenteAtual || 'Nenhum'));
+        alert('⚠️ Acesso negado! O Dashboard Avançado está disponível apenas para as atendentes Jaúna Constante e Jaciara Constante.');
         return;
       }
       
       await carregarHistoricoDoSupabase();
       
-      // Gerar opções de meses e anos
       const mesesOptions = [];
       const anosSet = new Set();
       historicoOrcamentosGlobal.forEach(item => {
@@ -2355,7 +2538,6 @@ ${dataAtual}
       `;
       document.body.appendChild(adminModal);
       
-      // Configurar tabs
       const tabs = adminModal.querySelectorAll('.tab-btn');
       const panes = adminModal.querySelectorAll('.tab-pane');
       tabs.forEach(tab => {
@@ -2368,7 +2550,6 @@ ${dataAtual}
         });
       });
       
-      // Configurar filtros
       const periodoSelect = adminModal.querySelector('#filtroPeriodo');
       const grupoMes = adminModal.querySelector('#grupoFiltroMes');
       const grupoAno = adminModal.querySelector('#grupoFiltroAno');
@@ -2377,48 +2558,47 @@ ${dataAtual}
         const val = periodoSelect.value;
         grupoMes.style.display = val === 'mes' ? 'block' : 'none';
         grupoAno.style.display = val === 'ano' ? 'block' : 'none';
-        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
       });
       
       adminModal.querySelector('#filtroMes')?.addEventListener('change', () => {
-        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
       });
       adminModal.querySelector('#filtroAno')?.addEventListener('change', () => {
-        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
       });
       adminModal.querySelector('#filtroValorTipo')?.addEventListener('change', () => {
-        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
       });
       adminModal.querySelector('#filtroValorComp')?.addEventListener('blur', function() {
         this.value = formatMoneyWithThousand(parseCurrency(this.value));
-        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
       });
       adminModal.querySelector('#filtroIdade')?.addEventListener('input', () => {
-        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
       });
       adminModal.querySelector('#filtroCliente')?.addEventListener('input', () => {
-        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
       });
       adminModal.querySelector('#filtroIdOrcamento')?.addEventListener('input', () => {
-        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
       });
       
-      // Sugestões
       const idsUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.id))];
       createSuggestionsDropdown('filtroIdOrcamento', 
         (value) => idsUnicos.filter(id => id.toLowerCase().includes(value)).slice(0, 10),
-        (selected) => { if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual(); }
+        (selected) => { if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin(); }
       );
       
       const clientesUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.cliente))];
       createSuggestionsDropdown('filtroCliente',
         (value) => clientesUnicos.filter(nome => nome && nome.toLowerCase().includes(value)).slice(0, 10),
-        (selected) => { if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual(); }
+        (selected) => { if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin(); }
       );
       
       adminModal.querySelector('#refreshDashboardBtnAdmin').onclick = async () => {
         await carregarHistoricoDoSupabase();
-        if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
         renderizarGestaoAtendentes(adminModal.querySelector('#gestaoAtendentesContainer'));
       };
       
@@ -2458,10 +2638,166 @@ ${dataAtual}
         }
       });
       
-      if (window.renderizarDashboardComFiltrosAtual) window.renderizarDashboardComFiltrosAtual();
+      if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
       renderizarGestaoAtendentes(adminModal.querySelector('#gestaoAtendentesContainer'));
       
       adminModal.querySelector('#closeAdminBtn').onclick = () => adminModal.remove();
+    });
+    
+    // ========== BOTÃO PESQUISA DE ORÇAMENTO (para atendentes não admin - apenas listagem) ==========
+    document.getElementById('pesquisaAccessBtn').addEventListener('click', async () => {
+      let atendenteAtual = atendenteSelect?.value;
+      
+      if (!atendenteAtual || atendenteAtual === '') {
+        const usuarioSalvo = localStorage.getItem('usuarioLogado');
+        if (usuarioSalvo) {
+          try {
+            const user = JSON.parse(usuarioSalvo);
+            atendenteAtual = user.nome;
+            if (atendenteSelect) {
+              const optionExists = Array.from(atendenteSelect.options).some(opt => opt.value === atendenteAtual);
+              if (optionExists) {
+                atendenteSelect.value = atendenteAtual;
+              }
+            }
+          } catch(e) {}
+        }
+      }
+      
+      if (atendenteAtual === 'Jaúna Constante' || atendenteAtual === 'Jaciara Constante') {
+        alert('⚠️ Você é administradora. Utilize o botão "Área Admin" para acesso completo.');
+        return;
+      }
+      
+      await carregarHistoricoDoSupabase();
+      
+      const mesesOptions = [];
+      const anosSet = new Set();
+      historicoOrcamentosGlobal.forEach(item => {
+        if (item.dataRaw) {
+          const d = new Date(item.dataRaw);
+          if (!isNaN(d)) {
+            const key = `${d.getFullYear()}-${d.getMonth()+1}`;
+            const label = d.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+            if (!mesesOptions.find(m => m.value === key)) {
+              mesesOptions.push({ value: key, label: label });
+            }
+            anosSet.add(d.getFullYear());
+          }
+        }
+      });
+      mesesOptions.sort((a,b) => b.value.localeCompare(a.value));
+      const anosOptions = Array.from(anosSet).sort((a,b) => b - a);
+      
+      let pesquisaModal = document.createElement('div'); pesquisaModal.className = 'modal-overlay';
+      pesquisaModal.innerHTML = `
+        <div class="modal-content" style="max-width:1200px;">
+          <div class="dashboard-container" style="width:100%;">
+            <div class="dashboard-header">
+              <h1><i class="fas fa-search"></i> Pesquisa de Orçamentos</h1>
+              <p style="color:#666; margin-top:8px;">Consulta de todos os orçamentos realizados - ${escapeHtml(atendenteAtual)}</p>
+              <button class="refresh-btn" id="refreshPesquisaBtn"><i class="fas fa-sync-alt"></i> Atualizar Dados</button>
+            </div>
+            
+            <div class="filter-bar">
+              <div class="filter-group">
+                <label>📅 Período:</label>
+                <select id="pesquisaFiltroPeriodo">
+                  <option value="todos">Todos os períodos</option>
+                  <option value="mes">Mês específico</option>
+                  <option value="ano">Ano específico</option>
+                </select>
+              </div>
+              <div class="filter-group" id="pesquisaGrupoFiltroMes" style="display:none;">
+                <label>📆 Selecionar Mês/Ano:</label>
+                <select id="pesquisaFiltroMes">
+                  <option value="">Selecione...</option>
+                  ${mesesOptions.map(m => `<option value="${m.value}">${m.label}</option>`).join('')}
+                </select>
+              </div>
+              <div class="filter-group" id="pesquisaGrupoFiltroAno" style="display:none;">
+                <label>📆 Selecionar Ano:</label>
+                <select id="pesquisaFiltroAno">
+                  <option value="">Selecione...</option>
+                  ${anosOptions.map(a => `<option value="${a}">${a}</option>`).join('')}
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>💰 Filtrar por valor:</label>
+                <select id="pesquisaFiltroValorTipo">
+                  <option value="todos">Todos</option>
+                  <option value="maior">Maior que</option>
+                  <option value="menor">Menor que</option>
+                  <option value="igual">Igual a</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>&nbsp;</label>
+                <input type="text" id="pesquisaFiltroValorComp" placeholder="R$ 0,00">
+              </div>
+              <div class="filter-group">
+                <label>🎂 Idade exata:</label>
+                <input type="text" id="pesquisaFiltroIdade" placeholder="Digite a idade">
+              </div>
+              <div class="filter-group">
+                <label>👤 Nome do cliente:</label>
+                <input type="text" id="pesquisaFiltroCliente" placeholder="Buscar por nome">
+              </div>
+              <div class="filter-group">
+                <label>🆔 ID do Orçamento:</label>
+                <input type="text" id="pesquisaFiltroIdOrcamento" placeholder="Buscar por ID">
+              </div>
+            </div>
+            
+            <div id="pesquisaContent"><div class="empty-state"><i class="fas fa-spinner fa-pulse"></i> Carregando...</div></div>
+          </div>
+          <div class="modal-buttons-row"><button id="closePesquisaBtn" class="btn btn-primary">Fechar</button></div>
+        </div>
+      `;
+      document.body.appendChild(pesquisaModal);
+      
+      const periodoSelect = pesquisaModal.querySelector('#pesquisaFiltroPeriodo');
+      const grupoMes = pesquisaModal.querySelector('#pesquisaGrupoFiltroMes');
+      const grupoAno = pesquisaModal.querySelector('#pesquisaGrupoFiltroAno');
+      
+      periodoSelect.addEventListener('change', () => {
+        const val = periodoSelect.value;
+        grupoMes.style.display = val === 'mes' ? 'block' : 'none';
+        grupoAno.style.display = val === 'ano' ? 'block' : 'none';
+        renderizarPesquisaOrcamentos();
+      });
+      
+      pesquisaModal.querySelector('#pesquisaFiltroMes')?.addEventListener('change', () => renderizarPesquisaOrcamentos());
+      pesquisaModal.querySelector('#pesquisaFiltroAno')?.addEventListener('change', () => renderizarPesquisaOrcamentos());
+      pesquisaModal.querySelector('#pesquisaFiltroValorTipo')?.addEventListener('change', () => renderizarPesquisaOrcamentos());
+      pesquisaModal.querySelector('#pesquisaFiltroValorComp')?.addEventListener('blur', function() {
+        this.value = formatMoneyWithThousand(parseCurrency(this.value));
+        renderizarPesquisaOrcamentos();
+      });
+      pesquisaModal.querySelector('#pesquisaFiltroIdade')?.addEventListener('input', () => renderizarPesquisaOrcamentos());
+      pesquisaModal.querySelector('#pesquisaFiltroCliente')?.addEventListener('input', () => renderizarPesquisaOrcamentos());
+      pesquisaModal.querySelector('#pesquisaFiltroIdOrcamento')?.addEventListener('input', () => renderizarPesquisaOrcamentos());
+      
+      const idsUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.id))];
+      createSuggestionsDropdown('pesquisaFiltroIdOrcamento', 
+        (value) => idsUnicos.filter(id => id.toLowerCase().includes(value)).slice(0, 10),
+        (selected) => renderizarPesquisaOrcamentos()
+      );
+      
+      const clientesUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.cliente))];
+      createSuggestionsDropdown('pesquisaFiltroCliente',
+        (value) => clientesUnicos.filter(nome => nome && nome.toLowerCase().includes(value)).slice(0, 10),
+        (selected) => renderizarPesquisaOrcamentos()
+      );
+      
+      pesquisaModal.querySelector('#refreshPesquisaBtn').onclick = async () => {
+        await carregarHistoricoDoSupabase();
+        renderizarPesquisaOrcamentos();
+      };
+      
+      renderizarPesquisaOrcamentos();
+      
+      pesquisaModal.querySelector('#closePesquisaBtn').onclick = () => pesquisaModal.remove();
     });
     
     window.addEventListener('beforeunload', (e) => {
