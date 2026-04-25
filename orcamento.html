@@ -443,7 +443,7 @@
     let pendingSyncData = [];
     let isOnline = navigator.onLine;
     
-    // ========== GERENCIAMENTO DE ATENDENTES (COM SENHA E LOGIN) ==========
+    // ========== GERENCIAMENTO DE ATENDENTES ==========
     let atendentes = [];
     
     const DEFAULT_ATENDENTES = [
@@ -559,14 +559,6 @@
     function deletarAtendente(id) {
       atendentes = atendentes.filter(a => a.id !== id);
       salvarAtendentes();
-    }
-    
-    function verificarSenhaAtendente(nome, senha) {
-      const atendente = atendentes.find(a => a.nome === nome && a.ativo === true);
-      if (atendente && atendente.senha === senha) {
-        return true;
-      }
-      return false;
     }
     
     function sincronizarAtendenteAtual() {
@@ -750,9 +742,12 @@
         
         if (error) throw error;
         
+        // CORREÇÃO: mapear os campos snake_case para camelCase
         historicoOrcamentosGlobal = data.map(item => ({
           ...item,
           itens: typeof item.itens === 'string' ? JSON.parse(item.itens) : item.itens,
+          totalFinal: item.total_final,
+          descontoGeral: item.desconto_geral,
           dataRaw: item.data_raw || item.created_at,
           data: new Date(item.created_at).toLocaleString('pt-BR')
         }));
@@ -1371,13 +1366,29 @@
       goToStep(1);
     }
     
+    // ========== FUNÇÃO DE EDIÇÃO COM TRANSFERÊNCIA DE ATENDENTE ==========
     function carregarOrcamentoParaEdicao(orcamento) {
       modoEdicao = true;
       orcamentoEditandoId = orcamento.id;
       currentOrcamentoId = orcamento.id;
       jaPassouStep1 = true;
       
-      atendenteSelect.value = orcamento.atendente;
+      // 🔁 ALTERAÇÃO PRINCIPAL: ao editar um orçamento, o atendente passa a ser o usuário logado (quem está editando)
+      let novoAtendente = null;
+      const usuarioSalvo = localStorage.getItem('usuarioLogado');
+      if (usuarioSalvo) {
+        try {
+          const user = JSON.parse(usuarioSalvo);
+          novoAtendente = user.nome;
+        } catch(e) {}
+      }
+      // Caso não consiga obter o usuário logado (fallback), mantém o atendente original
+      if (novoAtendente && atendentes.some(a => a.nome === novoAtendente && a.ativo === true)) {
+        atendenteSelect.value = novoAtendente;
+      } else {
+        atendenteSelect.value = orcamento.atendente;
+      }
+      
       clientName.value = orcamento.cliente;
       clientAge.value = orcamento.idade || '';
       clientPhone.value = orcamento.telefone || '';
@@ -1397,7 +1408,7 @@
       updateOrcamentoIdDisplay();
       goToStep(3);
       
-      alert(`Editando orçamento: ${orcamento.id}\nCliente: ${orcamento.cliente}\nStatus atual: ${orcamento.status === 'fechado' ? 'FECHADO' : 'NÃO FINALIZADO'}\n\nVocê pode modificar os itens e finalizar novamente.`);
+      alert(`Editando orçamento: ${orcamento.id}\nCliente: ${orcamento.cliente}\nAtendente alterado para: ${atendenteSelect.value}\nStatus atual: ${orcamento.status === 'fechado' ? 'FECHADO' : 'NÃO FINALIZADO'}\n\nVocê pode modificar os itens e finalizar novamente.`);
     }
     
     function formatPhoneForWhatsApp(phone) {
@@ -1713,6 +1724,8 @@ ${dataAtual}
     // ========== FUNÇÕES DE APOIO ==========
     
     function renderizarGestaoAtendentes(container) {
+      if (!container) return;
+      
       const ativos = atendentes.filter(a => a.ativo === true);
       const ocultos = atendentes.filter(a => a.ativo === false);
       
@@ -1726,7 +1739,7 @@ ${dataAtual}
           <h4 style="margin-bottom: 15px; color: #1e293b;">📋 Atendentes Ativos</h4>
           <table class="atendentes-table">
             <thead>
-              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Senha</th><th>Status</th><th>Ações</th>
+              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Senha</th><th>Status</th><th>Ações</th></tr>
             </thead>
             <tbody>
       `;
@@ -1737,13 +1750,13 @@ ${dataAtual}
             <td><strong>${escapeHtml(a.nome)}</strong></td>
             <td>${escapeHtml(a.email)}</td>
             <td>${escapeHtml(a.login || '')}</td>
-            <td>••••••••</span></td>
+            <td>••••••••</td>
             <td><span class="status-ativo">● Ativo</span></td>
             <td>
               <button class="btn-edit-atendente btn btn-edit btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" data-email="${escapeHtml(a.email)}" data-login="${escapeHtml(a.login || '')}" data-senha="${escapeHtml(a.senha)}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-edit"></i> Editar</button>
               <button class="btn-ocultar-atendente btn btn-warning btn-sm" data-id="${a.id}" style="padding: 4px 10px; background: #f39c12; border-color: #f39c12;"><i class="fas fa-eye-slash"></i> Ocultar</button>
               <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
-            </td>
+              </td>
             </tr>
         `;
       });
@@ -1756,7 +1769,7 @@ ${dataAtual}
           <h4 style="margin: 25px 0 15px 0; color: #1e293b;">🔒 Atendentes Ocultos</h4>
           <table class="atendentes-table">
             <thead>
-              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Senha</th><th>Status</th><th>Ações</th>
+              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Senha</th><th>Status</th><th>Ações</th></tr>
             </thead>
             <tbody>
         `;
@@ -1767,13 +1780,13 @@ ${dataAtual}
               <td><strong>${escapeHtml(a.nome)}</strong></td>
               <td>${escapeHtml(a.email)}</td>
               <td>${escapeHtml(a.login || '')}</td>
-              <td>••••••••</span></td>
+              <td>••••••••</td>
               <td><span class="status-oculto">● Oculto</span></td>
               <td>
                 <button class="btn-reativar-atendente btn btn-success btn-sm" data-id="${a.id}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-eye"></i> Reativar</button>
                 <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
-              </td>
-             </tr>
+               </td>
+            </tr>
           `;
         });
       }
@@ -1914,7 +1927,7 @@ ${dataAtual}
       
       input.addEventListener('input', function() {
         const value = this.value.toLowerCase();
-        if (value.length === 0) {
+        if (value.length === 0 || !getSuggestionsFn) {
           dropdown.classList.remove('show');
           return;
         }
@@ -1944,7 +1957,7 @@ ${dataAtual}
       });
     }
     
-    // Função global de exclusão SIMPLIFICADA (sem dupla confirmação - apenas um alerta)
+    // Função global de exclusão SIMPLIFICADA
     window.deletarOrcamento = async function(id, nomeCliente) {
       if (confirm(`⚠️ Confirmar exclusão do orçamento de "${nomeCliente}"?\n\nID: ${id}\n\nEsta ação não pode ser desfeita.`)) {
         showLoading();
@@ -1954,7 +1967,6 @@ ${dataAtual}
           alert(`✅ Orçamento de "${nomeCliente}" excluído com sucesso!`);
           await carregarHistoricoDoSupabase();
           
-          // Atualiza a tela ativa (admin ou pesquisa)
           if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#dashboardContent')) {
             if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
           } else if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#pesquisaContent')) {
@@ -1997,7 +2009,7 @@ ${dataAtual}
       carregarOrcamentoParaEdicao(orcamento);
     };
     
-    // Função para renderizar a PESQUISA DE ORÇAMENTOS (apenas listagem com filtros)
+    // Função para renderizar a PESQUISA DE ORÇAMENTOS (valor já aparece em cada card)
     function renderizarPesquisaOrcamentos() {
       const container = document.getElementById('pesquisaContent');
       if (!container) return;
@@ -2132,7 +2144,7 @@ ${dataAtual}
       }
       
       if (!data || !data.length) {
-        container.innerHTML = `<div class="empty-state"><i class="fas fa-chart-line"></i> Nenhum orçamento encontrado com os filtros aplicados.</div>`;
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-chart-line"></i> Nenhum orçamento encontrado com os filtros aplicados. ${historicoOrcamentosGlobal.length > 0 ? 'Tente remover os filtros.' : 'Não há orçamentos cadastrados ainda.'}</div>`;
         return;
       }
       
@@ -2326,7 +2338,7 @@ ${dataAtual}
       }
     }
     
-    // ========== BOTÃO ADMIN (para Jaúna e Jaciara - acesso total) ==========
+    // ========== BOTÃO ADMIN ==========
     document.getElementById('adminAccessBtn').addEventListener('click', async () => {
       let atendenteAtual = atendenteSelect?.value;
       
@@ -2454,12 +2466,14 @@ ${dataAtual}
       const grupoMes = adminModal.querySelector('#grupoFiltroMes');
       const grupoAno = adminModal.querySelector('#grupoFiltroAno');
       
-      periodoSelect.addEventListener('change', () => {
-        const val = periodoSelect.value;
-        grupoMes.style.display = val === 'mes' ? 'block' : 'none';
-        grupoAno.style.display = val === 'ano' ? 'block' : 'none';
-        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
-      });
+      if (periodoSelect) {
+        periodoSelect.addEventListener('change', () => {
+          const val = periodoSelect.value;
+          if (grupoMes) grupoMes.style.display = val === 'mes' ? 'block' : 'none';
+          if (grupoAno) grupoAno.style.display = val === 'ano' ? 'block' : 'none';
+          if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
+        });
+      }
       
       adminModal.querySelector('#filtroMes')?.addEventListener('change', () => { if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin(); });
       adminModal.querySelector('#filtroAno')?.addEventListener('change', () => { if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin(); });
@@ -2473,12 +2487,13 @@ ${dataAtual}
       adminModal.querySelector('#filtroIdOrcamento')?.addEventListener('input', () => { if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin(); });
       
       const idsUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.id))];
+      const clientesUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.cliente))];
+      
       createSuggestionsDropdown('filtroIdOrcamento', 
         (value) => idsUnicos.filter(id => id.toLowerCase().includes(value)).slice(0, 10),
         (selected) => { if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin(); }
       );
       
-      const clientesUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.cliente))];
       createSuggestionsDropdown('filtroCliente',
         (value) => clientesUnicos.filter(nome => nome && nome.toLowerCase().includes(value)).slice(0, 10),
         (selected) => { if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin(); }
@@ -2492,39 +2507,61 @@ ${dataAtual}
       
       // Delegação de eventos para os botões dinâmicos do admin
       const dashboardContent = adminModal.querySelector('#dashboardContent');
-      dashboardContent.addEventListener('click', (e) => {
-        const deleteBtn = e.target.closest('.btn-delete-single');
-        if (deleteBtn) {
-          e.preventDefault();
-          e.stopPropagation();
-          const id = deleteBtn.getAttribute('data-id');
-          const cliente = deleteBtn.getAttribute('data-cliente');
-          if (id && cliente) window.deletarOrcamento(id, cliente);
-          return;
-        }
-        
-        const editBtn = e.target.closest('.btn-edit-single');
-        if (editBtn) {
-          e.preventDefault();
-          e.stopPropagation();
-          const id = editBtn.getAttribute('data-id');
-          const orcamento = historicoOrcamentosGlobal.find(item => item.id === id);
-          if (orcamento) {
-            adminModal.remove();
-            window.editarOrcamento(orcamento);
+      if (dashboardContent) {
+        dashboardContent.addEventListener('click', (e) => {
+          const deleteBtn = e.target.closest('.btn-delete-single');
+          if (deleteBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = deleteBtn.getAttribute('data-id');
+            const cliente = deleteBtn.getAttribute('data-cliente');
+            if (id && cliente) window.deletarOrcamento(id, cliente);
+            return;
           }
-          return;
-        }
-        
-        const saleBtn = e.target.closest('.btn-sale-single');
-        if (saleBtn) {
-          e.preventDefault();
-          e.stopPropagation();
-          const id = saleBtn.getAttribute('data-id');
-          const cliente = saleBtn.getAttribute('data-cliente');
-          if (id && cliente) window.marcarComoVendaRealizada(id, cliente);
-          return;
-        }
+          
+          const editBtn = e.target.closest('.btn-edit-single');
+          if (editBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = editBtn.getAttribute('data-id');
+            const orcamento = historicoOrcamentosGlobal.find(item => item.id === id);
+            if (orcamento) {
+              adminModal.remove();
+              window.editarOrcamento(orcamento);
+            }
+            return;
+          }
+          
+          const saleBtn = e.target.closest('.btn-sale-single');
+          if (saleBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = saleBtn.getAttribute('data-id');
+            const cliente = saleBtn.getAttribute('data-cliente');
+            if (id && cliente) window.marcarComoVendaRealizada(id, cliente);
+            return;
+          }
+        });
+      }
+      
+      // Tabs do dashboard
+      const tabBtns = adminModal.querySelectorAll('.tab-btn');
+      const tabPanes = adminModal.querySelectorAll('.tab-pane');
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabId = btn.getAttribute('data-tab');
+          tabBtns.forEach(b => b.classList.remove('active'));
+          tabPanes.forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          const targetPane = adminModal.querySelector(`#tab-${tabId}`);
+          if (targetPane) targetPane.classList.add('active');
+          
+          if (tabId === 'atendentes') {
+            renderizarGestaoAtendentes(adminModal.querySelector('#gestaoAtendentesContainer'));
+          } else if (tabId === 'analytics' && window.renderizarDashboardAdmin) {
+            window.renderizarDashboardAdmin();
+          }
+        });
       });
       
       if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
@@ -2533,7 +2570,7 @@ ${dataAtual}
       adminModal.querySelector('#closeAdminBtn').onclick = () => adminModal.remove();
     });
     
-    // ========== BOTÃO PESQUISA DE ORÇAMENTO (para atendentes não admin) ==========
+    // ========== BOTÃO PESQUISA DE ORÇAMENTO ==========
     document.getElementById('pesquisaAccessBtn').addEventListener('click', async () => {
       let atendenteAtual = atendenteSelect?.value;
       
@@ -2650,12 +2687,14 @@ ${dataAtual}
       const grupoMes = pesquisaModal.querySelector('#pesquisaGrupoFiltroMes');
       const grupoAno = pesquisaModal.querySelector('#pesquisaGrupoFiltroAno');
       
-      periodoSelect.addEventListener('change', () => {
-        const val = periodoSelect.value;
-        grupoMes.style.display = val === 'mes' ? 'block' : 'none';
-        grupoAno.style.display = val === 'ano' ? 'block' : 'none';
-        renderizarPesquisaOrcamentos();
-      });
+      if (periodoSelect) {
+        periodoSelect.addEventListener('change', () => {
+          const val = periodoSelect.value;
+          if (grupoMes) grupoMes.style.display = val === 'mes' ? 'block' : 'none';
+          if (grupoAno) grupoAno.style.display = val === 'ano' ? 'block' : 'none';
+          renderizarPesquisaOrcamentos();
+        });
+      }
       
       pesquisaModal.querySelector('#pesquisaFiltroMes')?.addEventListener('change', () => renderizarPesquisaOrcamentos());
       pesquisaModal.querySelector('#pesquisaFiltroAno')?.addEventListener('change', () => renderizarPesquisaOrcamentos());
@@ -2667,6 +2706,9 @@ ${dataAtual}
       pesquisaModal.querySelector('#pesquisaFiltroIdade')?.addEventListener('input', () => renderizarPesquisaOrcamentos());
       pesquisaModal.querySelector('#pesquisaFiltroCliente')?.addEventListener('input', () => renderizarPesquisaOrcamentos());
       pesquisaModal.querySelector('#pesquisaFiltroIdOrcamento')?.addEventListener('input', () => renderizarPesquisaOrcamentos());
+      
+      const idsUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.id))];
+      const clientesUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.cliente))];
       
       createSuggestionsDropdown('pesquisaFiltroIdOrcamento', 
         (value) => idsUnicos.filter(id => id.toLowerCase().includes(value)).slice(0, 10),
@@ -2685,40 +2727,42 @@ ${dataAtual}
       
       // Delegação de eventos para os botões dinâmicos da pesquisa
       const pesquisaContent = pesquisaModal.querySelector('#pesquisaContent');
-      pesquisaContent.addEventListener('click', (e) => {
-        const deleteBtn = e.target.closest('.btn-delete-single-pesquisa');
-        if (deleteBtn) {
-          e.preventDefault();
-          e.stopPropagation();
-          const id = deleteBtn.getAttribute('data-id');
-          const cliente = deleteBtn.getAttribute('data-cliente');
-          if (id && cliente) window.deletarOrcamento(id, cliente);
-          return;
-        }
-        
-        const editBtn = e.target.closest('.btn-edit-single-pesquisa');
-        if (editBtn) {
-          e.preventDefault();
-          e.stopPropagation();
-          const id = editBtn.getAttribute('data-id');
-          const orcamento = historicoOrcamentosGlobal.find(item => item.id === id);
-          if (orcamento) {
-            pesquisaModal.remove();
-            window.editarOrcamento(orcamento);
+      if (pesquisaContent) {
+        pesquisaContent.addEventListener('click', (e) => {
+          const deleteBtn = e.target.closest('.btn-delete-single-pesquisa');
+          if (deleteBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = deleteBtn.getAttribute('data-id');
+            const cliente = deleteBtn.getAttribute('data-cliente');
+            if (id && cliente) window.deletarOrcamento(id, cliente);
+            return;
           }
-          return;
-        }
-        
-        const saleBtn = e.target.closest('.btn-sale-single-pesquisa');
-        if (saleBtn) {
-          e.preventDefault();
-          e.stopPropagation();
-          const id = saleBtn.getAttribute('data-id');
-          const cliente = saleBtn.getAttribute('data-cliente');
-          if (id && cliente) window.marcarComoVendaRealizada(id, cliente);
-          return;
-        }
-      });
+          
+          const editBtn = e.target.closest('.btn-edit-single-pesquisa');
+          if (editBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = editBtn.getAttribute('data-id');
+            const orcamento = historicoOrcamentosGlobal.find(item => item.id === id);
+            if (orcamento) {
+              pesquisaModal.remove();
+              window.editarOrcamento(orcamento);
+            }
+            return;
+          }
+          
+          const saleBtn = e.target.closest('.btn-sale-single-pesquisa');
+          if (saleBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const id = saleBtn.getAttribute('data-id');
+            const cliente = saleBtn.getAttribute('data-cliente');
+            if (id && cliente) window.marcarComoVendaRealizada(id, cliente);
+            return;
+          }
+        });
+      }
       
       renderizarPesquisaOrcamentos();
       
