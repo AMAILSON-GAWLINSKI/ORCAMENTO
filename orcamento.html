@@ -308,6 +308,7 @@
     .atendentes-table tr:hover { background: #fef3e8; }
     .status-ativo { color: #25d366; font-weight: 600; }
     .status-oculto { color: #e74c3c; font-weight: 600; }
+    .admin-badge { background: #fc5404; color: white; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; margin-left: 8px; }
     
     .dashboard-tabs {
       display: flex;
@@ -443,15 +444,15 @@
     let pendingSyncData = [];
     let isOnline = navigator.onLine;
     
-    // ========== GERENCIAMENTO DE ATENDENTES ==========
+    // ========== GERENCIAMENTO DE ATENDENTES (com flag isAdmin) ==========
     let atendentes = [];
     
     const DEFAULT_ATENDENTES = [
-      { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-      { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() }
+      { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, isAdmin: true, criado_em: new Date().toISOString() },
+      { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, isAdmin: true, criado_em: new Date().toISOString() },
+      { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, isAdmin: false, criado_em: new Date().toISOString() },
+      { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, isAdmin: false, criado_em: new Date().toISOString() },
+      { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, isAdmin: false, criado_em: new Date().toISOString() }
     ];
     
     function carregarAtendentes() {
@@ -465,6 +466,11 @@
               a.login = a.nome.toLowerCase()
                 .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
                 .replace(/\s+/g, '');
+              precisaSalvar = true;
+            }
+            // Adiciona flag isAdmin se não existir (legado)
+            if (a.isAdmin === undefined) {
+              a.isAdmin = (a.nome === "Jaúna Constante" || a.nome === "Jaciara Constante");
               precisaSalvar = true;
             }
           });
@@ -522,6 +528,7 @@
         login: login,
         senha: senha,
         ativo: true,
+        isAdmin: false,
         criado_em: new Date().toISOString()
       });
       salvarAtendentes();
@@ -561,6 +568,44 @@
       salvarAtendentes();
     }
     
+    // NOVAS FUNÇÕES: evoluir/remover acesso admin
+    function evoluirParaAdmin(id) {
+      const index = atendentes.findIndex(a => a.id === id);
+      if (index !== -1) {
+        atendentes[index].isAdmin = true;
+        salvarAtendentes();
+        // Se o atendente logado for o mesmo, atualiza interface
+        const usuarioSalvo = localStorage.getItem('usuarioLogado');
+        if (usuarioSalvo) {
+          try {
+            const user = JSON.parse(usuarioSalvo);
+            if (user.nome === atendentes[index].nome) {
+              localStorage.setItem('usuarioLogado', JSON.stringify({...user, isAdmin: true}));
+            }
+          } catch(e) {}
+        }
+        toggleAccessButtons();
+      }
+    }
+    
+    function removerAcessoAdmin(id) {
+      const index = atendentes.findIndex(a => a.id === id);
+      if (index !== -1) {
+        atendentes[index].isAdmin = false;
+        salvarAtendentes();
+        const usuarioSalvo = localStorage.getItem('usuarioLogado');
+        if (usuarioSalvo) {
+          try {
+            const user = JSON.parse(usuarioSalvo);
+            if (user.nome === atendentes[index].nome) {
+              localStorage.setItem('usuarioLogado', JSON.stringify({...user, isAdmin: false}));
+            }
+          } catch(e) {}
+        }
+        toggleAccessButtons();
+      }
+    }
+    
     function sincronizarAtendenteAtual() {
       const usuarioSalvo = localStorage.getItem('usuarioLogado');
       if (usuarioSalvo && atendenteSelect) {
@@ -573,6 +618,40 @@
             atendenteSelect.dispatchEvent(changeEvent);
           }
         } catch(e) {}
+      }
+    }
+    
+    // FUNÇÃO MODIFICADA: agora verifica isAdmin em vez de nome fixo
+    function isAtendenteAdmin(nomeAtendente) {
+      const atendente = atendentes.find(a => a.nome === nomeAtendente && a.ativo === true);
+      return atendente ? atendente.isAdmin === true : false;
+    }
+    
+    function toggleAccessButtons() {
+      const adminBtn = document.getElementById('adminAccessBtn');
+      const pesquisaBtn = document.getElementById('pesquisaAccessBtn');
+      let atendente = atendenteSelect.value;
+      
+      if (!atendente || atendente === '') {
+        const usuarioSalvo = localStorage.getItem('usuarioLogado');
+        if (usuarioSalvo) {
+          try {
+            const user = JSON.parse(usuarioSalvo);
+            atendente = user.nome;
+          } catch(e) {}
+        }
+      }
+      
+      const isAdmin = isAtendenteAdmin(atendente);
+      if (isAdmin) {
+        adminBtn.classList.add('visible');
+        pesquisaBtn.classList.remove('visible');
+      } else if (atendente && atendente !== '') {
+        adminBtn.classList.remove('visible');
+        pesquisaBtn.classList.add('visible');
+      } else {
+        adminBtn.classList.remove('visible');
+        pesquisaBtn.classList.remove('visible');
       }
     }
     
@@ -589,7 +668,7 @@
     carregarAtendentes();
     sincronizarAtendenteAtual();
     
-    // Offline sync functions
+    // Offline sync functions (mantidas iguais)
     function updateOfflineIndicator() {
       const indicator = document.getElementById('offlineIndicator');
       const statusSpan = document.getElementById('offlineStatus');
@@ -742,7 +821,6 @@
         
         if (error) throw error;
         
-        // CORREÇÃO: mapear os campos snake_case para camelCase
         historicoOrcamentosGlobal = data.map(item => ({
           ...item,
           itens: typeof item.itens === 'string' ? JSON.parse(item.itens) : item.itens,
@@ -894,33 +972,6 @@
     function updateNavButtons() { 
       document.getElementById('nextToStep2').disabled = !validateStep1(); 
       document.getElementById('nextToStep3').disabled = !validateStep2(); 
-    }
-    
-    function toggleAccessButtons() {
-      const adminBtn = document.getElementById('adminAccessBtn');
-      const pesquisaBtn = document.getElementById('pesquisaAccessBtn');
-      let atendente = atendenteSelect.value;
-      
-      if (!atendente || atendente === '') {
-        const usuarioSalvo = localStorage.getItem('usuarioLogado');
-        if (usuarioSalvo) {
-          try {
-            const user = JSON.parse(usuarioSalvo);
-            atendente = user.nome;
-          } catch(e) {}
-        }
-      }
-      
-      if (atendente === 'Jaúna Constante' || atendente === 'Jaciara Constante') {
-        adminBtn.classList.add('visible');
-        pesquisaBtn.classList.remove('visible');
-      } else if (atendente && atendente !== '') {
-        adminBtn.classList.remove('visible');
-        pesquisaBtn.classList.add('visible');
-      } else {
-        adminBtn.classList.remove('visible');
-        pesquisaBtn.classList.remove('visible');
-      }
     }
     
     function verificarUsuarioLogado() {
@@ -1366,14 +1417,12 @@
       goToStep(1);
     }
     
-    // ========== FUNÇÃO DE EDIÇÃO COM TRANSFERÊNCIA DE ATENDENTE ==========
     function carregarOrcamentoParaEdicao(orcamento) {
       modoEdicao = true;
       orcamentoEditandoId = orcamento.id;
       currentOrcamentoId = orcamento.id;
       jaPassouStep1 = true;
       
-      // 🔁 ALTERAÇÃO PRINCIPAL: ao editar um orçamento, o atendente passa a ser o usuário logado (quem está editando)
       let novoAtendente = null;
       const usuarioSalvo = localStorage.getItem('usuarioLogado');
       if (usuarioSalvo) {
@@ -1382,7 +1431,6 @@
           novoAtendente = user.nome;
         } catch(e) {}
       }
-      // Caso não consiga obter o usuário logado (fallback), mantém o atendente original
       if (novoAtendente && atendentes.some(a => a.nome === novoAtendente && a.ativo === true)) {
         atendenteSelect.value = novoAtendente;
       } else {
@@ -1739,37 +1787,39 @@ ${dataAtual}
           <h4 style="margin-bottom: 15px; color: #1e293b;">📋 Atendentes Ativos</h4>
           <table class="atendentes-table">
             <thead>
-              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Senha</th><th>Status</th><th>Ações</th></tr>
+              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Status</th><th>Acesso</th><th>Ações</th></tr>
             </thead>
             <tbody>
       `;
       
       ativos.forEach(a => {
+        const adminBadge = a.isAdmin ? '<span class="admin-badge">Admin</span>' : '';
         html += `
           <tr data-id="${a.id}">
-            <td><strong>${escapeHtml(a.nome)}</strong></td>
+            <td><strong>${escapeHtml(a.nome)}</strong> ${adminBadge}</td>
             <td>${escapeHtml(a.email)}</td>
             <td>${escapeHtml(a.login || '')}</td>
-            <td>••••••••</td>
             <td><span class="status-ativo">● Ativo</span></td>
+            <td>${a.isAdmin ? '<span style="color:#fc5404; font-weight:600;">Dashboard Avançado</span>' : '<span style="color:#3498db;">Pesquisa de Orçamentos</span>'}</td>
             <td>
+              ${!a.isAdmin ? `<button class="btn-evoluir-admin btn btn-success btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" style="padding: 4px 10px; margin-right: 5px; background:#fc5404; border-color:#fc5404;"><i class="fas fa-crown"></i> Evoluir para Admin</button>` : `<button class="btn-remover-admin btn btn-warning btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" style="padding: 4px 10px; margin-right: 5px; background:#e67e22; border-color:#e67e22;"><i class="fas fa-user-minus"></i> Remover Acesso Admin</button>`}
               <button class="btn-edit-atendente btn btn-edit btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" data-email="${escapeHtml(a.email)}" data-login="${escapeHtml(a.login || '')}" data-senha="${escapeHtml(a.senha)}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-edit"></i> Editar</button>
               <button class="btn-ocultar-atendente btn btn-warning btn-sm" data-id="${a.id}" style="padding: 4px 10px; background: #f39c12; border-color: #f39c12;"><i class="fas fa-eye-slash"></i> Ocultar</button>
               <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
-              </td>
-            </tr>
+             </td>
+           </tr>
         `;
       });
       
       if (ocultos.length > 0) {
         html += `
             </tbody>
-          </table>
+           </table>
           
           <h4 style="margin: 25px 0 15px 0; color: #1e293b;">🔒 Atendentes Ocultos</h4>
           <table class="atendentes-table">
             <thead>
-              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Senha</th><th>Status</th><th>Ações</th></tr>
+              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Status</th><th>Ações</th></tr>
             </thead>
             <tbody>
         `;
@@ -1780,20 +1830,19 @@ ${dataAtual}
               <td><strong>${escapeHtml(a.nome)}</strong></td>
               <td>${escapeHtml(a.email)}</td>
               <td>${escapeHtml(a.login || '')}</td>
-              <td>••••••••</td>
               <td><span class="status-oculto">● Oculto</span></td>
               <td>
                 <button class="btn-reativar-atendente btn btn-success btn-sm" data-id="${a.id}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-eye"></i> Reativar</button>
                 <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
                </td>
-            </tr>
+             </tr>
           `;
         });
       }
       
       html += `
             </tbody>
-          </table>
+           </table>
         </div>
       `;
       
@@ -1834,6 +1883,32 @@ ${dataAtual}
           renderizarGestaoAtendentes(container);
         };
         modal.querySelector('#cancelarNovoAtendente').onclick = () => modal.remove();
+      });
+      
+      // NOVOS BOTÕES: evoluir para admin
+      document.querySelectorAll('.btn-evoluir-admin').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const nome = btn.dataset.nome;
+          if (confirm(`Deseja evoluir "${nome}" para ADMINISTRADOR? Ela terá acesso ao Dashboard Avançado e perderá o acesso à Pesquisa de Orçamentos.`)) {
+            evoluirParaAdmin(id);
+            renderizarGestaoAtendentes(container);
+            toggleAccessButtons();
+          }
+        });
+      });
+      
+      // NOVOS BOTÕES: remover acesso admin
+      document.querySelectorAll('.btn-remover-admin').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const nome = btn.dataset.nome;
+          if (confirm(`Deseja remover o acesso ADMIN de "${nome}"? Ela terá apenas acesso à Pesquisa de Orçamentos e perderá o Dashboard Avançado.`)) {
+            removerAcessoAdmin(id);
+            renderizarGestaoAtendentes(container);
+            toggleAccessButtons();
+          }
+        });
       });
       
       document.querySelectorAll('.btn-edit-atendente').forEach(btn => {
@@ -2009,7 +2084,7 @@ ${dataAtual}
       carregarOrcamentoParaEdicao(orcamento);
     };
     
-    // Função para renderizar a PESQUISA DE ORÇAMENTOS (valor já aparece em cada card)
+    // Função para renderizar a PESQUISA DE ORÇAMENTOS
     function renderizarPesquisaOrcamentos() {
       const container = document.getElementById('pesquisaContent');
       if (!container) return;
@@ -2095,8 +2170,27 @@ ${dataAtual}
       container.innerHTML = html;
     }
     
-    // Função para renderizar o dashboard ADMIN completo
+    // Função para renderizar o dashboard ADMIN completo (com verificação de admin)
     window.renderizarDashboardAdmin = function() {
+      // Verifica se o atendente logado ainda tem permissão de admin (segurança extra)
+      let atendenteAtual = atendenteSelect?.value;
+      if (!atendenteAtual || atendenteAtual === '') {
+        const usuarioSalvo = localStorage.getItem('usuarioLogado');
+        if (usuarioSalvo) {
+          try {
+            const user = JSON.parse(usuarioSalvo);
+            atendenteAtual = user.nome;
+          } catch(e) {}
+        }
+      }
+      if (!isAtendenteAdmin(atendenteAtual)) {
+        alert('⚠️ Seu acesso de administrador foi removido. O dashboard será fechado.');
+        const modal = document.querySelector('.modal-overlay');
+        if (modal) modal.remove();
+        toggleAccessButtons();
+        return;
+      }
+      
       const container = document.getElementById('dashboardContent');
       if (!container) return;
       
@@ -2358,8 +2452,9 @@ ${dataAtual}
         }
       }
       
-      if (atendenteAtual !== 'Jaúna Constante' && atendenteAtual !== 'Jaciara Constante') {
-        alert('⚠️ Acesso negado! O Dashboard Avançado está disponível apenas para as atendentes Jaúna Constante e Jaciara Constante.');
+      // Verifica se é admin usando a nova função dinâmica
+      if (!isAtendenteAdmin(atendenteAtual)) {
+        alert('⚠️ Acesso negado! O Dashboard Avançado está disponível apenas para atendentes com permissão de administrador.');
         return;
       }
       
@@ -2590,8 +2685,9 @@ ${dataAtual}
         }
       }
       
-      if (atendenteAtual === 'Jaúna Constante' || atendenteAtual === 'Jaciara Constante') {
-        alert('⚠️ Você é administradora. Utilize o botão "Área Admin" para acesso completo.');
+      // Verifica se é admin usando a nova função dinâmica
+      if (isAtendenteAdmin(atendenteAtual)) {
+        alert('⚠️ Você é administrador(a). Utilize o botão "Área Admin" para acesso completo.');
         return;
       }
       
