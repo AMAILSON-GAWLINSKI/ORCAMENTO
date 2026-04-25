@@ -1710,7 +1710,7 @@ ${dataAtual}
       }
     });
     
-    // ========== FUNÇÕES DO DASHBOARD ADMIN (COMPLETO COM GRÁFICOS E ESTATÍSTICAS) ==========
+    // ========== FUNÇÕES DE APOIO ==========
     
     function renderizarGestaoAtendentes(container) {
       const ativos = atendentes.filter(a => a.ativo === true);
@@ -1743,7 +1743,7 @@ ${dataAtual}
               <button class="btn-edit-atendente btn btn-edit btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" data-email="${escapeHtml(a.email)}" data-login="${escapeHtml(a.login || '')}" data-senha="${escapeHtml(a.senha)}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-edit"></i> Editar</button>
               <button class="btn-ocultar-atendente btn btn-warning btn-sm" data-id="${a.id}" style="padding: 4px 10px; background: #f39c12; border-color: #f39c12;"><i class="fas fa-eye-slash"></i> Ocultar</button>
               <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
-             </td>
+            </td>
             </tr>
         `;
       });
@@ -1944,41 +1944,28 @@ ${dataAtual}
       });
     }
     
-    // Função global de exclusão com confirmação (usada tanto no admin quanto na pesquisa)
+    // Função global de exclusão SIMPLIFICADA (sem dupla confirmação - apenas um alerta)
     window.deletarOrcamento = async function(id, nomeCliente) {
-      const confirmModal = document.createElement('div'); confirmModal.className = 'modal-overlay';
-      confirmModal.innerHTML = `
-        <div class="modal-content" style="max-width:400px;">
-          <h3><i class="fas fa-trash-alt" style="color:#e74c3c;"></i> Confirmar exclusão</h3>
-          <p>Tem certeza que deseja excluir o orçamento de <strong>${escapeHtml(nomeCliente)}</strong>?</p>
-          <p style="font-size:0.8rem; color:#666; margin-top:8px;">ID: ${escapeHtml(id)}</p>
-          <div class="modal-buttons-row">
-            <button id="confirmDeleteBtn" class="btn btn-danger" style="flex:0 1 auto;">Sim, excluir</button>
-            <button id="cancelDeleteBtn" class="btn btn-outline" style="flex:0 1 auto;">Cancelar</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(confirmModal);
-      
-      confirmModal.querySelector('#confirmDeleteBtn').onclick = async () => {
+      if (confirm(`⚠️ Confirmar exclusão do orçamento de "${nomeCliente}"?\n\nID: ${id}\n\nEsta ação não pode ser desfeita.`)) {
+        showLoading();
         const sucesso = await deletarOrcamentoDoSupabase(id);
-        confirmModal.remove();
+        hideLoading();
         if (sucesso) {
-          // Após excluir, recarrega os dados e re-renderiza a tela ativa (admin ou pesquisa)
+          alert(`✅ Orçamento de "${nomeCliente}" excluído com sucesso!`);
           await carregarHistoricoDoSupabase();
+          
+          // Atualiza a tela ativa (admin ou pesquisa)
           if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#dashboardContent')) {
-            // Se o modal admin estiver aberto, atualiza ele
             if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
           } else if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#pesquisaContent')) {
-            // Se o modal de pesquisa estiver aberto, atualiza ele
             renderizarPesquisaOrcamentos();
           } else {
-            // Se nenhum modal aberto, apenas garantir que ambos possam ser atualizados depois
             if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
           }
+        } else {
+          alert(`❌ Erro ao excluir o orçamento. Tente novamente.`);
         }
-      };
-      confirmModal.querySelector('#cancelDeleteBtn').onclick = () => confirmModal.remove();
+      }
     };
     
     window.marcarComoVendaRealizada = async function(id, nomeCliente) {
@@ -1991,7 +1978,6 @@ ${dataAtual}
         if(atualizado) {
           alert(`✅ Orçamento de ${nomeCliente} marcado como VENDA REALIZADA!`);
           await carregarHistoricoDoSupabase();
-          // Atualiza a tela ativa
           if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#dashboardContent')) {
             if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
           } else if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#pesquisaContent')) {
@@ -2011,7 +1997,7 @@ ${dataAtual}
       carregarOrcamentoParaEdicao(orcamento);
     };
     
-    // Função para renderizar a PESQUISA DE ORÇAMENTOS (apenas listagem com filtros, sem estatísticas e gráficos)
+    // Função para renderizar a PESQUISA DE ORÇAMENTOS (apenas listagem com filtros)
     function renderizarPesquisaOrcamentos() {
       const container = document.getElementById('pesquisaContent');
       if (!container) return;
@@ -2095,43 +2081,9 @@ ${dataAtual}
       html += `</div>`;
       
       container.innerHTML = html;
-      
-      // Delegação de eventos para os botões da pesquisa (evita problemas com re-renderização)
-      container.querySelectorAll('.btn-delete-single-pesquisa').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const id = btn.getAttribute('data-id');
-          const cliente = btn.getAttribute('data-cliente');
-          if (id && cliente) window.deletarOrcamento(id, cliente);
-        });
-      });
-      
-      container.querySelectorAll('.btn-edit-single-pesquisa').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const id = btn.getAttribute('data-id');
-          const orcamento = historicoOrcamentosGlobal.find(item => item.id === id);
-          if (orcamento) {
-            const modal = document.querySelector('.modal-overlay');
-            if (modal) modal.remove();
-            window.editarOrcamento(orcamento);
-          }
-        });
-      });
-      
-      container.querySelectorAll('.btn-sale-single-pesquisa').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          e.preventDefault();
-          const id = btn.getAttribute('data-id');
-          const cliente = btn.getAttribute('data-cliente');
-          if (id && cliente) {
-            await window.marcarComoVendaRealizada(id, cliente);
-          }
-        });
-      });
     }
     
-    // Função para renderizar o dashboard ADMIN completo (com todas as estatísticas)
+    // Função para renderizar o dashboard ADMIN completo
     window.renderizarDashboardAdmin = function() {
       const container = document.getElementById('dashboardContent');
       if (!container) return;
@@ -2355,21 +2307,12 @@ ${dataAtual}
           }
           
           const idsSelecionados = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+          const nomes = idsSelecionados.map(id => {
+            const item = historicoOrcamentosGlobal.find(i => i.id === id);
+            return item ? item.cliente : id;
+          }).join(', ');
           
-          const confirmModal = document.createElement('div'); confirmModal.className = 'modal-overlay';
-          confirmModal.innerHTML = `
-            <div class="modal-content" style="max-width:450px;">
-              <h3><i class="fas fa-trash-alt" style="color:#e74c3c;"></i> Confirmar exclusão em massa</h3>
-              <p>Tem certeza que deseja excluir <strong>${checkboxes.length} orçamento(s)</strong>?</p>
-              <div class="modal-buttons-row">
-                <button id="confirmMassDeleteBtn" class="btn btn-danger" style="flex:0 1 auto;">Sim, excluir todos</button>
-                <button id="cancelMassDeleteBtn" class="btn btn-outline" style="flex:0 1 auto;">Cancelar</button>
-              </div>
-            </div>
-          `;
-          document.body.appendChild(confirmModal);
-          
-          confirmModal.querySelector('#confirmMassDeleteBtn').onclick = async () => {
+          if (confirm(`⚠️ Confirmar exclusão de ${idsSelecionados.length} orçamento(s)?\n\n${nomes}\n\nEsta ação não pode ser desfeita.`)) {
             showLoading();
             for (const id of idsSelecionados) {
               await deletarOrcamentoDoSupabase(id);
@@ -2377,47 +2320,11 @@ ${dataAtual}
             await carregarHistoricoDoSupabase();
             hideLoading();
             alert(`✅ ${idsSelecionados.length} orçamento(s) excluído(s) com sucesso!`);
-            confirmModal.remove();
             window.renderizarDashboardAdmin();
-          };
-          confirmModal.querySelector('#cancelMassDeleteBtn').onclick = () => confirmModal.remove();
+          }
         };
       }
-      
-      // Eventos para os botões individuais (delegação via listeners diretos)
-      document.querySelectorAll('.btn-delete-single').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const id = btn.getAttribute('data-id');
-          const cliente = btn.getAttribute('data-cliente');
-          if (id && cliente) window.deletarOrcamento(id, cliente);
-        });
-      });
-      
-      document.querySelectorAll('.btn-edit-single').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const id = btn.getAttribute('data-id');
-          const orcamento = historicoOrcamentosGlobal.find(item => item.id === id);
-          if (orcamento) {
-            const modal = document.querySelector('.modal-overlay');
-            if (modal) modal.remove();
-            window.editarOrcamento(orcamento);
-          }
-        });
-      });
-      
-      document.querySelectorAll('.btn-sale-single').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          e.preventDefault();
-          const id = btn.getAttribute('data-id');
-          const cliente = btn.getAttribute('data-cliente');
-          if (id && cliente) {
-            await window.marcarComoVendaRealizada(id, cliente);
-          }
-        });
-      });
-    };
+    }
     
     // ========== BOTÃO ADMIN (para Jaúna e Jaciara - acesso total) ==========
     document.getElementById('adminAccessBtn').addEventListener('click', async () => {
@@ -2542,18 +2449,7 @@ ${dataAtual}
       `;
       document.body.appendChild(adminModal);
       
-      const tabs = adminModal.querySelectorAll('.tab-btn');
-      const panes = adminModal.querySelectorAll('.tab-pane');
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          const targetTab = tab.dataset.tab;
-          tabs.forEach(t => t.classList.remove('active'));
-          panes.forEach(p => p.classList.remove('active'));
-          tab.classList.add('active');
-          adminModal.querySelector(`#tab-${targetTab}`).classList.add('active');
-        });
-      });
-      
+      // Configuração dos filtros
       const periodoSelect = adminModal.querySelector('#filtroPeriodo');
       const grupoMes = adminModal.querySelector('#grupoFiltroMes');
       const grupoAno = adminModal.querySelector('#grupoFiltroAno');
@@ -2565,28 +2461,16 @@ ${dataAtual}
         if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
       });
       
-      adminModal.querySelector('#filtroMes')?.addEventListener('change', () => {
-        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
-      });
-      adminModal.querySelector('#filtroAno')?.addEventListener('change', () => {
-        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
-      });
-      adminModal.querySelector('#filtroValorTipo')?.addEventListener('change', () => {
-        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
-      });
+      adminModal.querySelector('#filtroMes')?.addEventListener('change', () => { if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin(); });
+      adminModal.querySelector('#filtroAno')?.addEventListener('change', () => { if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin(); });
+      adminModal.querySelector('#filtroValorTipo')?.addEventListener('change', () => { if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin(); });
       adminModal.querySelector('#filtroValorComp')?.addEventListener('blur', function() {
         this.value = formatMoneyWithThousand(parseCurrency(this.value));
         if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
       });
-      adminModal.querySelector('#filtroIdade')?.addEventListener('input', () => {
-        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
-      });
-      adminModal.querySelector('#filtroCliente')?.addEventListener('input', () => {
-        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
-      });
-      adminModal.querySelector('#filtroIdOrcamento')?.addEventListener('input', () => {
-        if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
-      });
+      adminModal.querySelector('#filtroIdade')?.addEventListener('input', () => { if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin(); });
+      adminModal.querySelector('#filtroCliente')?.addEventListener('input', () => { if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin(); });
+      adminModal.querySelector('#filtroIdOrcamento')?.addEventListener('input', () => { if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin(); });
       
       const idsUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.id))];
       createSuggestionsDropdown('filtroIdOrcamento', 
@@ -2606,8 +2490,8 @@ ${dataAtual}
         renderizarGestaoAtendentes(adminModal.querySelector('#gestaoAtendentesContainer'));
       };
       
+      // Delegação de eventos para os botões dinâmicos do admin
       const dashboardContent = adminModal.querySelector('#dashboardContent');
-      // Usamos delegação de eventos no container para evitar problemas de eventos perdidos
       dashboardContent.addEventListener('click', (e) => {
         const deleteBtn = e.target.closest('.btn-delete-single');
         if (deleteBtn) {
@@ -2649,7 +2533,7 @@ ${dataAtual}
       adminModal.querySelector('#closeAdminBtn').onclick = () => adminModal.remove();
     });
     
-    // ========== BOTÃO PESQUISA DE ORÇAMENTO (para atendentes não admin - apenas listagem) ==========
+    // ========== BOTÃO PESQUISA DE ORÇAMENTO (para atendentes não admin) ==========
     document.getElementById('pesquisaAccessBtn').addEventListener('click', async () => {
       let atendenteAtual = atendenteSelect?.value;
       
@@ -2761,6 +2645,7 @@ ${dataAtual}
       `;
       document.body.appendChild(pesquisaModal);
       
+      // Configuração dos filtros da pesquisa
       const periodoSelect = pesquisaModal.querySelector('#pesquisaFiltroPeriodo');
       const grupoMes = pesquisaModal.querySelector('#pesquisaGrupoFiltroMes');
       const grupoAno = pesquisaModal.querySelector('#pesquisaGrupoFiltroAno');
@@ -2783,13 +2668,11 @@ ${dataAtual}
       pesquisaModal.querySelector('#pesquisaFiltroCliente')?.addEventListener('input', () => renderizarPesquisaOrcamentos());
       pesquisaModal.querySelector('#pesquisaFiltroIdOrcamento')?.addEventListener('input', () => renderizarPesquisaOrcamentos());
       
-      const idsUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.id))];
       createSuggestionsDropdown('pesquisaFiltroIdOrcamento', 
         (value) => idsUnicos.filter(id => id.toLowerCase().includes(value)).slice(0, 10),
         (selected) => renderizarPesquisaOrcamentos()
       );
       
-      const clientesUnicos = [...new Set(historicoOrcamentosGlobal.map(item => item.cliente))];
       createSuggestionsDropdown('pesquisaFiltroCliente',
         (value) => clientesUnicos.filter(nome => nome && nome.toLowerCase().includes(value)).slice(0, 10),
         (selected) => renderizarPesquisaOrcamentos()
@@ -2799,6 +2682,43 @@ ${dataAtual}
         await carregarHistoricoDoSupabase();
         renderizarPesquisaOrcamentos();
       };
+      
+      // Delegação de eventos para os botões dinâmicos da pesquisa
+      const pesquisaContent = pesquisaModal.querySelector('#pesquisaContent');
+      pesquisaContent.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('.btn-delete-single-pesquisa');
+        if (deleteBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = deleteBtn.getAttribute('data-id');
+          const cliente = deleteBtn.getAttribute('data-cliente');
+          if (id && cliente) window.deletarOrcamento(id, cliente);
+          return;
+        }
+        
+        const editBtn = e.target.closest('.btn-edit-single-pesquisa');
+        if (editBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = editBtn.getAttribute('data-id');
+          const orcamento = historicoOrcamentosGlobal.find(item => item.id === id);
+          if (orcamento) {
+            pesquisaModal.remove();
+            window.editarOrcamento(orcamento);
+          }
+          return;
+        }
+        
+        const saleBtn = e.target.closest('.btn-sale-single-pesquisa');
+        if (saleBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = saleBtn.getAttribute('data-id');
+          const cliente = saleBtn.getAttribute('data-cliente');
+          if (id && cliente) window.marcarComoVendaRealizada(id, cliente);
+          return;
+        }
+      });
       
       renderizarPesquisaOrcamentos();
       
