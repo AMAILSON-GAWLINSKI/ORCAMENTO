@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * {
       margin: 0;
@@ -157,6 +158,24 @@
       font-size: 1.2rem;
     }
 
+    .alert-success {
+      background: #e8f5e9;
+      border-left: 4px solid #25d366;
+      padding: 12px 16px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.85rem;
+      color: #1e7e34;
+      font-weight: 500;
+    }
+
+    .alert-success i {
+      font-size: 1.2rem;
+    }
+
     .user-session {
       background: #f0fdf4;
       border-radius: 20px;
@@ -257,6 +276,35 @@
       color: #94a3b8;
     }
 
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      backdrop-filter: blur(4px);
+    }
+    .loading-spinner {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      color: #fc5404;
+    }
+    .loading-spinner i { font-size: 1.5rem; animation: spin 1s linear infinite; }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       25% { transform: translateX(-5px); }
@@ -298,6 +346,11 @@
         <span id="errorText">Usuário ou senha incorretos!</span>
       </div>
 
+      <div id="successMessage" style="display: none;" class="alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span id="successText">Login realizado com sucesso!</span>
+      </div>
+
       <div class="input-group">
         <label><i class="fas fa-user"></i> Login</label>
         <div class="input-with-icon">
@@ -326,51 +379,184 @@
     </div>
     
     <div class="sync-status" id="syncStatus">
-      <i class="fas fa-sync-alt"></i> Carregando atendentes...
+      <i class="fas fa-sync-alt fa-spin"></i> Conectando ao banco de dados...
     </div>
   </div>
 </div>
 
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"><i class="fas fa-spinner"></i> Carregando...</div>
+</div>
+
 <script>
+  // ========== SUPABASE CONFIG ==========
+  const SUPABASE_URL = 'https://ywzjyoqqnweinrwbbnza.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODA5ODcsImV4cCI6MjA5MjQ1Njk4N30.6Rf26bE_yeE2NwJgggyGa-GrgM4bpMgaTvwQ_QiyPs0';
+  
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
   // ==================== ATENDENTES PADRÃO ====================
   const DEFAULT_ATENDENTES = [
-    { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, isAdmin: true, criado_em: new Date().toISOString() },
-    { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, isAdmin: true, criado_em: new Date().toISOString() },
-    { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, isAdmin: false, criado_em: new Date().toISOString() },
-    { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, isAdmin: false, criado_em: new Date().toISOString() },
-    { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, isAdmin: false, criado_em: new Date().toISOString() }
+    { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, is_admin: true, criado_em: new Date().toISOString() },
+    { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, is_admin: true, criado_em: new Date().toISOString() },
+    { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, is_admin: false, criado_em: new Date().toISOString() },
+    { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, is_admin: false, criado_em: new Date().toISOString() },
+    { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, is_admin: false, criado_em: new Date().toISOString() }
   ];
 
   let atendentes = [];
 
-  // Função para carregar atendentes do localStorage
-  function carregarAtendentes() {
-    const saved = localStorage.getItem('atendentes');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          atendentes = parsed;
-          console.log('✅ Atendentes carregados do localStorage:', atendentes.length);
-          document.getElementById('syncStatus').innerHTML = '<i class="fas fa-check-circle"></i> Atendentes sincronizados com o sistema';
-          setTimeout(() => {
-            const statusDiv = document.getElementById('syncStatus');
-            if (statusDiv) statusDiv.style.opacity = '0.5';
-          }, 3000);
-          return;
-        }
-      } catch(e) {
-        console.error('Erro ao parser atendentes:', e);
-      }
-    }
-    
-    // Se não houver dados, usar padrão
-    atendentes = JSON.parse(JSON.stringify(DEFAULT_ATENDENTES));
-    localStorage.setItem('atendentes', JSON.stringify(atendentes));
-    document.getElementById('syncStatus').innerHTML = '<i class="fas fa-info-circle"></i> Configuração inicial carregada';
+  function showLoading() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
   }
 
-  // Função para validar login
+  function hideLoading() {
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
+
+  function showSyncStatus(message, isError = false) {
+    const statusDiv = document.getElementById('syncStatus');
+    if (isError) {
+      statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+      statusDiv.style.color = '#e74c3c';
+    } else {
+      statusDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+      statusDiv.style.color = '#25d366';
+    }
+    setTimeout(() => {
+      statusDiv.style.opacity = '0.5';
+      setTimeout(() => {
+        statusDiv.style.opacity = '1';
+        statusDiv.style.color = '#94a3b8';
+      }, 2000);
+    }, 3000);
+  }
+
+  // ==================== CARREGAR ATENDENTES DO SUPABASE ====================
+  async function carregarAtendentesDoSupabase() {
+    showLoading();
+    try {
+      // Tenta buscar do Supabase
+      const { data, error } = await supabase
+        .from('atendentes')
+        .select('*')
+        .order('id');
+      
+      if (error) {
+        console.error('Erro ao buscar atendentes do Supabase:', error);
+        throw error;
+      }
+      
+      if (data && data.length > 0) {
+        // Converte is_admin do banco para isAdmin
+        atendentes = data.map(a => ({
+          id: a.id,
+          nome: a.nome,
+          login: a.login,
+          senha: a.senha,
+          email: a.email,
+          ativo: a.ativo === true,
+          isAdmin: a.is_admin === true,
+          criado_em: a.criado_em
+        }));
+        
+        // Salva no localStorage como fallback
+        localStorage.setItem('atendentes', JSON.stringify(atendentes));
+        console.log('✅ Atendentes carregados do Supabase:', atendentes.length);
+        showSyncStatus('Atendentes sincronizados com o banco de dados');
+        return true;
+      } else {
+        // Se não há dados no Supabase, usa os padrão e insere
+        console.log('Nenhum atendente encontrado no Supabase, inserindo dados padrão...');
+        await inserirAtendentesPadrao();
+        return true;
+      }
+    } catch (error) {
+      console.error('Erro ao carregar atendentes do Supabase:', error);
+      
+      // Fallback: tenta carregar do localStorage
+      const saved = localStorage.getItem('atendentes');
+      if (saved) {
+        try {
+          atendentes = JSON.parse(saved);
+          console.log('⚠️ Usando atendentes do localStorage (fallback):', atendentes.length);
+          showSyncStatus('Usando dados locais (offline)');
+          return true;
+        } catch(e) {}
+      }
+      
+      // Último fallback: usar dados padrão
+      atendentes = JSON.parse(JSON.stringify(DEFAULT_ATENDENTES));
+      localStorage.setItem('atendentes', JSON.stringify(atendentes));
+      showSyncStatus('⚠️ Usando configuração local. Reconecte para sincronizar.', true);
+      return false;
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // ==================== INSERIR ATENDENTES PADRÃO NO SUPABASE ====================
+  async function inserirAtendentesPadrao() {
+    showLoading();
+    try {
+      // Verifica se já existem atendentes
+      const { count, error: countError } = await supabase
+        .from('atendentes')
+        .select('*', { count: 'exact', head: true });
+      
+      if (countError) throw countError;
+      
+      if (count === 0) {
+        // Insere os atendentes padrão
+        const atendentesParaInserir = DEFAULT_ATENDENTES.map(a => ({
+          nome: a.nome,
+          login: a.login,
+          senha: a.senha,
+          email: a.email,
+          ativo: a.ativo,
+          is_admin: a.is_admin,
+          criado_em: a.criado_em
+        }));
+        
+        const { data, error } = await supabase
+          .from('atendentes')
+          .insert(atendentesParaInserir)
+          .select();
+        
+        if (error) throw error;
+        
+        if (data) {
+          atendentes = data.map(a => ({
+            id: a.id,
+            nome: a.nome,
+            login: a.login,
+            senha: a.senha,
+            email: a.email,
+            ativo: a.ativo === true,
+            isAdmin: a.is_admin === true,
+            criado_em: a.criado_em
+          }));
+          localStorage.setItem('atendentes', JSON.stringify(atendentes));
+          console.log('✅ Atendentes padrão inseridos no Supabase:', atendentes.length);
+          showSyncStatus('Atendentes cadastrados com sucesso!');
+          return true;
+        }
+      } else {
+        // Recarrega os atendentes existentes
+        return await carregarAtendentesDoSupabase();
+      }
+    } catch (error) {
+      console.error('Erro ao inserir atendentes padrão:', error);
+      atendentes = JSON.parse(JSON.stringify(DEFAULT_ATENDENTES));
+      localStorage.setItem('atendentes', JSON.stringify(atendentes));
+      showSyncStatus('Erro ao sincronizar com o banco de dados', true);
+      return false;
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // ==================== VALIDAR LOGIN ====================
   function validarLogin(login, senha) {
     console.log('🔐 Tentando login:', login);
     console.log('📋 Atendentes disponíveis:', atendentes.map(a => ({ login: a.login, nome: a.nome, ativo: a.ativo, isAdmin: a.isAdmin })));
@@ -401,6 +587,9 @@
     errorText.textContent = message || 'Usuário ou senha incorretos!';
     errorDiv.style.display = 'flex';
     
+    const successDiv = document.getElementById('successMessage');
+    if (successDiv) successDiv.style.display = 'none';
+    
     const card = document.querySelector('.login-card');
     card.classList.add('shake-animation');
     setTimeout(() => {
@@ -409,6 +598,20 @@
     
     setTimeout(() => {
       errorDiv.style.display = 'none';
+    }, 3000);
+  }
+
+  function showSuccess(message) {
+    const successDiv = document.getElementById('successMessage');
+    const successText = document.getElementById('successText');
+    successText.textContent = message || 'Login realizado com sucesso!';
+    successDiv.style.display = 'flex';
+    
+    const errorDiv = document.getElementById('errorMessage');
+    if (errorDiv) errorDiv.style.display = 'none';
+    
+    setTimeout(() => {
+      successDiv.style.display = 'none';
     }, 3000);
   }
 
@@ -517,7 +720,7 @@
     }, 500);
   }
 
-  function handleLogin() {
+  async function handleLogin() {
     const loginInput = document.getElementById('loginUser');
     const passwordInput = document.getElementById('loginPassword');
     
@@ -529,6 +732,12 @@
       return;
     }
     
+    // Garante que os atendentes estão carregados
+    if (atendentes.length === 0) {
+      showError('Carregando dados do sistema. Aguarde e tente novamente.');
+      await carregarAtendentesDoSupabase();
+    }
+    
     const user = validarLogin(login, password);
     
     if (!user) {
@@ -537,6 +746,8 @@
       passwordInput.focus();
       return;
     }
+    
+    showSuccess(`✅ Bem-vindo(a), ${user.nomeExibicao}!`);
     
     localStorage.setItem('usuarioLogado', JSON.stringify({
       nome: user.nomeExibicao,
@@ -548,79 +759,78 @@
     
     updateUIBasedOnSession();
     
-    // Redirecionar diretamente para o orcamento.html
-    window.location.href = 'orcamento.html';
+    // Redirecionar para o orcamento.html
+    setTimeout(() => {
+      window.location.href = 'orcamento.html';
+    }, 500);
   }
 
-  // ==================== NOVA FUNÇÃO: MONITORAMENTO EM TEMPO REAL ====================
+  // ==================== MONITORAMENTO EM TEMPO REAL ====================
   function iniciarMonitoramentoAtendentes() {
     // Monitora mudanças no localStorage de outras abas
     window.addEventListener('storage', function(event) {
       if (event.key === 'atendentes') {
         console.log('🔄 Atendentes atualizados em outra aba/janela');
-        carregarAtendentes();
-        
-        // Verifica se o usuário atual ainda existe
-        const usuarioSalvo = localStorage.getItem('usuarioLogado');
-        if (usuarioSalvo) {
+        const saved = localStorage.getItem('atendentes');
+        if (saved) {
           try {
-            const user = JSON.parse(usuarioSalvo);
-            const aindaExiste = atendentes.some(a => 
-              a.ativo === true && a.nome === user.nome
-            );
-            if (!aindaExiste) {
-              alert('⚠️ Seu usuário foi desativado ou removido. Faça login novamente.');
-              logout();
-            }
+            atendentes = JSON.parse(saved);
+            updateUIBasedOnSession();
           } catch(e) {}
         }
       }
     });
     
-    // Verifica periodicamente (a cada 30 segundos)
-    setInterval(() => {
-      const saved = localStorage.getItem('atendentes');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (JSON.stringify(atendentes) !== JSON.stringify(parsed)) {
-            console.log('🔄 Detectada mudança nos atendentes, recarregando...');
-            atendentes = parsed;
-            updateUIBasedOnSession();
-          }
-        } catch(e) {}
+    // Sincronização periódica com o Supabase (a cada 5 minutos)
+    setInterval(async () => {
+      if (navigator.onLine) {
+        console.log('🔄 Sincronizando atendentes com o Supabase...');
+        await carregarAtendentesDoSupabase();
+        updateUIBasedOnSession();
       }
-    }, 30000);
+    }, 300000);
   }
 
-  // Escutar mudanças no localStorage
-  function escutarMudancasAtendentes() {
-    window.addEventListener('storage', function(event) {
-      if (event.key === 'atendentes') {
-        console.log('Atendentes atualizados em outra aba/janela');
-        carregarAtendentes();
-        const usuarioSalvo = localStorage.getItem('usuarioLogado');
-        if (usuarioSalvo) {
-          try {
-            const user = JSON.parse(usuarioSalvo);
-            const aindaExiste = atendentes.some(a => a.ativo === true && a.nome === user.nome);
-            if (!aindaExiste) {
-              logout();
-              alert('⚠️ Seu usuário foi desativado ou removido. Faça login novamente.');
-            }
-          } catch(e) {}
+  // ==================== VERIFICAR SESSÃO EXISTENTE ====================
+  function verificarSessaoExistente() {
+    const usuarioSalvo = localStorage.getItem('usuarioLogado');
+    if (usuarioSalvo) {
+      try {
+        const user = JSON.parse(usuarioSalvo);
+        const timestamp = new Date(user.loginTimestamp);
+        const agora = new Date();
+        const diffHoras = (agora - timestamp) / (1000 * 60 * 60);
+        
+        if (diffHoras <= 8) {
+          updateUIBasedOnSession();
+          return true;
+        } else {
+          localStorage.removeItem('usuarioLogado');
         }
-      }
-    });
+      } catch(e) {}
+    }
+    return false;
   }
 
-  // Inicialização
-  function init() {
-    carregarAtendentes();
-    iniciarMonitoramentoAtendentes(); // ADICIONADO: monitoramento em tempo real
-    escutarMudancasAtendentes();
+  // ==================== INICIALIZAÇÃO ====================
+  async function init() {
+    showLoading();
+    
+    // Carrega atendentes do Supabase
+    await carregarAtendentesDoSupabase();
+    
+    // Verifica se já existe sessão ativa
+    verificarSessaoExistente();
+    
+    // Atualiza UI
     updateUIBasedOnSession();
     
+    // Inicia monitoramento
+    iniciarMonitoramentoAtendentes();
+    
+    hideLoading();
+    
+    // Tratamento do logo
     const logoImg = document.querySelector('.logo-image');
     if (logoImg) {
       logoImg.addEventListener('error', function() {
@@ -629,8 +839,14 @@
         if (fallback) fallback.style.display = 'inline-flex';
       });
     }
+    
+    // Verifica conectividade
+    if (!navigator.onLine) {
+      showSyncStatus('⚠️ Modo offline - usando dados locais', true);
+    }
   }
 
+  // Event listeners
   const loginBtn = document.getElementById('loginBtn');
   const passwordField = document.getElementById('loginPassword');
   const userField = document.getElementById('loginUser');
@@ -664,6 +880,7 @@
     passwordField.addEventListener('input', clearError);
   }
   
+  // Inicia a aplicação
   init();
 </script>
 </body>
