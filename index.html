@@ -274,6 +274,7 @@
       text-align: center;
       margin-top: 16px;
       color: #94a3b8;
+      transition: all 0.3s ease;
     }
 
     .loading-overlay {
@@ -389,66 +390,125 @@
 </div>
 
 <script>
-  // ========== SUPABASE CONFIG ==========
+  // ========== SUPABASE CONFIG (MESMA DO ORCAMENTO.HTML) ==========
   const SUPABASE_URL = 'https://ywzjyoqqnweinrwbbnza.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODA5ODcsImV4cCI6MjA5MjQ1Njk4N30.6Rf26bE_yeE2NwJgggyGa-GrgM4bpMgaTvwQ_QiyPs0';
   
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // ==================== ATENDENTES PADRÃO ====================
+  // ==================== ATENDENTES PADRÃO (MESMA ESTRUTURA DO SQL) ====================
   const DEFAULT_ATENDENTES = [
-    { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, is_admin: true, criado_em: new Date().toISOString() },
-    { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, is_admin: true, criado_em: new Date().toISOString() },
-    { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, is_admin: false, criado_em: new Date().toISOString() },
-    { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, is_admin: false, criado_em: new Date().toISOString() },
-    { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, is_admin: false, criado_em: new Date().toISOString() }
+    { nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, is_admin: true },
+    { nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, is_admin: true },
+    { nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, is_admin: false },
+    { nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, is_admin: false },
+    { nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, is_admin: false }
   ];
 
   let atendentes = [];
 
+  // ========== FUNÇÕES DE UI ==========
   function showLoading() {
-    document.getElementById('loadingOverlay').style.display = 'flex';
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.style.display = 'flex';
   }
 
   function hideLoading() {
-    document.getElementById('loadingOverlay').style.display = 'none';
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.style.display = 'none';
   }
 
-  function showSyncStatus(message, isError = false) {
+  function showSyncStatus(message, isError = false, isSuccess = false) {
     const statusDiv = document.getElementById('syncStatus');
+    if (!statusDiv) return;
+    
     if (isError) {
       statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
       statusDiv.style.color = '#e74c3c';
-    } else {
+    } else if (isSuccess) {
       statusDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
       statusDiv.style.color = '#25d366';
+    } else {
+      statusDiv.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+      statusDiv.style.color = '#94a3b8';
     }
+    
+    // Remove o estilo após 4 segundos
     setTimeout(() => {
-      statusDiv.style.opacity = '0.5';
-      setTimeout(() => {
-        statusDiv.style.opacity = '1';
-        statusDiv.style.color = '#94a3b8';
-      }, 2000);
+      if (statusDiv && !statusDiv.innerHTML.includes('Conectando')) {
+        statusDiv.style.opacity = '0.5';
+        setTimeout(() => {
+          if (statusDiv) {
+            statusDiv.style.opacity = '1';
+            statusDiv.style.color = '#94a3b8';
+          }
+        }, 2000);
+      }
+    }, 4000);
+  }
+
+  function showError(message) {
+    const errorDiv = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+    if (errorDiv && errorText) {
+      errorText.textContent = message || 'Usuário ou senha incorretos!';
+      errorDiv.style.display = 'flex';
+    }
+    
+    const successDiv = document.getElementById('successMessage');
+    if (successDiv) successDiv.style.display = 'none';
+    
+    const card = document.querySelector('.login-card');
+    if (card) {
+      card.classList.add('shake-animation');
+      setTimeout(() => card.classList.remove('shake-animation'), 300);
+    }
+    
+    setTimeout(() => {
+      if (errorDiv) errorDiv.style.display = 'none';
     }, 3000);
   }
 
-  // ==================== CARREGAR ATENDENTES DO SUPABASE ====================
-  async function carregarAtendentesDoSupabase() {
+  function showSuccess(message) {
+    const successDiv = document.getElementById('successMessage');
+    const successText = document.getElementById('successText');
+    if (successDiv && successText) {
+      successText.textContent = message || 'Login realizado com sucesso!';
+      successDiv.style.display = 'flex';
+    }
+    
+    const errorDiv = document.getElementById('errorMessage');
+    if (errorDiv) errorDiv.style.display = 'none';
+    
+    setTimeout(() => {
+      if (successDiv) successDiv.style.display = 'none';
+    }, 3000);
+  }
+
+  function clearError() {
+    const errorDiv = document.getElementById('errorMessage');
+    if (errorDiv) errorDiv.style.display = 'none';
+  }
+
+  // ========== FUNÇÕES DE SINCRONIZAÇÃO COM SUPABASE ==========
+  
+  // Sincroniza atendentes do Supabase para o localStorage
+  async function sincronizarAtendentesDoSupabase() {
     showLoading();
     try {
-      // Tenta buscar do Supabase
+      // Busca atendentes do Supabase
       const { data, error } = await supabase
         .from('atendentes')
         .select('*')
         .order('id');
       
       if (error) {
-        console.error('Erro ao buscar atendentes do Supabase:', error);
+        console.error('Erro ao buscar atendentes:', error);
         throw error;
       }
       
       if (data && data.length > 0) {
-        // Converte is_admin do banco para isAdmin
+        // Converte os dados para o formato usado no frontend
         atendentes = data.map(a => ({
           id: a.id,
           nome: a.nome,
@@ -460,42 +520,47 @@
           criado_em: a.criado_em
         }));
         
-        // Salva no localStorage como fallback
+        // Salva no localStorage para fallback offline
         localStorage.setItem('atendentes', JSON.stringify(atendentes));
-        console.log('✅ Atendentes carregados do Supabase:', atendentes.length);
-        showSyncStatus('Atendentes sincronizados com o banco de dados');
+        
+        console.log('✅ Atendentes sincronizados do Supabase:', atendentes.length);
+        showSyncStatus(`${atendentes.length} atendentes sincronizados`, false, true);
         return true;
       } else {
-        // Se não há dados no Supabase, usa os padrão e insere
-        console.log('Nenhum atendente encontrado no Supabase, inserindo dados padrão...');
-        await inserirAtendentesPadrao();
-        return true;
+        console.log('Nenhum atendente encontrado no Supabase. Inserindo dados padrão...');
+        return await inserirAtendentesPadrao();
       }
     } catch (error) {
-      console.error('Erro ao carregar atendentes do Supabase:', error);
+      console.error('Erro na sincronização:', error);
       
       // Fallback: tenta carregar do localStorage
       const saved = localStorage.getItem('atendentes');
       if (saved) {
         try {
           atendentes = JSON.parse(saved);
-          console.log('⚠️ Usando atendentes do localStorage (fallback):', atendentes.length);
-          showSyncStatus('Usando dados locais (offline)');
+          console.log('⚠️ Usando atendentes do localStorage (fallback)');
+          showSyncStatus('Usando dados locais (offline)', true);
           return true;
-        } catch(e) {}
+        } catch(e) {
+          console.error('Erro ao ler localStorage:', e);
+        }
       }
       
-      // Último fallback: usar dados padrão
-      atendentes = JSON.parse(JSON.stringify(DEFAULT_ATENDENTES));
+      // Último recurso: usar dados padrão
+      atendentes = DEFAULT_ATENDENTES.map((a, index) => ({
+        id: index + 1,
+        ...a,
+        isAdmin: a.is_admin
+      }));
       localStorage.setItem('atendentes', JSON.stringify(atendentes));
-      showSyncStatus('⚠️ Usando configuração local. Reconecte para sincronizar.', true);
+      showSyncStatus('Erro de conexão. Usando configuração local.', true);
       return false;
     } finally {
       hideLoading();
     }
   }
 
-  // ==================== INSERIR ATENDENTES PADRÃO NO SUPABASE ====================
+  // Insere os atendentes padrão no Supabase
   async function inserirAtendentesPadrao() {
     showLoading();
     try {
@@ -508,19 +573,9 @@
       
       if (count === 0) {
         // Insere os atendentes padrão
-        const atendentesParaInserir = DEFAULT_ATENDENTES.map(a => ({
-          nome: a.nome,
-          login: a.login,
-          senha: a.senha,
-          email: a.email,
-          ativo: a.ativo,
-          is_admin: a.is_admin,
-          criado_em: a.criado_em
-        }));
-        
         const { data, error } = await supabase
           .from('atendentes')
-          .insert(atendentesParaInserir)
+          .insert(DEFAULT_ATENDENTES)
           .select();
         
         if (error) throw error;
@@ -537,18 +592,16 @@
             criado_em: a.criado_em
           }));
           localStorage.setItem('atendentes', JSON.stringify(atendentes));
-          console.log('✅ Atendentes padrão inseridos no Supabase:', atendentes.length);
-          showSyncStatus('Atendentes cadastrados com sucesso!');
+          console.log('✅ Atendentes padrão inseridos com sucesso');
+          showSyncStatus('Atendentes cadastrados com sucesso!', false, true);
           return true;
         }
       } else {
-        // Recarrega os atendentes existentes
-        return await carregarAtendentesDoSupabase();
+        // Se já existem, apenas sincroniza
+        return await sincronizarAtendentesDoSupabase();
       }
     } catch (error) {
       console.error('Erro ao inserir atendentes padrão:', error);
-      atendentes = JSON.parse(JSON.stringify(DEFAULT_ATENDENTES));
-      localStorage.setItem('atendentes', JSON.stringify(atendentes));
       showSyncStatus('Erro ao sincronizar com o banco de dados', true);
       return false;
     } finally {
@@ -556,10 +609,15 @@
     }
   }
 
-  // ==================== VALIDAR LOGIN ====================
+  // ========== VALIDAÇÃO DE LOGIN ==========
   function validarLogin(login, senha) {
     console.log('🔐 Tentando login:', login);
-    console.log('📋 Atendentes disponíveis:', atendentes.map(a => ({ login: a.login, nome: a.nome, ativo: a.ativo, isAdmin: a.isAdmin })));
+    console.log('📋 Atendentes disponíveis:', atendentes.map(a => ({ 
+      login: a.login, 
+      nome: a.nome, 
+      ativo: a.ativo, 
+      isAdmin: a.isAdmin 
+    })));
     
     const userFound = atendentes.find(atendente => 
       atendente.ativo === true && 
@@ -581,45 +639,7 @@
     return null;
   }
 
-  function showError(message) {
-    const errorDiv = document.getElementById('errorMessage');
-    const errorText = document.getElementById('errorText');
-    errorText.textContent = message || 'Usuário ou senha incorretos!';
-    errorDiv.style.display = 'flex';
-    
-    const successDiv = document.getElementById('successMessage');
-    if (successDiv) successDiv.style.display = 'none';
-    
-    const card = document.querySelector('.login-card');
-    card.classList.add('shake-animation');
-    setTimeout(() => {
-      card.classList.remove('shake-animation');
-    }, 300);
-    
-    setTimeout(() => {
-      errorDiv.style.display = 'none';
-    }, 3000);
-  }
-
-  function showSuccess(message) {
-    const successDiv = document.getElementById('successMessage');
-    const successText = document.getElementById('successText');
-    successText.textContent = message || 'Login realizado com sucesso!';
-    successDiv.style.display = 'flex';
-    
-    const errorDiv = document.getElementById('errorMessage');
-    if (errorDiv) errorDiv.style.display = 'none';
-    
-    setTimeout(() => {
-      successDiv.style.display = 'none';
-    }, 3000);
-  }
-
-  function clearError() {
-    const errorDiv = document.getElementById('errorMessage');
-    if (errorDiv) errorDiv.style.display = 'none';
-  }
-
+  // ========== GERENCIAMENTO DE SESSÃO ==========
   function removeContinueButton() {
     const continueBtn = document.getElementById('goToOrcamentoBtn');
     if (continueBtn && continueBtn.parentNode) {
@@ -642,6 +662,7 @@
         const agora = new Date();
         const diffHoras = (agora - timestamp) / (1000 * 60 * 60);
         
+        // Sessão expira após 8 horas
         if (diffHoras > 8) {
           localStorage.removeItem('usuarioLogado');
           sessionStorage.removeItem('auth');
@@ -712,20 +733,15 @@
     const errorDiv = document.getElementById('errorMessage');
     if (errorDiv) errorDiv.style.display = 'none';
     
-    const card = document.querySelector('.login-card');
-    const originalBorder = card.style.border;
-    card.style.border = '2px solid #25d366';
-    setTimeout(() => {
-      card.style.border = originalBorder;
-    }, 500);
+    showSyncStatus('Sessão encerrada. Faça login novamente.', false);
   }
 
   async function handleLogin() {
     const loginInput = document.getElementById('loginUser');
     const passwordInput = document.getElementById('loginPassword');
     
-    const login = loginInput.value.trim().toLowerCase();
-    const password = passwordInput.value.trim();
+    const login = loginInput?.value?.trim()?.toLowerCase() || '';
+    const password = passwordInput?.value?.trim() || '';
     
     if (login === '' || password === '') {
       showError('Por favor, preencha ambos os campos!');
@@ -734,16 +750,16 @@
     
     // Garante que os atendentes estão carregados
     if (atendentes.length === 0) {
-      showError('Carregando dados do sistema. Aguarde e tente novamente.');
-      await carregarAtendentesDoSupabase();
+      showSyncStatus('Carregando dados do sistema...', false);
+      await sincronizarAtendentesDoSupabase();
     }
     
     const user = validarLogin(login, password);
     
     if (!user) {
       showError('❌ Login ou senha incorretos! Tente novamente.');
-      passwordInput.value = '';
-      passwordInput.focus();
+      if (passwordInput) passwordInput.value = '';
+      if (passwordInput) passwordInput.focus();
       return;
     }
     
@@ -759,13 +775,13 @@
     
     updateUIBasedOnSession();
     
-    // Redirecionar para o orcamento.html
+    // Redireciona para o sistema de orçamentos
     setTimeout(() => {
       window.location.href = 'orcamento.html';
-    }, 500);
+    }, 800);
   }
 
-  // ==================== MONITORAMENTO EM TEMPO REAL ====================
+  // ========== MONITORAMENTO EM TEMPO REAL ==========
   function iniciarMonitoramentoAtendentes() {
     // Monitora mudanças no localStorage de outras abas
     window.addEventListener('storage', function(event) {
@@ -776,7 +792,10 @@
           try {
             atendentes = JSON.parse(saved);
             updateUIBasedOnSession();
-          } catch(e) {}
+            showSyncStatus('Lista de atendentes atualizada', false);
+          } catch(e) {
+            console.error('Erro ao processar atualização:', e);
+          }
         }
       }
     });
@@ -785,13 +804,13 @@
     setInterval(async () => {
       if (navigator.onLine) {
         console.log('🔄 Sincronizando atendentes com o Supabase...');
-        await carregarAtendentesDoSupabase();
+        await sincronizarAtendentesDoSupabase();
         updateUIBasedOnSession();
       }
-    }, 300000);
+    }, 300000); // 5 minutos
   }
 
-  // ==================== VERIFICAR SESSÃO EXISTENTE ====================
+  // ========== VERIFICAR SESSÃO EXISTENTE ==========
   function verificarSessaoExistente() {
     const usuarioSalvo = localStorage.getItem('usuarioLogado');
     if (usuarioSalvo) {
@@ -807,17 +826,26 @@
         } else {
           localStorage.removeItem('usuarioLogado');
         }
-      } catch(e) {}
+      } catch(e) {
+        console.error('Erro ao verificar sessão:', e);
+        localStorage.removeItem('usuarioLogado');
+      }
     }
     return false;
   }
 
-  // ==================== INICIALIZAÇÃO ====================
+  // ========== INICIALIZAÇÃO ==========
   async function init() {
+    console.log('🚀 Inicializando sistema de login...');
     showLoading();
     
+    // Verifica conectividade
+    if (!navigator.onLine) {
+      showSyncStatus('⚠️ Modo offline - usando dados locais', true);
+    }
+    
     // Carrega atendentes do Supabase
-    await carregarAtendentesDoSupabase();
+    await sincronizarAtendentesDoSupabase();
     
     // Verifica se já existe sessão ativa
     verificarSessaoExistente();
@@ -830,7 +858,7 @@
     
     hideLoading();
     
-    // Tratamento do logo
+    // Tratamento da imagem do logo
     const logoImg = document.querySelector('.logo-image');
     if (logoImg) {
       logoImg.addEventListener('error', function() {
@@ -840,13 +868,10 @@
       });
     }
     
-    // Verifica conectividade
-    if (!navigator.onLine) {
-      showSyncStatus('⚠️ Modo offline - usando dados locais', true);
-    }
+    console.log('✅ Sistema inicializado com sucesso');
   }
 
-  // Event listeners
+  // ========== EVENT LISTENERS ==========
   const loginBtn = document.getElementById('loginBtn');
   const passwordField = document.getElementById('loginPassword');
   const userField = document.getElementById('loginUser');
@@ -880,8 +905,8 @@
     passwordField.addEventListener('input', clearError);
   }
   
-  // Inicia a aplicação
-  init();
+  // Inicia a aplicação quando a página carregar
+  window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
