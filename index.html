@@ -334,11 +334,11 @@
 <script>
   // ==================== ATENDENTES PADRÃO ====================
   const DEFAULT_ATENDENTES = [
-    { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-    { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-    { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-    { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-    { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() }
+    { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, isAdmin: true, criado_em: new Date().toISOString() },
+    { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, isAdmin: true, criado_em: new Date().toISOString() },
+    { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, isAdmin: false, criado_em: new Date().toISOString() },
+    { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, isAdmin: false, criado_em: new Date().toISOString() },
+    { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, isAdmin: false, criado_em: new Date().toISOString() }
   ];
 
   let atendentes = [];
@@ -351,7 +351,7 @@
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           atendentes = parsed;
-          console.log('Atendentes carregados do localStorage:', atendentes.length);
+          console.log('✅ Atendentes carregados do localStorage:', atendentes.length);
           document.getElementById('syncStatus').innerHTML = '<i class="fas fa-check-circle"></i> Atendentes sincronizados com o sistema';
           setTimeout(() => {
             const statusDiv = document.getElementById('syncStatus');
@@ -372,8 +372,8 @@
 
   // Função para validar login
   function validarLogin(login, senha) {
-    console.log('Tentando login:', login);
-    console.log('Atendentes disponíveis:', atendentes.map(a => ({ login: a.login, nome: a.nome, ativo: a.ativo })));
+    console.log('🔐 Tentando login:', login);
+    console.log('📋 Atendentes disponíveis:', atendentes.map(a => ({ login: a.login, nome: a.nome, ativo: a.ativo, isAdmin: a.isAdmin })));
     
     const userFound = atendentes.find(atendente => 
       atendente.ativo === true && 
@@ -383,15 +383,15 @@
     );
     
     if (userFound) {
-      console.log('Usuário encontrado:', userFound.nome);
+      console.log('✅ Usuário encontrado:', userFound.nome, 'Admin:', userFound.isAdmin);
       return {
         nomeExibicao: userFound.nome,
         login: userFound.login,
-        isAdmin: userFound.nome === 'Jaúna Constante' || userFound.nome === 'Jaciara Constante',
+        isAdmin: userFound.isAdmin === true,
         id: userFound.id
       };
     }
-    console.log('Usuário não encontrado ou credenciais inválidas');
+    console.log('❌ Usuário não encontrado ou credenciais inválidas');
     return null;
   }
 
@@ -552,6 +552,47 @@
     window.location.href = 'orcamento.html';
   }
 
+  // ==================== NOVA FUNÇÃO: MONITORAMENTO EM TEMPO REAL ====================
+  function iniciarMonitoramentoAtendentes() {
+    // Monitora mudanças no localStorage de outras abas
+    window.addEventListener('storage', function(event) {
+      if (event.key === 'atendentes') {
+        console.log('🔄 Atendentes atualizados em outra aba/janela');
+        carregarAtendentes();
+        
+        // Verifica se o usuário atual ainda existe
+        const usuarioSalvo = localStorage.getItem('usuarioLogado');
+        if (usuarioSalvo) {
+          try {
+            const user = JSON.parse(usuarioSalvo);
+            const aindaExiste = atendentes.some(a => 
+              a.ativo === true && a.nome === user.nome
+            );
+            if (!aindaExiste) {
+              alert('⚠️ Seu usuário foi desativado ou removido. Faça login novamente.');
+              logout();
+            }
+          } catch(e) {}
+        }
+      }
+    });
+    
+    // Verifica periodicamente (a cada 30 segundos)
+    setInterval(() => {
+      const saved = localStorage.getItem('atendentes');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (JSON.stringify(atendentes) !== JSON.stringify(parsed)) {
+            console.log('🔄 Detectada mudança nos atendentes, recarregando...');
+            atendentes = parsed;
+            updateUIBasedOnSession();
+          }
+        } catch(e) {}
+      }
+    }, 30000);
+  }
+
   // Escutar mudanças no localStorage
   function escutarMudancasAtendentes() {
     window.addEventListener('storage', function(event) {
@@ -576,6 +617,7 @@
   // Inicialização
   function init() {
     carregarAtendentes();
+    iniciarMonitoramentoAtendentes(); // ADICIONADO: monitoramento em tempo real
     escutarMudancasAtendentes();
     updateUIBasedOnSession();
     
