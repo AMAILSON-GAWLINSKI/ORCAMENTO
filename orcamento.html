@@ -417,8 +417,8 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODA5ODcsImV4cCI6MjA5MjQ1Njk4N30.6Rf26bE_yeE2NwJgggyGa-GrgM4bpMgaTvwQ_QiyPs0';
     
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    // LOGO_BASE64 resumido - use a imagem real em produção
+
+     // LOGO_BASE64 resumido - use a imagem real em produção
     const LOGO_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAGQCAYAAAByNR6YAAAQAElEQVR4Aex9B4AdV3X2OTPz2vauLdKqd8mWZdm4YBu5ICMwxjZRghsYBxwgQOiE6pCekEDITwiQUExIiCH0mADGcpFllVXZ3nvv/fWZ+c83b5+0llZ19612pTs7Z+6d2+ebmXu/e859sxqpTSGgEFAIKAQUAgoBhYBCYE4RUATrVIhVhEJAIaAQUAgoBBQCCoG5QkARrLlCUpWjEFAIKAQUAgoBhYBC4FQEFME6FRIVoxBQCCgEFAIKAYWAQmCuEFAEa66QVOUoBBQCCgGFgEJAIaAQOBUBRbBOhUTFKAQUAgoBhYBCQCGgEJgrBBTBmiskVTkKAYWAQkAhoBBQCCgETkVgJgTrtddeO7UIHaMQUAgoBBQCCgGFgEJAIXCzIHDTTTfdhHZ+9KMfhX322Wc37tmzxze3Tf3Uc9LpXK3c8zKt6U9/+tPYsWPHvqy15p/+9Kfb3O/+93//t3Lr1q2I4+Tk5DE0A+Hu7u7fWJb1MRy/+c1v/hnC3/3ud5fc/e53r9d1vRrHQI/BWmusnstMaZpvM6VpvmmaVjPNEc6XpinKlaZpHbZpmuZzHOfxX//617/ZtH79etJ1fR/y/cEf/NEo6v/Nb36zQgiVY2Fh4W+EYE022mxoY2Fh4S+++93vftR1XQcetE9oQmHAJbSJthqGYWZkZHwM7f7+97+PjDfddNNwOBx+YNeuXam2bU977rnnOo1tnK/vDrTphhhf+7Wvfe2MZgN5FhYW/rveevfaTDe1v3Dh1Po4+uijE+2P+uM//uPjTzzxxLc+/elP54TD4V8cPny4Fm2BmeFw+Le6rqM/5pmm+dmMjIz/+NznPndM0zT0J/zRf/qf/ufQ9u3b/3H//v0h2j7nrvXBN7rRj+jjnXM/SH8qMnMifj7h6rZt2x4fGhp6zbFjx47Ztj06Ojr6m0OHDk0Av9nUYaZpqKd41apV92RnZ+dy/9rWbva9b7rppifXrVv3nUOHDuV+//vff+ull14a27p1a2rr1q2p8PPkyZMnDx06lHrkyJGT4ODnnnvuOZg+v/vd7/7y0ksvHcT5j33sY2lHjx4d27VrVzq2T33qU2nbtm1Lf/nLX55Mn+9+97v/B+dXXnllwjXPl7Zt23YMbTt//vyEy30u9OMf/zghKxwOj7/wwgtH//3f/x3tnXj22WcTLrjggkS69u/fn3DxxRcnXPShD30o4a1vfWvCX/3VXyVcd911CRdffHHCVVddleC6LuFTn/pUwoc//OGEv//7v0/44he/mHDZZZclnH/++Qkf+MAHEj760Y8mfOITn0hE/TgP/6tf/WrCpz/96YRPfOITCZ/5zGcSLr300oSLL7444ZJLLkn4whe+kPCFL3whAelRzze+8Y2EL3/5ywl/+7d/m/DXf/3XCd/61rcS0DagR/0f//jHEz7xiU8kfP3rX0+4/PLLEy677LKEyy+/POFzn/tcAuq/4oorkkbTtEMHDhx4/7vf/e5zXvGKV7znYx/72HvRr6985SsJl1122YkLLrgg4TWvec0JtBnthzY+9dRTEyaJhg9/+MN1L33pS3/4iU984ne/+c1v/vzggw/u+vSnP/1Ht95667e+973v/fArX/nKDz/xiU/84d/+7d/+4R133PGHd9111x/+8Ic//MNPf/rTf/jJT37yDz/+8Y//4Q9/+MN/+Id/+MMbb7zxDz/2sY/94cc+9rE//Md//MeED3/4wwkf/ehHEz75yU8mfPazn0344he/mPDlL3854Stf+UrCX/3VXyV87WtfS/j617+e8M1vfjPhG9/4RsK3vvWthG9/+9sJ3/3udxO+973vJfzgBz9I+NGPfpTw4x//OOHHP/5xwg9/+MOEf/mXf0n4l3/5lwT0A+mFfyIf+hf9i/5GP8Ovvo/+h36gf+Gnfo/+gP4Rfse2+fnnn3/4iSeeeOTnP//5I7/97W8f+c1vfvPIb3/720fQNvQd7Ue7EX/kyJFH7LjpsZ04ceKJ48ePP/Hyyy8/8corrzxx7NixJ9Bnx48ff+LYsWNP7N2794n9+/c/ceDAgScOHjz4BDA7dOjQE0ePHn3i2LFjT7z00ktPADPgc/z48bc+++yzb8f9XL9+/VswYcHEZevWrW/ZtWvXW6H06dOf/vSnNm/e/Jbdu3e/Ze/evW/BddxjHMP/vve9D9oE7Ado/913333vu++++we33HLL2x544IG33nPPPW+977773vqjH/3orQ8//PBbH3rooR+if/fu3fvD+++//4d/8zd/88Obb77phz/5yU/e+rd/+7d/+MMf/vCH6Hv0PwTz0f/of+CA6w8++OAPcB+AB/y4H8AO+OGa77rrrt9B++67777fbdu27Xc7duz4HbTbbrvtd3//93//u02bNv0OfQtB/4IfgQH0BfrRoUOHfvTCCy/8qKqq6kcPP/zwo/37978R7d+1a9ePX3755R8fOHDgx/v37//xsWPHtLZt2762ZcuWn2zatOkn27Ztu+nmm2/+3YUXXvjjiy666Gd33XXXz2655ZafPfjggz87dOjQz8rKyn5WV1f3s/r6+p81Nzf/rLu7+2e9vb0/6+vr+9nAwMDPBgYGfjY4OPizoaGhnw0PD/9seHj4ZxMTE38WCoX+bGpqqrajo+PPS0tL/7ysrOwvUY+6+h75H/nf//3f/4s+TExM/HloYvyZ0bHx/8jPzf/C0tLSfy0qLPzZ8vKSPystLfmzstLSvxgaGvrLwYGBvxwcHPzL4eHhvxweGfnL0dHRvxwYGPhLtE9rX7d+v+aMmfjbW2655Zbb33Dn7d/+v3e+8a0/uv322//h7rvv/od77rnnH+69995/RC/wu+uuu/6hq6vrH7q6uv6hp6fnH3p6ev6hr6/vH/r7+/9hcHDwHwYHB/9hcHDwH4aGhoiZudkU5gK/RgfR/r8oKir66vDg4F8ODw//pdPQ/wOcJbQBqEHzAAAAAElFTkSuQmCC";
     
     let historicoOrcamentosGlobal = [];
@@ -426,7 +426,6 @@
     let orcamentoEditandoId = null;
     let currentStep = 1;
     let jaPassouStep1 = false;
-    let pendingSyncData = [];
     let isOnline = navigator.onLine;
     
     // ========== GERENCIAMENTO DE ATENDENTES ==========
@@ -440,86 +439,12 @@
       { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, isAdmin: false, criado_em: new Date().toISOString() }
     ];
     
-    // ========== FUNÇÃO DE MONITORAMENTO EM TEMPO REAL ==========
-    function iniciarMonitoramentoAtendentes() {
-      window.addEventListener('storage', function(event) {
-        if (event.key === 'atendentes') {
-          console.log('🔄 Atendentes modificados em outra aba');
-          carregarAtendentes();
-          
-          const usuarioSalvo = localStorage.getItem('usuarioLogado');
-          if (usuarioSalvo) {
-            try {
-              const user = JSON.parse(usuarioSalvo);
-              const aindaAtivo = atendentes.some(a => a.nome === user.nome && a.ativo === true);
-              if (!aindaAtivo) {
-                alert('⚠️ Seu usuário foi desativado ou alterado. Você será redirecionado para o login.');
-                window.location.href = 'index.html';
-              } else {
-                atualizarSelectAtendentes();
-                toggleAccessButtons();
-                const atendenteAtual = atendenteSelect?.value;
-                if (atendenteAtual && !atendentes.some(a => a.nome === atendenteAtual && a.ativo === true)) {
-                  alert('⚠️ O atendente selecionado foi desativado. Você será redirecionado para o login.');
-                  window.location.href = 'index.html';
-                }
-              }
-            } catch(e) {}
-          }
-          atualizarSelectAtendentes();
-          toggleAccessButtons();
-        }
-      });
-      
-      setInterval(() => {
-        const saved = localStorage.getItem('atendentes');
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            if (JSON.stringify(atendentes) !== JSON.stringify(parsed)) {
-              console.log('🔄 Detectada mudança nos atendentes, recarregando...');
-              atendentes = parsed;
-              localStorage.setItem('atendentes', JSON.stringify(atendentes));
-              atualizarSelectAtendentes();
-              toggleAccessButtons();
-              
-              const usuarioSalvo = localStorage.getItem('usuarioLogado');
-              if (usuarioSalvo) {
-                const user = JSON.parse(usuarioSalvo);
-                const aindaExiste = atendentes.some(a => a.nome === user.nome && a.ativo === true);
-                if (!aindaExiste) {
-                  alert('⚠️ Seu acesso foi modificado. Faça login novamente.');
-                  window.location.href = 'index.html';
-                }
-              }
-            }
-          } catch(e) {
-            console.error('Erro na verificação periódica:', e);
-          }
-        }
-      }, 30000);
-    }
-    
     function carregarAtendentes() {
       const saved = localStorage.getItem('atendentes');
       if (saved) {
         try {
-          const parsed = JSON.parse(saved);
-          let precisaSalvar = false;
-          parsed.forEach(a => {
-            if (!a.login && a.nome) {
-              a.login = a.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
-              precisaSalvar = true;
-            }
-            if (a.isAdmin === undefined) {
-              a.isAdmin = (a.nome === "Jaúna Constante" || a.nome === "Jaciara Constante");
-              precisaSalvar = true;
-            }
-          });
-          atendentes = parsed;
-          if (precisaSalvar) localStorage.setItem('atendentes', JSON.stringify(atendentes));
+          atendentes = JSON.parse(saved);
         } catch(e) {
-          console.error('Erro ao carregar atendentes:', e);
           atendentes = JSON.parse(JSON.stringify(DEFAULT_ATENDENTES));
           localStorage.setItem('atendentes', JSON.stringify(atendentes));
         }
@@ -554,10 +479,6 @@
             const user = JSON.parse(usuarioSalvo);
             if (atendentesAtivos.some(a => a.nome === user.nome)) {
               select.value = user.nome;
-            } else {
-              alert('⚠️ Seu usuário foi desativado. Faça login novamente.');
-              window.location.href = 'index.html';
-              return;
             }
           } catch(e) {}
         }
@@ -566,107 +487,20 @@
       toggleAccessButtons();
     }
     
-    function salvarAtendentes() {
-      localStorage.setItem('atendentes', JSON.stringify(atendentes));
-      atualizarSelectAtendentes();
-      window.dispatchEvent(new StorageEvent('storage', { key: 'atendentes', newValue: JSON.stringify(atendentes) }));
-    }
-    
-    function adicionarAtendenteComLogin(nome, email, login, senha) {
-      const novoId = Math.max(...atendentes.map(a => a.id), 0) + 1;
-      atendentes.push({
-        id: novoId, nome, email, login, senha,
-        ativo: true, isAdmin: false, criado_em: new Date().toISOString()
-      });
-      salvarAtendentes();
-    }
-    
-    function editarAtendenteComLogin(id, nome, email, login, senha) {
-      const index = atendentes.findIndex(a => a.id === id);
-      if (index !== -1) {
-        atendentes[index].nome = nome;
-        atendentes[index].email = email;
-        atendentes[index].login = login;
-        if (senha && senha.trim() !== "") atendentes[index].senha = senha;
-        salvarAtendentes();
-      }
-    }
-    
-    function ocultarAtendente(id) {
-      const index = atendentes.findIndex(a => a.id === id);
-      if (index !== -1) { atendentes[index].ativo = false; salvarAtendentes(); }
-    }
-    
-    function reativarAtendente(id) {
-      const index = atendentes.findIndex(a => a.id === id);
-      if (index !== -1) { atendentes[index].ativo = true; salvarAtendentes(); }
-    }
-    
-    function deletarAtendente(id) {
-      atendentes = atendentes.filter(a => a.id !== id);
-      salvarAtendentes();
-    }
-    
-    function evoluirParaAdmin(id) {
-      const index = atendentes.findIndex(a => a.id === id);
-      if (index !== -1) {
-        atendentes[index].isAdmin = true;
-        salvarAtendentes();
-        const usuarioSalvo = localStorage.getItem('usuarioLogado');
-        if (usuarioSalvo) {
-          try {
-            const user = JSON.parse(usuarioSalvo);
-            if (user.nome === atendentes[index].nome) {
-              localStorage.setItem('usuarioLogado', JSON.stringify({...user, isAdmin: true}));
-            }
-          } catch(e) {}
-        }
-        toggleAccessButtons();
-      }
-    }
-    
-    function removerAcessoAdmin(id) {
-      const index = atendentes.findIndex(a => a.id === id);
-      if (index !== -1) {
-        atendentes[index].isAdmin = false;
-        salvarAtendentes();
-        const usuarioSalvo = localStorage.getItem('usuarioLogado');
-        if (usuarioSalvo) {
-          try {
-            const user = JSON.parse(usuarioSalvo);
-            if (user.nome === atendentes[index].nome) {
-              localStorage.setItem('usuarioLogado', JSON.stringify({...user, isAdmin: false}));
-            }
-          } catch(e) {}
-        }
-        toggleAccessButtons();
-      }
-    }
-    
-    function sincronizarAtendenteAtual() {
-      const usuarioSalvo = localStorage.getItem('usuarioLogado');
-      if (usuarioSalvo && atendenteSelect) {
-        try {
-          const user = JSON.parse(usuarioSalvo);
-          const optionExists = Array.from(atendenteSelect.options).some(opt => opt.value === user.nome);
-          if (optionExists && atendenteSelect.value !== user.nome) {
-            atendenteSelect.value = user.nome;
-            const changeEvent = new Event('change', { bubbles: true });
-            atendenteSelect.dispatchEvent(changeEvent);
-          }
-        } catch(e) {}
-      }
-    }
-    
     function isAtendenteAdmin(nomeAtendente) {
       const atendente = atendentes.find(a => a.nome === nomeAtendente && a.ativo === true);
       return atendente ? atendente.isAdmin === true : false;
     }
     
+    function salvarAtendentes() {
+      localStorage.setItem('atendentes', JSON.stringify(atendentes));
+      atualizarSelectAtendentes();
+    }
+    
     function toggleAccessButtons() {
       const adminBtn = document.getElementById('adminAccessBtn');
       const pesquisaBtn = document.getElementById('pesquisaAccessBtn');
-      let atendente = atendenteSelect.value;
+      let atendente = atendenteSelect?.value;
       
       if (!atendente || atendente === '') {
         const usuarioSalvo = localStorage.getItem('usuarioLogado');
@@ -688,20 +522,23 @@
       }
     }
     
-    const stepCards = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3'), document.getElementById('step4')];
-    const stepItems = document.querySelectorAll('.step-item');
-    const atendenteSelect = document.getElementById('atendenteSelect');
-    const clientName = document.getElementById('clientName');
-    const clientAge = document.getElementById('clientAge');
-    const clientPhone = document.getElementById('clientPhone');
-    const clientSource = document.getElementById('clientSource');
-    const descontoGeralInput = document.getElementById('descontoGeralInput');
-    let currentOrcamentoId = '';
+    // ========== FUNÇÕES DE SINCRONIZAÇÃO ==========
+    function showLoading() {
+      let loading = document.querySelector('.loading-overlay');
+      if (!loading) {
+        loading = document.createElement('div');
+        loading.className = 'loading-overlay';
+        loading.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner"></i> Carregando...</div>';
+        document.body.appendChild(loading);
+      }
+      loading.style.display = 'flex';
+    }
     
-    carregarAtendentes();
-    sincronizarAtendenteAtual();
+    function hideLoading() {
+      const loading = document.querySelector('.loading-overlay');
+      if (loading) loading.style.display = 'none';
+    }
     
-    // Offline sync functions (mantidas iguais)
     function updateOfflineIndicator() {
       const indicator = document.getElementById('offlineIndicator');
       const statusSpan = document.getElementById('offlineStatus');
@@ -739,7 +576,7 @@
               atendente: data.atendente,
               origem: data.origem,
               concorrente: data.concorrente || '',
-              itens: JSON.stringify(data.itens),
+              itens: data.itens,
               subtotal: data.subtotal,
               desconto_geral: data.descontoGeral,
               total_final: data.totalFinal,
@@ -747,7 +584,7 @@
               justificativa: data.justificativa || '',
               data_raw: data.dataRaw,
               created_at: data.dataRaw
-            }, { onConflict: 'id' });
+            });
           
           if (!error) successCount++;
         } catch(e) {
@@ -762,44 +599,28 @@
       hideLoading();
     }
     
-    async function salvarComFallback(orcamentoData) {
-      if (navigator.onLine) {
-        try {
-          const { error } = await supabase
-            .from('orcamentos')
-            .upsert({
-              id: orcamentoData.id,
-              cliente: orcamentoData.cliente,
-              idade: orcamentoData.idade,
-              telefone: orcamentoData.telefone,
-              atendente: orcamentoData.atendente,
-              origem: orcamentoData.origem,
-              concorrente: orcamentoData.concorrente || '',
-              itens: JSON.stringify(orcamentoData.itens),
-              subtotal: orcamentoData.subtotal,
-              desconto_geral: orcamentoData.descontoGeral,
-              total_final: orcamentoData.totalFinal,
-              status: orcamentoData.status,
-              justificativa: orcamentoData.justificativa || '',
-              data_raw: orcamentoData.dataRaw,
-              created_at: orcamentoData.dataRaw
-            }, { onConflict: 'id' });
-          
-          if (!error) {
-            await carregarHistoricoDoSupabase();
-            return true;
-          } else {
-            throw error;
-          }
-        } catch(error) {
-          console.error('Erro ao salvar no Supabase, salvando localmente:', error);
-          addToPendingSync(orcamentoData);
-          return true;
-        }
-      } else {
-        addToPendingSync(orcamentoData);
-        return true;
-      }
+    async function salvarNoSupabase(orcamentoData) {
+      const { error } = await supabase
+        .from('orcamentos')
+        .upsert({
+          id: orcamentoData.id,
+          cliente: orcamentoData.cliente,
+          idade: orcamentoData.idade,
+          telefone: orcamentoData.telefone,
+          atendente: orcamentoData.atendente,
+          origem: orcamentoData.origem,
+          concorrente: orcamentoData.concorrente || '',
+          itens: JSON.stringify(orcamentoData.itens),
+          subtotal: orcamentoData.subtotal,
+          desconto_geral: orcamentoData.descontoGeral,
+          total_final: orcamentoData.totalFinal,
+          status: orcamentoData.status,
+          justificativa: orcamentoData.justificativa || '',
+          data_raw: orcamentoData.dataRaw,
+          created_at: orcamentoData.dataRaw
+        });
+      
+      return !error;
     }
     
     function addToPendingSync(orcamentoData) {
@@ -821,20 +642,21 @@
       localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
     }
     
-    function showLoading() {
-      let loading = document.querySelector('.loading-overlay');
-      if (!loading) {
-        loading = document.createElement('div');
-        loading.className = 'loading-overlay';
-        loading.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner"></i> Carregando...</div>';
-        document.body.appendChild(loading);
+    async function salvarComFallback(orcamentoData) {
+      if (navigator.onLine) {
+        const sucesso = await salvarNoSupabase(orcamentoData);
+        if (sucesso) {
+          await carregarHistoricoDoSupabase();
+          return true;
+        } else {
+          console.error('Erro ao salvar no Supabase, salvando localmente');
+          addToPendingSync(orcamentoData);
+          return true;
+        }
+      } else {
+        addToPendingSync(orcamentoData);
+        return true;
       }
-      loading.style.display = 'flex';
-    }
-    
-    function hideLoading() {
-      const loading = document.querySelector('.loading-overlay');
-      if (loading) loading.style.display = 'none';
     }
     
     async function carregarHistoricoDoSupabase() {
@@ -887,9 +709,6 @@
         } else {
           historicoOrcamentosGlobal = historicoOrcamentosGlobal.filter(item => item.id !== id);
           localStorage.setItem('historicoOrcamentos', JSON.stringify(historicoOrcamentosGlobal));
-          const pendingDeletes = JSON.parse(localStorage.getItem('pendingDeletes') || '[]');
-          if (!pendingDeletes.includes(id)) pendingDeletes.push(id);
-          localStorage.setItem('pendingDeletes', JSON.stringify(pendingDeletes));
         }
         return true;
       } catch (error) {
@@ -912,6 +731,20 @@
     });
     
     updateOfflineIndicator();
+    carregarHistoricoDoSupabase();
+    
+    // ========== FUNÇÕES DO FORMULÁRIO ==========
+    const stepCards = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3'), document.getElementById('step4')];
+    const stepItems = document.querySelectorAll('.step-item');
+    const atendenteSelect = document.getElementById('atendenteSelect');
+    const clientName = document.getElementById('clientName');
+    const clientAge = document.getElementById('clientAge');
+    const clientPhone = document.getElementById('clientPhone');
+    const clientSource = document.getElementById('clientSource');
+    const descontoGeralInput = document.getElementById('descontoGeralInput');
+    let currentOrcamentoId = '';
+    
+    carregarAtendentes();
     
     clientSource.addEventListener('change', function() {
       const concorrenteGroup = document.getElementById('concorrenteGroup');
@@ -984,24 +817,16 @@
       const nameValid = clientName.value.trim() !== '';
       const sourceValid = clientSource.value !== '';
       
-      if (!phoneValid) {
-        clientPhone.classList.add('required-error');
-      } else {
-        clientPhone.classList.remove('required-error');
-      }
-      if (!nameValid) {
-        clientName.classList.add('required-error');
-      } else {
-        clientName.classList.remove('required-error');
-      }
-      if (!sourceValid) {
-        clientSource.classList.add('required-error');
-      } else {
-        clientSource.classList.remove('required-error');
-      }
+      if (!phoneValid) clientPhone.classList.add('required-error');
+      else clientPhone.classList.remove('required-error');
+      if (!nameValid) clientName.classList.add('required-error');
+      else clientName.classList.remove('required-error');
+      if (!sourceValid) clientSource.classList.add('required-error');
+      else clientSource.classList.remove('required-error');
       
       return nameValid && phoneValid && sourceValid;
     }
+    
     function updateNavButtons() { 
       document.getElementById('nextToStep2').disabled = !validateStep1(); 
       document.getElementById('nextToStep3').disabled = !validateStep2(); 
@@ -1012,34 +837,19 @@
       if (usuarioSalvo) {
         try {
           const user = JSON.parse(usuarioSalvo);
-          const timestamp = new Date(user.loginTimestamp);
-          const agora = new Date();
-          const diffHoras = (agora - timestamp) / (1000 * 60 * 60);
-          
-          if (diffHoras > 8) {
-            localStorage.removeItem('usuarioLogado');
-            return false;
-          }
-          
           const nomeAtendente = user.nome;
           const atendenteAtivo = atendentes.find(a => a.nome === nomeAtendente && a.ativo === true);
           
           if (atendenteAtivo) {
             atendenteSelect.value = nomeAtendente;
-            const changeEvent = new Event('change', { bubbles: true });
-            atendenteSelect.dispatchEvent(changeEvent);
-            
             if (validateStep1()) {
               jaPassouStep1 = true;
-              setTimeout(() => {
-                goToStep(2);
-              }, 50);
+              setTimeout(() => goToStep(2), 50);
             }
             return true;
           }
           return false;
         } catch(e) {
-          console.error('Erro ao ler usuário logado:', e);
           localStorage.removeItem('usuarioLogado');
           return false;
         }
@@ -1055,11 +865,8 @@
     });
     
     document.getElementById('backToStep1')?.addEventListener('click',()=>{
-      if(!jaPassouStep1) {
-        goToStep(1);
-      } else {
-        alert('⚠️ Você não pode voltar para a seleção de atendente. Clique em "Sair" para trocar de atendente.');
-      }
+      if(!jaPassouStep1) goToStep(1);
+      else alert('⚠️ Você não pode voltar para a seleção de atendente. Clique em "Sair" para trocar de atendente.');
     });
     
     document.getElementById('nextToStep3')?.addEventListener('click',()=>{if(validateStep2()){goToStep(3);renderOrcamentosForm();}});
@@ -1576,13 +1383,6 @@
       function addHeader() {
         doc.setFillColor(252, 84, 4);
         doc.rect(0, 0, pageWidth, 35, 'F');
-        
-        try {
-          doc.addImage(LOGO_BASE64, 'PNG', 175, 5, 20, 20);
-        } catch(e) {
-          console.warn("Erro ao adicionar logo:", e);
-        }
-        
         doc.setTextColor(255, 255, 255);
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(22);
@@ -1802,8 +1602,7 @@ ${dataAtual}
       }
     });
     
-    // ========== FUNÇÕES DE APOIO ==========
-    
+    // ========== FUNÇÕES DAS ABAS ADMIN ==========
     function renderizarGestaoAtendentes(container) {
       if (!container) return;
       
@@ -1815,45 +1614,36 @@ ${dataAtual}
           <i class="fas fa-users"></i> Gerenciar Atendentes
           <button id="btnNovoAtendente" class="btn btn-success btn-sm" style="margin-left: auto; padding: 8px 16px;"><i class="fas fa-plus"></i> Novo Atendente</button>
         </div>
-        
         <div style="margin-bottom: 30px;">
           <h4 style="margin-bottom: 15px; color: #1e293b;">📋 Atendentes Ativos</h4>
           <table class="atendentes-table">
-            <thead>
-              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Status</th><th>Acesso</th><th>Ações</th></tr>
-            </thead>
+            <thead><tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody>
       `;
       
       ativos.forEach(a => {
-        const adminBadge = a.isAdmin ? '<span class="admin-badge">Admin</span>' : '';
         html += `
           <tr data-id="${a.id}">
-            <td><strong>${escapeHtml(a.nome)}</strong> ${adminBadge}</td>
+            <td><strong>${escapeHtml(a.nome)}</strong> ${a.isAdmin ? '<span class="admin-badge">Admin</span>' : ''}</td>
             <td>${escapeHtml(a.email)}</td>
             <td>${escapeHtml(a.login || '')}</td>
             <td><span class="status-ativo">● Ativo</span></td>
-            <td>${a.isAdmin ? '<span style="color:#fc5404; font-weight:600;">Dashboard Avançado</span>' : '<span style="color:#3498db;">Pesquisa de Orçamentos</span>'}</td>
             <td>
-              ${!a.isAdmin ? `<button class="btn-evoluir-admin btn btn-success btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" style="padding: 4px 10px; margin-right: 5px; background:#fc5404; border-color:#fc5404;"><i class="fas fa-crown"></i> Evoluir para Admin</button>` : `<button class="btn-remover-admin btn btn-warning btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" style="padding: 4px 10px; margin-right: 5px; background:#e67e22; border-color:#e67e22;"><i class="fas fa-user-minus"></i> Remover Acesso Admin</button>`}
-              <button class="btn-edit-atendente btn btn-edit btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" data-email="${escapeHtml(a.email)}" data-login="${escapeHtml(a.login || '')}" data-senha="${escapeHtml(a.senha)}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-edit"></i> Editar</button>
-              <button class="btn-ocultar-atendente btn btn-warning btn-sm" data-id="${a.id}" style="padding: 4px 10px; background: #f39c12; border-color: #f39c12;"><i class="fas fa-eye-slash"></i> Ocultar</button>
-              <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
-             </td>
-           </tr>
+              <button class="btn-edit-atendente btn btn-edit btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" data-email="${escapeHtml(a.email)}" data-login="${escapeHtml(a.login || '')}"><i class="fas fa-edit"></i> Editar</button>
+              <button class="btn-ocultar-atendente btn btn-warning btn-sm" data-id="${a.id}"><i class="fas fa-eye-slash"></i> Ocultar</button>
+              <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}"><i class="fas fa-trash"></i> Excluir</button>
+            </td>
+          </tr>
         `;
       });
       
       if (ocultos.length > 0) {
         html += `
             </tbody>
-           </table>
-          
+          </table>
           <h4 style="margin: 25px 0 15px 0; color: #1e293b;">🔒 Atendentes Ocultos</h4>
           <table class="atendentes-table">
-            <thead>
-              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Status</th><th>Ações</th></tr>
-            </thead>
+            <thead><tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody>
         `;
         
@@ -1865,134 +1655,59 @@ ${dataAtual}
               <td>${escapeHtml(a.login || '')}</td>
               <td><span class="status-oculto">● Oculto</span></td>
               <td>
-                <button class="btn-reativar-atendente btn btn-success btn-sm" data-id="${a.id}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-eye"></i> Reativar</button>
-                <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
-               </td>
-             </tr>
+                <button class="btn-reativar-atendente btn btn-success btn-sm" data-id="${a.id}"><i class="fas fa-eye"></i> Reativar</button>
+                <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}"><i class="fas fa-trash"></i> Excluir</button>
+              </td>
+            </tr>
           `;
         });
       }
       
-      html += `
-            </tbody>
-           </table>
-        </div>
-      `;
-      
+      html += `</tbody></table></div>`;
       container.innerHTML = html;
       
       document.getElementById('btnNovoAtendente')?.addEventListener('click', () => {
-        const modal = document.createElement('div'); modal.className = 'modal-overlay';
-        modal.innerHTML = `
-          <div class="modal-content" style="max-width:450px;">
-            <h3><i class="fas fa-user-plus"></i> Novo Atendente</h3>
-            <div class="input-group"><label>Nome completo *</label><input type="text" id="novoNomeAtendente" placeholder="Ex: Maria Silva"></div>
-            <div class="input-group"><label>E-mail *</label><input type="email" id="novoEmailAtendente" placeholder="exemplo@email.com"></div>
-            <div class="input-group"><label>Login *</label><input type="text" id="novoLoginAtendente" placeholder="usuário para login"></div>
-            <div class="input-group"><label>Senha *</label><input type="password" id="novaSenhaAtendente" placeholder="Digite uma senha"></div>
-            <div class="modal-buttons-row">
-              <button id="confirmarNovoAtendente" class="btn btn-primary">Adicionar</button>
-              <button id="cancelarNovoAtendente" class="btn btn-outline">Cancelar</button>
-            </div>
-          </div>
-        `;
-        document.body.appendChild(modal);
-        
-        modal.querySelector('#confirmarNovoAtendente').onclick = () => {
-          const nome = modal.querySelector('#novoNomeAtendente').value.trim();
-          const email = modal.querySelector('#novoEmailAtendente').value.trim();
-          const login = modal.querySelector('#novoLoginAtendente').value.trim();
-          const senha = modal.querySelector('#novaSenhaAtendente').value.trim();
-          if (!nome || !email || !login || !senha) {
-            alert('Preencha todos os campos!');
-            return;
-          }
-          if (atendentes.some(a => a.login === login)) {
-            alert('Este login já existe! Escolha outro.');
-            return;
-          }
-          adicionarAtendenteComLogin(nome, email, login, senha);
-          modal.remove();
+        const nome = prompt('Nome completo:');
+        const email = prompt('E-mail:');
+        const login = prompt('Login:');
+        const senha = prompt('Senha:');
+        if (nome && email && login && senha) {
+          const novoId = Math.max(...atendentes.map(a => a.id), 0) + 1;
+          atendentes.push({
+            id: novoId, nome, email, login, senha,
+            ativo: true, isAdmin: false, criado_em: new Date().toISOString()
+          });
+          salvarAtendentes();
           renderizarGestaoAtendentes(container);
-        };
-        modal.querySelector('#cancelarNovoAtendente').onclick = () => modal.remove();
-      });
-      
-      // NOVOS BOTÕES: evoluir para admin
-      document.querySelectorAll('.btn-evoluir-admin').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const id = parseInt(btn.dataset.id);
-          const nome = btn.dataset.nome;
-          if (confirm(`Deseja evoluir "${nome}" para ADMINISTRADOR? Ela terá acesso ao Dashboard Avançado e perderá o acesso à Pesquisa de Orçamentos.`)) {
-            evoluirParaAdmin(id);
-            renderizarGestaoAtendentes(container);
-            toggleAccessButtons();
-          }
-        });
-      });
-      
-      // NOVOS BOTÕES: remover acesso admin
-      document.querySelectorAll('.btn-remover-admin').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const id = parseInt(btn.dataset.id);
-          const nome = btn.dataset.nome;
-          if (confirm(`Deseja remover o acesso ADMIN de "${nome}"? Ela terá apenas acesso à Pesquisa de Orçamentos e perderá o Dashboard Avançado.`)) {
-            removerAcessoAdmin(id);
-            renderizarGestaoAtendentes(container);
-            toggleAccessButtons();
-          }
-        });
+        }
       });
       
       document.querySelectorAll('.btn-edit-atendente').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = parseInt(btn.dataset.id);
-          const nomeAtual = btn.dataset.nome;
-          const emailAtual = btn.dataset.email;
-          const loginAtual = btn.dataset.login;
-          const modal = document.createElement('div'); modal.className = 'modal-overlay';
-          modal.innerHTML = `
-            <div class="modal-content" style="max-width:450px;">
-              <h3><i class="fas fa-edit"></i> Editar Atendente</h3>
-              <div class="input-group"><label>Nome completo *</label><input type="text" id="editarNomeAtendente" value="${escapeHtml(nomeAtual)}"></div>
-              <div class="input-group"><label>E-mail *</label><input type="email" id="editarEmailAtendente" value="${escapeHtml(emailAtual)}"></div>
-              <div class="input-group"><label>Login *</label><input type="text" id="editarLoginAtendente" value="${escapeHtml(loginAtual)}"></div>
-              <div class="input-group"><label>Nova Senha (deixe em branco para manter a atual)</label><input type="password" id="editarSenhaAtendente" placeholder="Digite uma nova senha"></div>
-              <div class="modal-buttons-row">
-                <button id="confirmarEditarAtendente" class="btn btn-primary">Salvar</button>
-                <button id="cancelarEditarAtendente" class="btn btn-outline">Cancelar</button>
-              </div>
-            </div>
-          `;
-          document.body.appendChild(modal);
-          
-          modal.querySelector('#confirmarEditarAtendente').onclick = () => {
-            const nome = modal.querySelector('#editarNomeAtendente').value.trim();
-            const email = modal.querySelector('#editarEmailAtendente').value.trim();
-            const login = modal.querySelector('#editarLoginAtendente').value.trim();
-            const novaSenha = modal.querySelector('#editarSenhaAtendente').value.trim();
-            if (!nome || !email || !login) {
-              alert('Preencha os campos obrigatórios!');
-              return;
+          const novoNome = prompt('Novo nome:', btn.dataset.nome);
+          const novoEmail = prompt('Novo e-mail:', btn.dataset.email);
+          const novoLogin = prompt('Novo login:', btn.dataset.login);
+          if (novoNome && novoEmail && novoLogin) {
+            const index = atendentes.findIndex(a => a.id === id);
+            if (index !== -1) {
+              atendentes[index].nome = novoNome;
+              atendentes[index].email = novoEmail;
+              atendentes[index].login = novoLogin;
+              salvarAtendentes();
+              renderizarGestaoAtendentes(container);
             }
-            if (atendentes.some(a => a.id !== id && a.login === login)) {
-              alert('Este login já existe em outro atendente!');
-              return;
-            }
-            editarAtendenteComLogin(id, nome, email, login, novaSenha);
-            modal.remove();
-            renderizarGestaoAtendentes(container);
-          };
-          modal.querySelector('#cancelarEditarAtendente').onclick = () => modal.remove();
+          }
         });
       });
       
       document.querySelectorAll('.btn-ocultar-atendente').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = parseInt(btn.dataset.id);
-          const atendente = atendentes.find(a => a.id === id);
-          if (confirm(`Deseja ocultar o atendente "${atendente?.nome}"? Ele não aparecerá mais na lista de seleção.`)) {
-            ocultarAtendente(id);
+          const index = atendentes.findIndex(a => a.id === id);
+          if (index !== -1) {
+            atendentes[index].ativo = false;
+            salvarAtendentes();
             renderizarGestaoAtendentes(container);
           }
         });
@@ -2001,9 +1716,10 @@ ${dataAtual}
       document.querySelectorAll('.btn-reativar-atendente').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = parseInt(btn.dataset.id);
-          const atendente = atendentes.find(a => a.id === id);
-          if (confirm(`Deseja reativar o atendente "${atendente?.nome}"?`)) {
-            reativarAtendente(id);
+          const index = atendentes.findIndex(a => a.id === id);
+          if (index !== -1) {
+            atendentes[index].ativo = true;
+            salvarAtendentes();
             renderizarGestaoAtendentes(container);
           }
         });
@@ -2012,9 +1728,9 @@ ${dataAtual}
       document.querySelectorAll('.btn-deletar-atendente').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = parseInt(btn.dataset.id);
-          const atendente = atendentes.find(a => a.id === id);
-          if (confirm(`⚠️ ATENÇÃO: Excluir o atendente "${atendente?.nome}" removerá permanentemente este registro. Deseja continuar?`)) {
-            deletarAtendente(id);
+          if (confirm('Excluir este atendente permanentemente?')) {
+            atendentes = atendentes.filter(a => a.id !== id);
+            salvarAtendentes();
             renderizarGestaoAtendentes(container);
           }
         });
@@ -2065,22 +1781,16 @@ ${dataAtual}
       });
     }
     
-    // Função global de exclusão SIMPLIFICADA
     window.deletarOrcamento = async function(id, nomeCliente) {
       if (confirm(`⚠️ Confirmar exclusão do orçamento de "${nomeCliente}"?\n\nID: ${id}\n\nEsta ação não pode ser desfeita.`)) {
-        showLoading();
         const sucesso = await deletarOrcamentoDoSupabase(id);
-        hideLoading();
         if (sucesso) {
           alert(`✅ Orçamento de "${nomeCliente}" excluído com sucesso!`);
           await carregarHistoricoDoSupabase();
-          
-          if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#dashboardContent')) {
-            if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
-          } else if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#pesquisaContent')) {
+          if (document.querySelector('.modal-overlay')?.querySelector('#dashboardContent')) {
+            window.renderizarDashboardAdmin();
+          } else if (document.querySelector('.modal-overlay')?.querySelector('#pesquisaContent')) {
             renderizarPesquisaOrcamentos();
-          } else {
-            if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
           }
         } else {
           alert(`❌ Erro ao excluir o orçamento. Tente novamente.`);
@@ -2098,16 +1808,14 @@ ${dataAtual}
         if(atualizado) {
           alert(`✅ Orçamento de ${nomeCliente} marcado como VENDA REALIZADA!`);
           await carregarHistoricoDoSupabase();
-          if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#dashboardContent')) {
-            if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
-          } else if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#pesquisaContent')) {
+          if (document.querySelector('.modal-overlay')?.querySelector('#dashboardContent')) {
+            window.renderizarDashboardAdmin();
+          } else if (document.querySelector('.modal-overlay')?.querySelector('#pesquisaContent')) {
             renderizarPesquisaOrcamentos();
           }
         }
       } else if (index !== -1 && historicoOrcamentosGlobal[index].status === 'fechado') {
         alert(`ℹ️ Este orçamento já está marcado como VENDA REALIZADA.`);
-      } else {
-        alert(`❌ Orçamento não encontrado.`);
       }
     };
     
@@ -2117,7 +1825,6 @@ ${dataAtual}
       carregarOrcamentoParaEdicao(orcamento);
     };
     
-    // Função para renderizar a PESQUISA DE ORÇAMENTOS
     function renderizarPesquisaOrcamentos() {
       const container = document.getElementById('pesquisaContent');
       if (!container) return;
@@ -2203,9 +1910,7 @@ ${dataAtual}
       container.innerHTML = html;
     }
     
-    // Função para renderizar o dashboard ADMIN completo (com verificação de admin)
     window.renderizarDashboardAdmin = function() {
-      // Verifica se o atendente logado ainda tem permissão de admin (segurança extra)
       let atendenteAtual = atendenteSelect?.value;
       if (!atendenteAtual || atendenteAtual === '') {
         const usuarioSalvo = localStorage.getItem('usuarioLogado');
@@ -2291,9 +1996,8 @@ ${dataAtual}
           mesesMap.set(mesAno, { vendas: 0, perdidos: 0, valorPerdido: 0 });
         }
         const grupo = mesesMap.get(mesAno);
-        if (item.status === 'fechado') {
-          grupo.vendas++;
-        } else if (item.status === 'nao_fechado') {
+        if (item.status === 'fechado') grupo.vendas++;
+        else if (item.status === 'nao_fechado') {
           grupo.perdidos++;
           grupo.valorPerdido += (item.totalFinal || 0);
         }
@@ -2308,11 +2012,7 @@ ${dataAtual}
         const vendedor = item.atendente || 'Não definido';
         if (!vendedoresMap.has(vendedor)) {
           vendedoresMap.set(vendedor, {
-            vendas: 0,
-            perdidos: 0,
-            valorVendido: 0,
-            valorPerdido: 0,
-            justificativas: []
+            vendas: 0, perdidos: 0, valorVendido: 0, valorPerdido: 0, justificativas: []
           });
         }
         const reg = vendedoresMap.get(vendedor);
@@ -2324,11 +2024,7 @@ ${dataAtual}
           reg.valorPerdido += (item.totalFinal || 0);
           if (item.justificativa) {
             reg.justificativas.push({
-              id: item.id,
-              data: item.data,
-              cliente: item.cliente,
-              motivo: item.justificativa,
-              valor: item.totalFinal
+              id: item.id, data: item.data, cliente: item.cliente, motivo: item.justificativa, valor: item.totalFinal
             });
           }
         }
@@ -2355,10 +2051,8 @@ ${dataAtual}
         `;
       }
       
-      html += `
-        <div class="section-title"><i class="fas fa-users"></i> Performance por Atendente</div>
-        <table class="performer-table"><thead><tr><th>Vendedor(a)</th><th>Vendas</th><th>Não Finalizados</th><th>Valor Vendido</th><th>VALOR PERDIDO (R$)</th><th>Taxa Conversão</th></tr></thead><tbody>
-      `;
+      html += `<div class="section-title"><i class="fas fa-users"></i> Performance por Atendente</div>
+        <table class="performer-table"><thead><tr><th>Vendedor(a)</th><th>Vendas</th><th>Não Finalizados</th><th>Valor Vendido</th><th>VALOR PERDIDO (R$)</th><th>Taxa Conversão</th></tr></thead><tbody>`;
       for (const [nome, d] of vendedoresSorted) {
         const totalAtendimentos = d.vendas + d.perdidos;
         const taxa = totalAtendimentos > 0 ? ((d.vendas / totalAtendimentos) * 100).toFixed(1) : 0;
@@ -2475,17 +2169,10 @@ ${dataAtual}
           try {
             const user = JSON.parse(usuarioSalvo);
             atendenteAtual = user.nome;
-            if (atendenteSelect) {
-              const optionExists = Array.from(atendenteSelect.options).some(opt => opt.value === atendenteAtual);
-              if (optionExists) {
-                atendenteSelect.value = atendenteAtual;
-              }
-            }
           } catch(e) {}
         }
       }
       
-      // Verifica se é admin usando a nova função dinâmica
       if (!isAtendenteAdmin(atendenteAtual)) {
         alert('⚠️ Acesso negado! O Dashboard Avançado está disponível apenas para atendentes com permissão de administrador.');
         return;
@@ -2501,9 +2188,7 @@ ${dataAtual}
           if (!isNaN(d)) {
             const key = `${d.getFullYear()}-${d.getMonth()+1}`;
             const label = d.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
-            if (!mesesOptions.find(m => m.value === key)) {
-              mesesOptions.push({ value: key, label: label });
-            }
+            if (!mesesOptions.find(m => m.value === key)) mesesOptions.push({ value: key, label: label });
             anosSet.add(d.getFullYear());
           }
         }
@@ -2576,7 +2261,6 @@ ${dataAtual}
                   <input type="text" id="filtroIdOrcamento" placeholder="Buscar por ID">
                 </div>
               </div>
-              
               <div id="dashboardContent"><div class="empty-state"><i class="fas fa-spinner fa-pulse"></i> Carregando...</div></div>
             </div>
             
@@ -2589,7 +2273,6 @@ ${dataAtual}
       `;
       document.body.appendChild(adminModal);
       
-      // Configuração dos filtros
       const periodoSelect = adminModal.querySelector('#filtroPeriodo');
       const grupoMes = adminModal.querySelector('#grupoFiltroMes');
       const grupoAno = adminModal.querySelector('#grupoFiltroAno');
@@ -2633,24 +2316,20 @@ ${dataAtual}
         renderizarGestaoAtendentes(adminModal.querySelector('#gestaoAtendentesContainer'));
       };
       
-      // Delegação de eventos para os botões dinâmicos do admin
       const dashboardContent = adminModal.querySelector('#dashboardContent');
       if (dashboardContent) {
         dashboardContent.addEventListener('click', (e) => {
           const deleteBtn = e.target.closest('.btn-delete-single');
           if (deleteBtn) {
             e.preventDefault();
-            e.stopPropagation();
             const id = deleteBtn.getAttribute('data-id');
             const cliente = deleteBtn.getAttribute('data-cliente');
             if (id && cliente) window.deletarOrcamento(id, cliente);
             return;
           }
-          
           const editBtn = e.target.closest('.btn-edit-single');
           if (editBtn) {
             e.preventDefault();
-            e.stopPropagation();
             const id = editBtn.getAttribute('data-id');
             const orcamento = historicoOrcamentosGlobal.find(item => item.id === id);
             if (orcamento) {
@@ -2659,11 +2338,9 @@ ${dataAtual}
             }
             return;
           }
-          
           const saleBtn = e.target.closest('.btn-sale-single');
           if (saleBtn) {
             e.preventDefault();
-            e.stopPropagation();
             const id = saleBtn.getAttribute('data-id');
             const cliente = saleBtn.getAttribute('data-cliente');
             if (id && cliente) window.marcarComoVendaRealizada(id, cliente);
@@ -2672,7 +2349,6 @@ ${dataAtual}
         });
       }
       
-      // Tabs do dashboard
       const tabBtns = adminModal.querySelectorAll('.tab-btn');
       const tabPanes = adminModal.querySelectorAll('.tab-pane');
       tabBtns.forEach(btn => {
@@ -2683,7 +2359,6 @@ ${dataAtual}
           btn.classList.add('active');
           const targetPane = adminModal.querySelector(`#tab-${tabId}`);
           if (targetPane) targetPane.classList.add('active');
-          
           if (tabId === 'atendentes') {
             renderizarGestaoAtendentes(adminModal.querySelector('#gestaoAtendentesContainer'));
           } else if (tabId === 'analytics' && window.renderizarDashboardAdmin) {
@@ -2698,7 +2373,7 @@ ${dataAtual}
       adminModal.querySelector('#closeAdminBtn').onclick = () => adminModal.remove();
     });
     
-    // ========== BOTÃO PESQUISA DE ORÇAMENTO ==========
+    // ========== BOTÃO PESQUISA ==========
     document.getElementById('pesquisaAccessBtn').addEventListener('click', async () => {
       let atendenteAtual = atendenteSelect?.value;
       
@@ -2708,17 +2383,10 @@ ${dataAtual}
           try {
             const user = JSON.parse(usuarioSalvo);
             atendenteAtual = user.nome;
-            if (atendenteSelect) {
-              const optionExists = Array.from(atendenteSelect.options).some(opt => opt.value === atendenteAtual);
-              if (optionExists) {
-                atendenteSelect.value = atendenteAtual;
-              }
-            }
           } catch(e) {}
         }
       }
       
-      // Verifica se é admin usando a nova função dinâmica
       if (isAtendenteAdmin(atendenteAtual)) {
         alert('⚠️ Você é administrador(a). Utilize o botão "Área Admin" para acesso completo.');
         return;
@@ -2734,9 +2402,7 @@ ${dataAtual}
           if (!isNaN(d)) {
             const key = `${d.getFullYear()}-${d.getMonth()+1}`;
             const label = d.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
-            if (!mesesOptions.find(m => m.value === key)) {
-              mesesOptions.push({ value: key, label: label });
-            }
+            if (!mesesOptions.find(m => m.value === key)) mesesOptions.push({ value: key, label: label });
             anosSet.add(d.getFullYear());
           }
         }
@@ -2811,7 +2477,6 @@ ${dataAtual}
       `;
       document.body.appendChild(pesquisaModal);
       
-      // Configuração dos filtros da pesquisa
       const periodoSelect = pesquisaModal.querySelector('#pesquisaFiltroPeriodo');
       const grupoMes = pesquisaModal.querySelector('#pesquisaGrupoFiltroMes');
       const grupoAno = pesquisaModal.querySelector('#pesquisaGrupoFiltroAno');
@@ -2854,24 +2519,20 @@ ${dataAtual}
         renderizarPesquisaOrcamentos();
       };
       
-      // Delegação de eventos para os botões dinâmicos da pesquisa
       const pesquisaContent = pesquisaModal.querySelector('#pesquisaContent');
       if (pesquisaContent) {
         pesquisaContent.addEventListener('click', (e) => {
           const deleteBtn = e.target.closest('.btn-delete-single-pesquisa');
           if (deleteBtn) {
             e.preventDefault();
-            e.stopPropagation();
             const id = deleteBtn.getAttribute('data-id');
             const cliente = deleteBtn.getAttribute('data-cliente');
             if (id && cliente) window.deletarOrcamento(id, cliente);
             return;
           }
-          
           const editBtn = e.target.closest('.btn-edit-single-pesquisa');
           if (editBtn) {
             e.preventDefault();
-            e.stopPropagation();
             const id = editBtn.getAttribute('data-id');
             const orcamento = historicoOrcamentosGlobal.find(item => item.id === id);
             if (orcamento) {
@@ -2880,11 +2541,9 @@ ${dataAtual}
             }
             return;
           }
-          
           const saleBtn = e.target.closest('.btn-sale-single-pesquisa');
           if (saleBtn) {
             e.preventDefault();
-            e.stopPropagation();
             const id = saleBtn.getAttribute('data-id');
             const cliente = saleBtn.getAttribute('data-cliente');
             if (id && cliente) window.marcarComoVendaRealizada(id, cliente);
@@ -2902,9 +2561,6 @@ ${dataAtual}
       e.preventDefault();
       e.returnValue = '';
     });
-     carregarAtendentes();
-    iniciarMonitoramentoAtendentes(); // NOVA FUNÇÃO ADICIONADA
-    sincronizarAtendenteAtual();
   })();
 </script>
 </body>
