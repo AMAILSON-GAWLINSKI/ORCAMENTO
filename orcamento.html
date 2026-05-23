@@ -24,7 +24,6 @@
     }
     .app-container { max-width: 950px; width: 100%; margin: 0 auto; position: relative; }
     
-    /* Botão Sair permanente */
     .logout-btn-container {
       position: fixed;
       top: 20px;
@@ -46,10 +45,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       transition: all 0.2s ease;
     }
-    .btn-logout:hover {
-      background: #c0392b;
-      transform: scale(1.02);
-    }
+    .btn-logout:hover { background: #c0392b; transform: scale(1.02); }
     .btn-logout i { font-size: 1.1rem; }
     
     .loading-overlay {
@@ -75,16 +71,9 @@
       font-weight: 600;
       color: #fc5404;
     }
-    .loading-spinner i {
-      font-size: 1.5rem;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
+    .loading-spinner i { font-size: 1.5rem; animation: spin 1s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     
-    /* Offline indicator */
     .offline-indicator {
       position: fixed;
       bottom: 80px;
@@ -194,7 +183,6 @@
     .valor-input-hint { font-size: 0.8rem; color: #1e4620; background: #e8f5e9; padding: 8px 14px; border-radius: 20px; margin-top: 12px; font-weight: 600; }
     .field-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
     
-    /* Botões de acesso */
     .admin-btn, .pesquisa-btn {
       position: fixed;
       bottom: 20px;
@@ -213,16 +201,11 @@
       align-items: center;
       gap: 8px;
     }
-    .pesquisa-btn {
-      background: #3498db;
-      bottom: 20px;
-      right: 20px;
-    }
+    .pesquisa-btn { background: #3498db; bottom: 20px; right: 20px; }
     .admin-btn.visible, .pesquisa-btn.visible { display: flex; }
     .admin-btn:hover { transform: scale(1.05); background: #e04a02; }
     .pesquisa-btn:hover { transform: scale(1.05); background: #2980b9; }
     
-    /* Dashboard Admin Styles */
     .dashboard-container { max-width: 1400px; margin: 0 auto; }
     .dashboard-header { margin-bottom: 28px; }
     .dashboard-header h1 { font-size: 1.8rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 12px; }
@@ -258,7 +241,6 @@
     .modal-buttons-row .btn { flex: 0 1 auto; min-width: 120px; }
     #orcamentoIdDisplay { text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px dashed #ccc; font-size: 0.9rem; color: #5f647e; font-weight: 500; }
     
-    /* Filtros do Dashboard */
     .filter-bar { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; background: #f8fafc; padding: 16px; border-radius: 32px; align-items: flex-end; }
     .filter-group { flex: 1; min-width: 140px; position: relative; }
     .filter-group label { font-size: 0.7rem; margin-bottom: 4px; display: block; font-weight: 600; color: #475569; }
@@ -427,16 +409,11 @@
 
 <script>
   (function() {
-    // ========== SUPABASE CONFIG COM SERVICE KEY (ACESSO TOTAL) ==========
     const SUPABASE_URL = 'https://ywzjyoqqnweinrwbbnza.supabase.co';
     const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Njg4MDk4NywiZXhwIjoyMDkyNDU2OTg3fQ.rPdvH1TskJDMecMFtXakop8JR9AaRkT5zsn3KIdY7MY';
-      // Cliente anônimo para autenticação (usado para signIn)
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODA5ODcsImV4cCI6MjA5MjQ1Njk4N30.6Rf26bE_yeE2NwJgggyGa-GrgM4bpMgaTvwQ_QiyPs0';
-  
-    // Usando a chave de serviço para bypass RLS e garantir sincronização total
+    
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
     
-
     let historicoOrcamentosGlobal = [];
     let modoEdicao = false;
     let orcamentoEditandoId = null;
@@ -444,8 +421,8 @@
     let jaPassouStep1 = false;
     let pendingSyncData = [];
     let isOnline = navigator.onLine;
+    let syncInterval = null;
     
-    // ========== GERENCIAMENTO DE ATENDENTES (com flag isAdmin) ==========
     let atendentes = [];
     
     const DEFAULT_ATENDENTES = [
@@ -456,36 +433,99 @@
       { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, isAdmin: false, criado_em: new Date().toISOString() }
     ];
     
-    function carregarAtendentes() {
-      const saved = localStorage.getItem('atendentes');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          let precisaSalvar = false;
-          parsed.forEach(a => {
-            if (!a.login && a.nome) {
-              a.login = a.nome.toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .replace(/\s+/g, '');
-              precisaSalvar = true;
-            }
-            if (a.isAdmin === undefined) {
-              a.isAdmin = (a.nome === "Jaúna Constante" || a.nome === "Jaciara Constante");
-              precisaSalvar = true;
-            }
-          });
-          atendentes = parsed;
-          if (precisaSalvar) {
-            localStorage.setItem('atendentes', JSON.stringify(atendentes));
+    async function sincronizarAtendentesComSupabase() {
+      if (!navigator.onLine) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('atendentes')
+          .select('*');
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          atendentes = data.map(a => ({
+            ...a,
+            isAdmin: a.isadmin === true || a.is_admin === true
+          }));
+          localStorage.setItem('atendentes', JSON.stringify(atendentes));
+        } else {
+          for (const atendente of DEFAULT_ATENDENTES) {
+            const { error: insertError } = await supabase
+              .from('atendentes')
+              .upsert({
+                id: atendente.id,
+                nome: atendente.nome,
+                login: atendente.login,
+                senha: atendente.senha,
+                email: atendente.email,
+                ativo: atendente.ativo,
+                isadmin: atendente.isAdmin,
+                criado_em: atendente.criado_em
+              }, { onConflict: 'id' });
+            if (insertError) console.error('Erro ao inserir atendente:', insertError);
           }
-        } catch(e) {
-          console.error('Erro ao carregar atendentes:', e);
           atendentes = [...DEFAULT_ATENDENTES];
           localStorage.setItem('atendentes', JSON.stringify(atendentes));
         }
+      } catch (error) {
+        console.error('Erro ao sincronizar atendentes:', error);
+        const localData = localStorage.getItem('atendentes');
+        if (localData) atendentes = JSON.parse(localData);
+      }
+      
+      atualizarSelectAtendentes();
+      toggleAccessButtons();
+    }
+    
+    async function salvarAtendenteNoSupabase(atendente) {
+      if (!navigator.onLine) return;
+      
+      try {
+        const { error } = await supabase
+          .from('atendentes')
+          .upsert({
+            id: atendente.id,
+            nome: atendente.nome,
+            login: atendente.login,
+            senha: atendente.senha,
+            email: atendente.email,
+            ativo: atendente.ativo,
+            isadmin: atendente.isAdmin,
+            criado_em: atendente.criado_em || new Date().toISOString()
+          }, { onConflict: 'id' });
+        
+        if (error) throw error;
+      } catch (error) {
+        console.error('Erro ao salvar atendente no Supabase:', error);
+      }
+    }
+    
+    async function deletarAtendenteDoSupabase(id) {
+      if (!navigator.onLine) return;
+      
+      try {
+        const { error } = await supabase
+          .from('atendentes')
+          .delete()
+          .eq('id', id);
+        
+        if (error) throw error;
+      } catch (error) {
+        console.error('Erro ao deletar atendente do Supabase:', error);
+      }
+    }
+    
+    function carregarAtendentesLocal() {
+      const saved = localStorage.getItem('atendentes');
+      if (saved) {
+        try {
+          atendentes = JSON.parse(saved);
+        } catch(e) {
+          atendentes = [...DEFAULT_ATENDENTES];
+        }
       } else {
         atendentes = [...DEFAULT_ATENDENTES];
-        localStorage.setItem('atendentes', JSON.stringify(atendentes));
       }
       atualizarSelectAtendentes();
     }
@@ -513,15 +553,20 @@
       toggleAccessButtons();
     }
     
-    function salvarAtendentes() {
+    async function salvarAtendentesLocally() {
       localStorage.setItem('atendentes', JSON.stringify(atendentes));
       atualizarSelectAtendentes();
+      
+      for (const atendente of atendentes) {
+        await salvarAtendenteNoSupabase(atendente);
+      }
+      
       window.dispatchEvent(new StorageEvent('storage', { key: 'atendentes', newValue: JSON.stringify(atendentes) }));
     }
     
-    function adicionarAtendenteComLogin(nome, email, login, senha) {
+    async function adicionarAtendenteComLogin(nome, email, login, senha) {
       const novoId = Math.max(...atendentes.map(a => a.id), 0) + 1;
-      atendentes.push({
+      const novoAtendente = {
         id: novoId,
         nome: nome,
         email: email,
@@ -530,11 +575,12 @@
         ativo: true,
         isAdmin: false,
         criado_em: new Date().toISOString()
-      });
-      salvarAtendentes();
+      };
+      atendentes.push(novoAtendente);
+      await salvarAtendentesLocally();
     }
     
-    function editarAtendenteComLogin(id, nome, email, login, senha) {
+    async function editarAtendenteComLogin(id, nome, email, login, senha) {
       const index = atendentes.findIndex(a => a.id === id);
       if (index !== -1) {
         atendentes[index].nome = nome;
@@ -543,36 +589,37 @@
         if (senha && senha.trim() !== "") {
           atendentes[index].senha = senha;
         }
-        salvarAtendentes();
+        await salvarAtendentesLocally();
       }
     }
     
-    function ocultarAtendente(id) {
+    async function ocultarAtendente(id) {
       const index = atendentes.findIndex(a => a.id === id);
       if (index !== -1) {
         atendentes[index].ativo = false;
-        salvarAtendentes();
+        await salvarAtendentesLocally();
       }
     }
     
-    function reativarAtendente(id) {
+    async function reativarAtendente(id) {
       const index = atendentes.findIndex(a => a.id === id);
       if (index !== -1) {
         atendentes[index].ativo = true;
-        salvarAtendentes();
+        await salvarAtendentesLocally();
       }
     }
     
-    function deletarAtendente(id) {
+    async function deletarAtendente(id) {
       atendentes = atendentes.filter(a => a.id !== id);
-      salvarAtendentes();
+      await salvarAtendentesLocally();
+      await deletarAtendenteDoSupabase(id);
     }
     
-    function evoluirParaAdmin(id) {
+    async function evoluirParaAdmin(id) {
       const index = atendentes.findIndex(a => a.id === id);
       if (index !== -1) {
         atendentes[index].isAdmin = true;
-        salvarAtendentes();
+        await salvarAtendentesLocally();
         const usuarioSalvo = localStorage.getItem('usuarioLogado');
         if (usuarioSalvo) {
           try {
@@ -586,11 +633,11 @@
       }
     }
     
-    function removerAcessoAdmin(id) {
+    async function removerAcessoAdmin(id) {
       const index = atendentes.findIndex(a => a.id === id);
       if (index !== -1) {
         atendentes[index].isAdmin = false;
-        salvarAtendentes();
+        await salvarAtendentesLocally();
         const usuarioSalvo = localStorage.getItem('usuarioLogado');
         if (usuarioSalvo) {
           try {
@@ -652,6 +699,16 @@
       }
     }
     
+    function startAutoSync() {
+      if (syncInterval) clearInterval(syncInterval);
+      syncInterval = setInterval(async () => {
+        if (navigator.onLine) {
+          await carregarHistoricoDoSupabase();
+          await sincronizarAtendentesComSupabase();
+        }
+      }, 60000);
+    }
+    
     const stepCards = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3'), document.getElementById('step4')];
     const stepItems = document.querySelectorAll('.step-item');
     const atendenteSelect = document.getElementById('atendenteSelect');
@@ -662,8 +719,10 @@
     const descontoGeralInput = document.getElementById('descontoGeralInput');
     let currentOrcamentoId = '';
     
-    carregarAtendentes();
+    carregarAtendentesLocal();
+    sincronizarAtendentesComSupabase();
     sincronizarAtendenteAtual();
+    startAutoSync();
     
     function updateOfflineIndicator() {
       const indicator = document.getElementById('offlineIndicator');
@@ -868,6 +927,7 @@
       updateOfflineIndicator();
       syncPendingData();
       carregarHistoricoDoSupabase();
+      sincronizarAtendentesComSupabase();
     });
     window.addEventListener('offline', () => {
       isOnline = false;
@@ -887,10 +947,45 @@
       updateNavButtons();
     });
     
-    function fazerLogout() {
+    async function fazerLogout() {
+      const usuarioLogado = localStorage.getItem('usuarioLogado');
       localStorage.removeItem('usuarioLogado');
       localStorage.removeItem('orcamentosTemp');
       localStorage.removeItem('nextIdTemp');
+      
+      if (usuarioLogado) {
+        try {
+          const user = JSON.parse(usuarioLogado);
+          if (atendenteSelect) {
+            atendenteSelect.value = '';
+          }
+        } catch(e) {}
+      }
+      
+      jaPassouStep1 = false;
+      
+      orcamentos = [getEmptyOrcamento()];
+      nextId = 2;
+      clientName.value = '';
+      clientAge.value = '';
+      clientSource.value = '';
+      clientPhone.value = '';
+      document.getElementById('hasPrescription').value = 'Não';
+      document.getElementById('concorrenteNome').value = '';
+      document.getElementById('concorrenteGroup').style.display = 'none';
+      if(descontoGeralInput) descontoGeralInput.value = '';
+      updateNavButtons();
+      renderOrcamentosForm();
+      
+      currentOrcamentoId = generateOrcamentoId();
+      updateOrcamentoIdDisplay();
+      modoEdicao = false;
+      orcamentoEditandoId = null;
+      
+      goToStep(1);
+      
+      await sincronizarAtendentesComSupabase();
+      
       window.location.href = 'index.html';
     }
     
@@ -947,21 +1042,12 @@
       const nameValid = clientName.value.trim() !== '';
       const sourceValid = clientSource.value !== '';
       
-      if (!phoneValid) {
-        clientPhone.classList.add('required-error');
-      } else {
-        clientPhone.classList.remove('required-error');
-      }
-      if (!nameValid) {
-        clientName.classList.add('required-error');
-      } else {
-        clientName.classList.remove('required-error');
-      }
-      if (!sourceValid) {
-        clientSource.classList.add('required-error');
-      } else {
-        clientSource.classList.remove('required-error');
-      }
+      if (!phoneValid) clientPhone.classList.add('required-error');
+      else clientPhone.classList.remove('required-error');
+      if (!nameValid) clientName.classList.add('required-error');
+      else clientName.classList.remove('required-error');
+      if (!sourceValid) clientSource.classList.add('required-error');
+      else clientSource.classList.remove('required-error');
       
       return nameValid && phoneValid && sourceValid;
     }
@@ -1503,6 +1589,7 @@
         if(salvou) alert('✅ Orçamento finalizado com VENDA!'); 
         modal.remove(); 
         resetarFormularioParaNovoOrcamento();
+        await carregarHistoricoDoSupabase();
       };
       naoBtn.onclick = () => { 
         justArea.style.display = 'block'; 
@@ -1517,6 +1604,7 @@
         if(salvou) alert('📋 Orçamento arquivado como NÃO FINALIZADO.'); 
         modal.remove(); 
         resetarFormularioParaNovoOrcamento();
+        await carregarHistoricoDoSupabase();
       };
       cancelarJust.onclick = () => {
         justArea.style.display = 'none';
@@ -1758,8 +1846,6 @@ ${dataAtual}
       }
     });
     
-    // ========== FUNÇÕES DE APOIO ==========
-    
     function renderizarGestaoAtendentes(container) {
       if (!container) return;
       
@@ -1803,7 +1889,7 @@ ${dataAtual}
       if (ocultos.length > 0) {
         html += `
             </tbody>
-          </table>
+           </table>
           
           <h4 style="margin: 25px 0 15px 0; color: #1e293b;">🔒 Atendentes Ocultos</h4>
           <table class="atendentes-table">
@@ -1831,7 +1917,7 @@ ${dataAtual}
       
       html += `
             </tbody>
-          </table>
+           </table>
         </div>
       `;
       
@@ -1854,7 +1940,7 @@ ${dataAtual}
         `;
         document.body.appendChild(modal);
         
-        modal.querySelector('#confirmarNovoAtendente').onclick = () => {
+        modal.querySelector('#confirmarNovoAtendente').onclick = async () => {
           const nome = modal.querySelector('#novoNomeAtendente').value.trim();
           const email = modal.querySelector('#novoEmailAtendente').value.trim();
           const login = modal.querySelector('#novoLoginAtendente').value.trim();
@@ -1867,19 +1953,20 @@ ${dataAtual}
             alert('Este login já existe! Escolha outro.');
             return;
           }
-          adicionarAtendenteComLogin(nome, email, login, senha);
+          await adicionarAtendenteComLogin(nome, email, login, senha);
           modal.remove();
           renderizarGestaoAtendentes(container);
+          await sincronizarAtendentesComSupabase();
         };
         modal.querySelector('#cancelarNovoAtendente').onclick = () => modal.remove();
       });
       
       document.querySelectorAll('.btn-evoluir-admin').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
           const id = parseInt(btn.dataset.id);
           const nome = btn.dataset.nome;
           if (confirm(`Deseja evoluir "${nome}" para ADMINISTRADOR? Ela terá acesso ao Dashboard Avançado e perderá o acesso à Pesquisa de Orçamentos.`)) {
-            evoluirParaAdmin(id);
+            await evoluirParaAdmin(id);
             renderizarGestaoAtendentes(container);
             toggleAccessButtons();
           }
@@ -1887,11 +1974,11 @@ ${dataAtual}
       });
       
       document.querySelectorAll('.btn-remover-admin').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
           const id = parseInt(btn.dataset.id);
           const nome = btn.dataset.nome;
           if (confirm(`Deseja remover o acesso ADMIN de "${nome}"? Ela terá apenas acesso à Pesquisa de Orçamentos e perderá o Dashboard Avançado.`)) {
-            removerAcessoAdmin(id);
+            await removerAcessoAdmin(id);
             renderizarGestaoAtendentes(container);
             toggleAccessButtons();
           }
@@ -1920,7 +2007,7 @@ ${dataAtual}
           `;
           document.body.appendChild(modal);
           
-          modal.querySelector('#confirmarEditarAtendente').onclick = () => {
+          modal.querySelector('#confirmarEditarAtendente').onclick = async () => {
             const nome = modal.querySelector('#editarNomeAtendente').value.trim();
             const email = modal.querySelector('#editarEmailAtendente').value.trim();
             const login = modal.querySelector('#editarLoginAtendente').value.trim();
@@ -1933,43 +2020,45 @@ ${dataAtual}
               alert('Este login já existe em outro atendente!');
               return;
             }
-            editarAtendenteComLogin(id, nome, email, login, novaSenha);
+            await editarAtendenteComLogin(id, nome, email, login, novaSenha);
             modal.remove();
             renderizarGestaoAtendentes(container);
+            await sincronizarAtendentesComSupabase();
           };
           modal.querySelector('#cancelarEditarAtendente').onclick = () => modal.remove();
         });
       });
       
       document.querySelectorAll('.btn-ocultar-atendente').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
           const id = parseInt(btn.dataset.id);
           const atendente = atendentes.find(a => a.id === id);
           if (confirm(`Deseja ocultar o atendente "${atendente?.nome}"? Ele não aparecerá mais na lista de seleção.`)) {
-            ocultarAtendente(id);
+            await ocultarAtendente(id);
             renderizarGestaoAtendentes(container);
           }
         });
       });
       
       document.querySelectorAll('.btn-reativar-atendente').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
           const id = parseInt(btn.dataset.id);
           const atendente = atendentes.find(a => a.id === id);
           if (confirm(`Deseja reativar o atendente "${atendente?.nome}"?`)) {
-            reativarAtendente(id);
+            await reativarAtendente(id);
             renderizarGestaoAtendentes(container);
           }
         });
       });
       
       document.querySelectorAll('.btn-deletar-atendente').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
           const id = parseInt(btn.dataset.id);
           const atendente = atendentes.find(a => a.id === id);
           if (confirm(`⚠️ ATENÇÃO: Excluir o atendente "${atendente?.nome}" removerá permanentemente este registro. Deseja continuar?`)) {
-            deletarAtendente(id);
+            await deletarAtendente(id);
             renderizarGestaoAtendentes(container);
+            await sincronizarAtendentesComSupabase();
           }
         });
       });
