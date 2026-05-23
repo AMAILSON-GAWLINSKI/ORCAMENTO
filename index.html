@@ -23,7 +23,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 16px;
     }
 
     .login-container {
@@ -308,6 +308,129 @@
 
     .status-offline {
       color: #e74c3c;
+    }
+
+    /* ========== MEDIA QUERIES PARA MULTIPLATAFORMAS E SMARTPHONES ========== */
+    @media (max-width: 480px) {
+      body {
+        padding: 12px;
+      }
+      
+      .login-card {
+        padding: 28px 20px;
+        border-radius: 32px;
+      }
+      
+      .logo-image {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 16px;
+      }
+      
+      .subtitle {
+        font-size: 0.8rem;
+        margin-bottom: 24px;
+      }
+      
+      .input-group {
+        margin-bottom: 20px;
+      }
+      
+      label {
+        font-size: 0.8rem;
+      }
+      
+      input {
+        padding: 12px 14px 12px 44px;
+        font-size: 0.95rem;
+        border-radius: 28px;
+      }
+      
+      .input-with-icon i {
+        font-size: 1rem;
+        left: 14px;
+      }
+      
+      .btn-login, .btn-continue {
+        padding: 12px 20px;
+        font-size: 0.95rem;
+      }
+      
+      .alert-error, .alert-info, .user-session {
+        padding: 10px 14px;
+        font-size: 0.8rem;
+        margin-bottom: 20px;
+      }
+      
+      .user-session-info i {
+        font-size: 1.3rem;
+      }
+      
+      .user-session-info span {
+        font-size: 0.9rem;
+      }
+      
+      .btn-logout-session {
+        font-size: 1rem;
+        padding: 4px 10px;
+      }
+      
+      .logout-area {
+        margin-top: 16px;
+        padding-top: 16px;
+      }
+      
+      .btn-logout {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+      }
+      
+      .sync-status {
+        font-size: 0.65rem;
+        margin-top: 14px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .login-card {
+        padding: 24px 16px;
+        border-radius: 28px;
+      }
+      
+      .logo-image {
+        width: 70px;
+        height: 70px;
+      }
+      
+      .subtitle {
+        font-size: 0.75rem;
+      }
+      
+      input {
+        padding: 10px 12px 10px 40px;
+        font-size: 0.9rem;
+      }
+      
+      .btn-login, .btn-continue {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      /* Melhorias para telas touch */
+      .btn-login, .btn-continue, .btn-logout, .btn-logout-session {
+        cursor: default;
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      .btn-login:active, .btn-continue:active {
+        transform: scale(0.98);
+      }
+      
+      input {
+        font-size: 16px; /* Evita zoom automático em iOS */
+      }
     }
   </style>
 </head>
