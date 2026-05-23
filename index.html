@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Adicionando Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * {
@@ -302,6 +301,14 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
+    .status-online {
+      color: #22c55e;
+    }
+
+    .status-offline {
+      color: #e74c3c;
+    }
   </style>
 </head>
 <body>
@@ -367,24 +374,32 @@
     </div>
     
     <div class="sync-status" id="syncStatus">
-      <i class="fas fa-sync-alt"></i> Carregando atendentes...
+      <i class="fas fa-sync-alt fa-spin"></i> Conectando ao servidor...
     </div>
   </div>
 </div>
 
 <script>
   // ==================== CONFIGURAÇÃO DO SUPABASE ====================
-  // Substitua pelos seus valores do Supabase
-    const SUPABASE_URL = 'https://ywzjyoqqnweinrwbbnza.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODA5ODcsImV4cCI6MjA5MjQ1Njk4N30.6Rf26bE_yeE2NwJgggyGa-GrgM4bpMgaTvwQ_QiyPs0';
-
+  const SUPABASE_URL = 'https://ywzjyoqqnweinrwbbnza.supabase.co';
+  const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Njg4MDk4NywiZXhwIjoyMDkyNDU2OTg3fQ.rPdvH1TskJDMecMFtXakop8JR9AaRkT5zsn3KIdY7MY';
+  
+  // Cliente anônimo para autenticação (usado para signIn)
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODA5ODcsImV4cCI6MjA5MjQ1Njk4N30.6Rf26bE_yeE2NwJgggyGa-GrgM4bpMgaTvwQ_QiyPs0';
+  
   let supabaseClient = null;
+  let supabaseAdminClient = null;
 
   // Inicializar Supabase
   function initSupabase() {
-    if (typeof supabase !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== 'https://seu-projeto.supabase.co') {
+    if (typeof supabase !== 'undefined') {
       try {
+        // Cliente normal para autenticação
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Cliente com service role key para operações administrativas (buscar atendentes)
+        supabaseAdminClient = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+        
         console.log('Supabase inicializado com sucesso');
         return true;
       } catch(e) {
@@ -392,23 +407,78 @@
         return false;
       }
     }
-    console.warn('Supabase não configurado, usando apenas fallback local');
+    console.warn('Supabase não disponível');
     return false;
   }
 
-  // ==================== ATENDENTES PADRÃO ====================
+  // ==================== ATENDENTES PADRÃO (FALLBACK) ====================
   const DEFAULT_ATENDENTES = [
-    { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-    { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-    { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-    { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
-    { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() }
+    { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString(), is_admin: true },
+    { id: 2, nome: "Jaciara Constante", login: "jaciara", senha: "176320", email: "jaciara@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString(), is_admin: true },
+    { id: 3, nome: "Luana Paloschi", login: "luana", senha: "luana456", email: "luana@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString(), is_admin: false },
+    { id: 4, nome: "Aline", login: "aline", senha: "aline789", email: "aline@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString(), is_admin: false },
+    { id: 5, nome: "Amailson Gawlinski", login: "amailson", senha: "amailson123", email: "amailson@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString(), is_admin: false }
   ];
 
   let atendentes = [];
+  let supabaseDisponivel = false;
 
-  // Função para carregar atendentes do localStorage
-  function carregarAtendentes() {
+  // Função para carregar atendentes do Supabase
+  async function carregarAtendentesDoSupabase() {
+    if (!supabaseAdminClient) return false;
+    
+    try {
+      const { data, error } = await supabaseAdminClient
+        .from('atendentes')
+        .select('*')
+        .eq('ativo', true);
+      
+      if (error) {
+        console.error('Erro ao carregar atendentes do Supabase:', error);
+        return false;
+      }
+      
+      if (data && data.length > 0) {
+        atendentes = data.map(a => ({
+          id: a.id,
+          nome: a.nome,
+          login: a.login,
+          senha: a.senha,
+          email: a.email,
+          ativo: a.ativo,
+          is_admin: a.is_admin || false,
+          criado_em: a.criado_em
+        }));
+        console.log('Atendentes carregados do Supabase:', atendentes.length);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Erro na requisição Supabase:', err);
+      return false;
+    }
+  }
+
+  // Função para carregar atendentes (primeiro Supabase, depois fallback)
+  async function carregarAtendentes() {
+    const statusDiv = document.getElementById('syncStatus');
+    
+    // Tentar carregar do Supabase primeiro
+    const carregadoDoSupabase = await carregarAtendentesDoSupabase();
+    
+    if (carregadoDoSupabase && atendentes.length > 0) {
+      supabaseDisponivel = true;
+      // Salvar cache local
+      localStorage.setItem('atendentes', JSON.stringify(atendentes));
+      if (statusDiv) {
+        statusDiv.innerHTML = '<i class="fas fa-check-circle status-online"></i> Conectado ao servidor - Dados sincronizados';
+        statusDiv.style.color = '#22c55e';
+      }
+      console.log('✅ Usando dados do Supabase');
+      return;
+    }
+    
+    // Fallback: tentar carregar do localStorage
     const saved = localStorage.getItem('atendentes');
     if (saved) {
       try {
@@ -416,11 +486,10 @@
         if (Array.isArray(parsed) && parsed.length > 0) {
           atendentes = parsed;
           console.log('Atendentes carregados do localStorage:', atendentes.length);
-          document.getElementById('syncStatus').innerHTML = '<i class="fas fa-check-circle"></i> Atendentes sincronizados com o sistema';
-          setTimeout(() => {
-            const statusDiv = document.getElementById('syncStatus');
-            if (statusDiv) statusDiv.style.opacity = '0.5';
-          }, 3000);
+          if (statusDiv) {
+            statusDiv.innerHTML = '<i class="fas fa-database status-offline"></i> Modo offline - Usando dados locais';
+            statusDiv.style.color = '#e67e22';
+          }
           return;
         }
       } catch(e) {
@@ -428,15 +497,19 @@
       }
     }
     
-    // Se não houver dados, usar padrão
+    // Último recurso: usar dados padrão
     atendentes = JSON.parse(JSON.stringify(DEFAULT_ATENDENTES));
     localStorage.setItem('atendentes', JSON.stringify(atendentes));
-    document.getElementById('syncStatus').innerHTML = '<i class="fas fa-info-circle"></i> Configuração inicial carregada';
+    if (statusDiv) {
+      statusDiv.innerHTML = '<i class="fas fa-info-circle"></i> Configuração inicial carregada';
+      statusDiv.style.color = '#94a3b8';
+    }
+    console.log('📁 Usando dados padrão');
   }
 
-  // Função para validar login (fallback local)
+  // Função para validar login (usando atendentes carregados)
   function validarLogin(login, senha) {
-    console.log('Tentando login local:', login);
+    console.log('Validando login:', login);
     console.log('Atendentes disponíveis:', atendentes.map(a => ({ login: a.login, nome: a.nome, ativo: a.ativo })));
     
     const userFound = atendentes.find(atendente => 
@@ -447,16 +520,16 @@
     );
     
     if (userFound) {
-      console.log('Usuário encontrado localmente:', userFound.nome);
+      console.log('Usuário encontrado:', userFound.nome);
       return {
         nomeExibicao: userFound.nome,
         login: userFound.login,
-        isAdmin: userFound.nome === 'Jaúna Constante' || userFound.nome === 'Jaciara Constante',
+        isAdmin: userFound.is_admin === true,
         id: userFound.id,
         email: userFound.email
       };
     }
-    console.log('Usuário não encontrado localmente');
+    console.log('Usuário não encontrado');
     return null;
   }
 
@@ -583,7 +656,6 @@
   }
 
   function logout() {
-    // Se estiver logado no Supabase, fazer logout também
     if (supabaseClient) {
       supabaseClient.auth.signOut().catch(console.error);
     }
@@ -612,7 +684,7 @@
     }, 500);
   }
 
-  // ==================== FUNÇÃO DE LOGIN MODIFICADA COM SUPABASE ====================
+  // ==================== FUNÇÃO DE LOGIN ====================
   async function handleLogin() {
     const loginInput = document.getElementById('loginUser');
     const passwordInput = document.getElementById('loginPassword');
@@ -631,62 +703,31 @@
     let authSuccess = false;
     let userData = null;
     
-    // Verificar se Supabase está configurado
-    const supabaseConfigured = supabaseClient !== null && 
-                               SUPABASE_URL !== 'https://seu-projeto.supabase.co' && 
-                               SUPABASE_ANON_KEY !== 'sua-anon-key-aqui';
+    // Tentar autenticação local primeiro (com dados carregados do Supabase ou cache)
+    console.log('Tentando autenticação local...');
+    const localUser = validarLogin(login, password);
     
-    if (supabaseConfigured) {
-      try {
-        showInfo('Conectando ao servidor...');
-        
-        // Tentar autenticar no Supabase
-        const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
-          email: `${login}@oticagraudivino.com`,
-          password: password
-        });
-        
-        if (authError) {
-          console.log('Falha autenticação Supabase:', authError.message);
-          showInfo('Tentando autenticação local...');
-        } else {
-          // Autenticado com sucesso no Supabase
-          console.log('Autenticado no Supabase:', authData.user.email);
-          
-          // Buscar dados do atendente na tabela
-          const { data: atendenteData, error: atendenteError } = await supabaseClient
-            .from('atendentes')
-            .select('*')
-            .eq('email', authData.user.email)
-            .single();
-          
-          if (atendenteError) {
-            console.error('Erro ao buscar dados do atendente:', atendenteError);
-            showInfo('Usuário autenticado, mas dados não encontrados. Usando fallback.');
-          } else if (atendenteData) {
-            userData = {
-              nomeExibicao: atendenteData.nome,
-              login: atendenteData.login,
-              isAdmin: atendenteData.is_admin || false,
-              id: atendenteData.id,
-              email: atendenteData.email
-            };
-            authSuccess = true;
-          }
-        }
-      } catch (err) {
-        console.error('Erro na autenticação Supabase:', err);
-      }
-    }
-    
-    // Fallback: se Supabase falhou ou não está configurado, tentar autenticação local
-    if (!authSuccess) {
-      console.log('Usando fallback de autenticação local');
-      const localUser = validarLogin(login, password);
+    if (localUser) {
+      userData = localUser;
+      authSuccess = true;
+      console.log('✅ Autenticado localmente');
       
-      if (localUser) {
-        userData = localUser;
-        authSuccess = true;
+      // Se o Supabase estiver disponível, tentar também autenticar via Supabase Auth
+      if (supabaseClient && supabaseDisponivel) {
+        try {
+          const email = `${login}@oticagraudivino.com`;
+          const { error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+          });
+          if (error) {
+            console.log('Auth Supabase não sincronizado, mas login local OK');
+          } else {
+            console.log('Sessão Supabase criada com sucesso');
+          }
+        } catch(err) {
+          console.log('Erro ao criar sessão Supabase:', err);
+        }
       }
     }
     
@@ -706,17 +747,17 @@
       login: userData.login,
       isAdmin: userData.isAdmin,
       loginTimestamp: new Date().toISOString(),
-      supabaseAuth: supabaseConfigured && authSuccess && !validarLogin(login, password)
+      supabaseSync: supabaseDisponivel
     }));
     sessionStorage.setItem('auth', 'true');
     
-    // Redirecionar diretamente para o orcamento.html
+    // Redirecionar para orcamento.html
     window.location.href = 'orcamento.html';
   }
 
-  // Verificar sessão ativa do Supabase ao carregar
+  // Verificar sessão ativa do Supabase
   async function checkSupabaseSession() {
-    if (supabaseClient && SUPABASE_URL !== 'https://seu-projeto.supabase.co') {
+    if (supabaseClient && supabaseDisponivel) {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (session) {
         console.log('Sessão Supabase ativa:', session.user.email);
@@ -745,23 +786,53 @@
     });
   }
 
+  // Verificar conectividade com Supabase
+  async function testarConexaoSupabase() {
+    const statusDiv = document.getElementById('syncStatus');
+    if (!supabaseAdminClient) {
+      if (statusDiv) {
+        statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle status-offline"></i> Erro de conexão com servidor';
+      }
+      return false;
+    }
+    
+    try {
+      const { error } = await supabaseAdminClient.from('atendentes').select('count', { count: 'exact', head: true });
+      if (error) {
+        console.log('Teste de conexão falhou:', error);
+        if (statusDiv) {
+          statusDiv.innerHTML = '<i class="fas fa-database status-offline"></i> Servidor indisponível - Modo offline';
+          statusDiv.style.color = '#e67e22';
+        }
+        return false;
+      }
+      if (statusDiv) {
+        statusDiv.innerHTML = '<i class="fas fa-check-circle status-online"></i> Conectado ao servidor - Sincronizado';
+        statusDiv.style.color = '#22c55e';
+      }
+      return true;
+    } catch(err) {
+      console.log('Erro no teste de conexão:', err);
+      if (statusDiv) {
+        statusDiv.innerHTML = '<i class="fas fa-database status-offline"></i> Servidor indisponível - Modo offline';
+        statusDiv.style.color = '#e67e22';
+      }
+      return false;
+    }
+  }
+
   // Inicialização
-  function init() {
-    initSupabase();
-    carregarAtendentes();
+  async function init() {
+    const sucesso = initSupabase();
+    
+    if (sucesso) {
+      await testarConexaoSupabase();
+    }
+    
+    await carregarAtendentes();
     escutarMudancasAtendentes();
     updateUIBasedOnSession();
     checkSupabaseSession();
-    
-    // Verificar configuração do Supabase
-    if (SUPABASE_URL === 'https://ywzjyoqqnweinrwbbnza.supabase.co/rest/v1/' || SUPABASE_ANON_KEY === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODA5ODcsImV4cCI6MjA5MjQ1Njk4N30.6Rf26bE_yeE2NwJgggyGa-GrgM4bpMgaTvwQ_QiyPs0') {
-      console.warn('⚠️ Supabase não configurado. Configure SUPABASE_URL e SUPABASE_ANON_KEY.');
-      const statusDiv = document.getElementById('syncStatus');
-      if (statusDiv) {
-        statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Modo offline - Supabase não configurado';
-        statusDiv.style.color = '#e67e22';
-      }
-    }
     
     const logoImg = document.querySelector('.logo-image');
     if (logoImg) {
@@ -773,6 +844,7 @@
     }
   }
 
+  // Event Listeners
   const loginBtn = document.getElementById('loginBtn');
   const passwordField = document.getElementById('loginPassword');
   const userField = document.getElementById('loginUser');
