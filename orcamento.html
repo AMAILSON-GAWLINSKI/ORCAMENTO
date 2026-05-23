@@ -427,16 +427,14 @@
 
 <script>
   (function() {
-    // ========== SUPABASE CONFIG ==========
+    // ========== SUPABASE CONFIG (SERVICE ROLE KEY) ==========
     const SUPABASE_URL = 'https://ywzjyoqqnweinrwbbnza.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODA5ODcsImV4cCI6MjA5MjQ1Njk4N30.6Rf26bE_yeE2NwJgggyGa-GrgM4bpMgaTvwQ_QiyPs0';
+    const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Njg4MDk4NywiZXhwIjoyMDkyNDU2OTg3fQ.rPdvH1TskJDMecMFtXakop8JR9AaRkT5zsn3KIdY7MY';
     
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
     
-    // Variável global para armazenar a sessão atual
-    let currentSession = null;
+    // Variáveis globais
     let currentUser = null;
-
     let historicoOrcamentosGlobal = [];
     let modoEdicao = false;
     let orcamentoEditandoId = null;
@@ -444,73 +442,6 @@
     let jaPassouStep1 = false;
     let pendingSyncData = [];
     let isOnline = navigator.onLine;
-    
-    // ========== AUTENTICAÇÃO SUPABASE ==========
-    async function loginSupabase() {
-        const usuarioSalvo = localStorage.getItem('usuarioLogado');
-        if (!usuarioSalvo) return null;
-        
-        const user = JSON.parse(usuarioSalvo);
-        
-        // Verificar se já temos uma sessão ativa
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-            currentSession = session;
-            currentUser = session.user;
-            return session.user;
-        }
-        
-        // Buscar usuário no Supabase para obter email e senha
-        const { data: atendenteData, error: atendenteError } = await supabase
-            .from('atendentes')
-            .select('*')
-            .eq('login', user.login.toLowerCase())
-            .eq('ativo', true)
-            .single();
-        
-        if (atendenteError || !atendenteData) {
-            console.error('Erro ao buscar atendente:', atendenteError);
-            // Tentar fazer login com credenciais padrão
-            const defaultAtendente = DEFAULT_ATENDENTES.find(a => a.login === user.login.toLowerCase());
-            if (defaultAtendente) {
-                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-                    email: defaultAtendente.email,
-                    password: defaultAtendente.senha
-                });
-                if (!authError && authData) {
-                    currentSession = authData.session;
-                    currentUser = authData.user;
-                    return authData.user;
-                }
-            }
-            return null;
-        }
-        
-        // Realizar login com as credenciais do atendente
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-            email: atendenteData.email,
-            password: atendenteData.senha
-        });
-        
-        if (authError) {
-            console.error('Erro no login Supabase:', authError);
-            return null;
-        }
-        
-        currentSession = authData.session;
-        currentUser = authData.user;
-        return authData.user;
-    }
-    
-    // Função para verificar se está autenticado
-    async function ensureAuthenticated() {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-            const user = await loginSupabase();
-            if (!user) return false;
-        }
-        return true;
-    }
     
     // ========== GERENCIAMENTO DE ATENDENTES ==========
     let atendentes = [];
@@ -657,15 +588,11 @@
       showLoading();
       let successCount = 0;
       
-      // Garantir autenticação antes de sincronizar
-      await ensureAuthenticated();
-      
       for (const data of pending) {
         try {
-          // Usar INSERT ao invés de UPSERT para evitar conflitos
           const { error } = await supabase
             .from('orcamentos')
-            .insert({
+            .upsert({
               id: data.id,
               cliente: data.cliente,
               idade: data.idade,
@@ -681,32 +608,10 @@
               justificativa: data.justificativa || '',
               data_raw: data.dataRaw,
               created_at: data.dataRaw
-            });
+            }, { onConflict: 'id' });
           
           if (!error) successCount++;
-          else if (error.code === '23505') { // Duplicate key error
-            // Tentar atualizar se já existe
-            const { error: updateError } = await supabase
-              .from('orcamentos')
-              .update({
-                cliente: data.cliente,
-                idade: data.idade,
-                telefone: data.telefone,
-                atendente: data.atendente,
-                origem: data.origem,
-                concorrente: data.concorrente || '',
-                itens: JSON.stringify(data.itens),
-                subtotal: data.subtotal,
-                desconto_geral: data.descontoGeral,
-                total_final: data.totalFinal,
-                status: data.status,
-                justificativa: data.justificativa || '',
-                data_raw: data.dataRaw
-              })
-              .eq('id', data.id);
-            
-            if (!updateError) successCount++;
-          }
+          else console.error('Erro ao sincronizar:', error);
         } catch(e) {
           console.error('Erro ao sincronizar:', e);
         }
@@ -722,14 +627,6 @@
     async function salvarComFallback(orcamentoData) {
       if (navigator.onLine) {
         try {
-          // Garantir autenticação
-          const isAuth = await ensureAuthenticated();
-          if (!isAuth) {
-            console.warn('Não foi possível autenticar, salvando localmente');
-            addToPendingSync(orcamentoData);
-            return true;
-          }
-          
           const dadosParaSalvar = {
             id: orcamentoData.id,
             cliente: orcamentoData.cliente,
@@ -748,7 +645,6 @@
             created_at: orcamentoData.dataRaw
           };
           
-          // Tentar inserir ou atualizar
           const { error } = await supabase
             .from('orcamentos')
             .upsert(dadosParaSalvar, { onConflict: 'id' });
@@ -808,16 +704,6 @@
     async function carregarHistoricoDoSupabase() {
       showLoading();
       try {
-        // Garantir autenticação
-        const isAuth = await ensureAuthenticated();
-        if (!isAuth) {
-          console.warn('Usuário não autenticado no Supabase');
-          const localData = localStorage.getItem('historicoOrcamentos');
-          if (localData) historicoOrcamentosGlobal = JSON.parse(localData);
-          hideLoading();
-          return;
-        }
-        
         if (!navigator.onLine) {
           const localData = localStorage.getItem('historicoOrcamentos');
           if (localData) historicoOrcamentosGlobal = JSON.parse(localData);
@@ -855,7 +741,6 @@
       showLoading();
       try {
         if (navigator.onLine) {
-          await ensureAuthenticated();
           const { error } = await supabase
             .from('orcamentos')
             .delete()
@@ -1758,9 +1643,6 @@ ${dataAtual}
     
     // ========== INICIALIZAÇÃO PRINCIPAL ==========
     async function inicializar() {
-      // Garantir autenticação Supabase
-      await ensureAuthenticated();
-      
       await carregarHistoricoDoSupabase();
       
       const usuarioFoiPreenchido = verificarUsuarioLogado();
@@ -1773,7 +1655,7 @@ ${dataAtual}
     
     inicializar();
     
-    // Função para renderizar a PESQUISA DE ORÇAMENTOS
+    // ========== FUNÇÕES DE PESQUISA E DASHBOARD ==========
     function renderizarPesquisaOrcamentos() {
       const container = document.getElementById('pesquisaContent');
       if (!container) return;
@@ -1925,9 +1807,8 @@ ${dataAtual}
       container.innerHTML = html;
     }
     
-    // Função para renderizar o dashboard ADMIN completo (com verificação de admin)
+    // Dashboard Admin
     window.renderizarDashboardAdmin = async function() {
-      // Verifica se o atendente logado ainda tem permissão de admin (segurança extra)
       let atendenteAtual = atendenteSelect?.value;
       if (!atendenteAtual || atendenteAtual === '') {
         const usuarioSalvo = localStorage.getItem('usuarioLogado');
@@ -1937,16 +1818,6 @@ ${dataAtual}
             atendenteAtual = user.nome;
           } catch(e) {}
         }
-      }
-      
-      // Verificar autenticação Supabase
-      const isAuth = await ensureAuthenticated();
-      if (!isAuth) {
-        alert('⚠️ Sessão expirada. Faça login novamente.');
-        const modal = document.querySelector('.modal-overlay');
-        if (modal) modal.remove();
-        window.location.href = 'index.html';
-        return;
       }
       
       if (!isAtendenteAdmin(atendenteAtual)) {
@@ -2293,7 +2164,7 @@ ${dataAtual}
       carregarOrcamentoParaEdicao(orcamento);
     };
     
-    // ========== BOTÃO ADMIN ==========
+    // Botão ADMIN
     document.getElementById('adminAccessBtn').addEventListener('click', async () => {
       let atendenteAtual = atendenteSelect?.value;
       
@@ -2313,17 +2184,8 @@ ${dataAtual}
         }
       }
       
-      // Verifica se é admin usando a nova função dinâmica
       if (!isAtendenteAdmin(atendenteAtual)) {
         alert('⚠️ Acesso negado! O Dashboard Avançado está disponível apenas para atendentes com permissão de administrador.');
-        return;
-      }
-      
-      // Garantir autenticação antes de abrir o dashboard
-      const isAuth = await ensureAuthenticated();
-      if (!isAuth) {
-        alert('⚠️ Não foi possível autenticar. Faça login novamente.');
-        window.location.href = 'index.html';
         return;
       }
       
@@ -2425,7 +2287,6 @@ ${dataAtual}
       `;
       document.body.appendChild(adminModal);
       
-      // Configuração dos filtros
       const periodoSelect = adminModal.querySelector('#filtroPeriodo');
       const grupoMes = adminModal.querySelector('#grupoFiltroMes');
       const grupoAno = adminModal.querySelector('#grupoFiltroAno');
@@ -2469,7 +2330,6 @@ ${dataAtual}
         renderizarGestaoAtendentes(adminModal.querySelector('#gestaoAtendentesContainer'));
       };
       
-      // Delegação de eventos para os botões dinâmicos do admin
       const dashboardContent = adminModal.querySelector('#dashboardContent');
       if (dashboardContent) {
         dashboardContent.addEventListener('click', (e) => {
@@ -2508,7 +2368,6 @@ ${dataAtual}
         });
       }
       
-      // Tabs do dashboard
       const tabBtns = adminModal.querySelectorAll('.tab-btn');
       const tabPanes = adminModal.querySelectorAll('.tab-pane');
       tabBtns.forEach(btn => {
@@ -2534,7 +2393,7 @@ ${dataAtual}
       adminModal.querySelector('#closeAdminBtn').onclick = () => adminModal.remove();
     });
     
-    // ========== BOTÃO PESQUISA DE ORÇAMENTO ==========
+    // Botão PESQUISA
     document.getElementById('pesquisaAccessBtn').addEventListener('click', async () => {
       let atendenteAtual = atendenteSelect?.value;
       
@@ -2554,14 +2413,11 @@ ${dataAtual}
         }
       }
       
-      // Verifica se é admin usando a nova função dinâmica
       if (isAtendenteAdmin(atendenteAtual)) {
         alert('⚠️ Você é administrador(a). Utilize o botão "Área Admin" para acesso completo.');
         return;
       }
       
-      // Garantir autenticação
-      await ensureAuthenticated();
       await carregarHistoricoDoSupabase();
       
       const mesesOptions = [];
@@ -2649,7 +2505,6 @@ ${dataAtual}
       `;
       document.body.appendChild(pesquisaModal);
       
-      // Configuração dos filtros da pesquisa
       const periodoSelect = pesquisaModal.querySelector('#pesquisaFiltroPeriodo');
       const grupoMes = pesquisaModal.querySelector('#pesquisaGrupoFiltroMes');
       const grupoAno = pesquisaModal.querySelector('#pesquisaGrupoFiltroAno');
@@ -2692,7 +2547,6 @@ ${dataAtual}
         renderizarPesquisaOrcamentos();
       };
       
-      // Delegação de eventos para os botões dinâmicos da pesquisa
       const pesquisaContent = pesquisaModal.querySelector('#pesquisaContent');
       if (pesquisaContent) {
         pesquisaContent.addEventListener('click', (e) => {
