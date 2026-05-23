@@ -427,14 +427,14 @@
 
 <script>
   (function() {
-    // ========== SUPABASE CONFIG (SERVICE ROLE KEY) ==========
+    // ========== SUPABASE CONFIG COM SERVICE KEY (ACESSO TOTAL) ==========
     const SUPABASE_URL = 'https://ywzjyoqqnweinrwbbnza.supabase.co';
     const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Njg4MDk4NywiZXhwIjoyMDkyNDU2OTg3fQ.rPdvH1TskJDMecMFtXakop8JR9AaRkT5zsn3KIdY7MY';
     
+    // Usando a chave de serviço para bypass RLS e garantir sincronização total
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
     
-    // Variáveis globais
-    let currentUser = null;
+
     let historicoOrcamentosGlobal = [];
     let modoEdicao = false;
     let orcamentoEditandoId = null;
@@ -443,7 +443,7 @@
     let pendingSyncData = [];
     let isOnline = navigator.onLine;
     
-    // ========== GERENCIAMENTO DE ATENDENTES ==========
+    // ========== GERENCIAMENTO DE ATENDENTES (com flag isAdmin) ==========
     let atendentes = [];
     
     const DEFAULT_ATENDENTES = [
@@ -517,6 +517,106 @@
       window.dispatchEvent(new StorageEvent('storage', { key: 'atendentes', newValue: JSON.stringify(atendentes) }));
     }
     
+    function adicionarAtendenteComLogin(nome, email, login, senha) {
+      const novoId = Math.max(...atendentes.map(a => a.id), 0) + 1;
+      atendentes.push({
+        id: novoId,
+        nome: nome,
+        email: email,
+        login: login,
+        senha: senha,
+        ativo: true,
+        isAdmin: false,
+        criado_em: new Date().toISOString()
+      });
+      salvarAtendentes();
+    }
+    
+    function editarAtendenteComLogin(id, nome, email, login, senha) {
+      const index = atendentes.findIndex(a => a.id === id);
+      if (index !== -1) {
+        atendentes[index].nome = nome;
+        atendentes[index].email = email;
+        atendentes[index].login = login;
+        if (senha && senha.trim() !== "") {
+          atendentes[index].senha = senha;
+        }
+        salvarAtendentes();
+      }
+    }
+    
+    function ocultarAtendente(id) {
+      const index = atendentes.findIndex(a => a.id === id);
+      if (index !== -1) {
+        atendentes[index].ativo = false;
+        salvarAtendentes();
+      }
+    }
+    
+    function reativarAtendente(id) {
+      const index = atendentes.findIndex(a => a.id === id);
+      if (index !== -1) {
+        atendentes[index].ativo = true;
+        salvarAtendentes();
+      }
+    }
+    
+    function deletarAtendente(id) {
+      atendentes = atendentes.filter(a => a.id !== id);
+      salvarAtendentes();
+    }
+    
+    function evoluirParaAdmin(id) {
+      const index = atendentes.findIndex(a => a.id === id);
+      if (index !== -1) {
+        atendentes[index].isAdmin = true;
+        salvarAtendentes();
+        const usuarioSalvo = localStorage.getItem('usuarioLogado');
+        if (usuarioSalvo) {
+          try {
+            const user = JSON.parse(usuarioSalvo);
+            if (user.nome === atendentes[index].nome) {
+              localStorage.setItem('usuarioLogado', JSON.stringify({...user, isAdmin: true}));
+            }
+          } catch(e) {}
+        }
+        toggleAccessButtons();
+      }
+    }
+    
+    function removerAcessoAdmin(id) {
+      const index = atendentes.findIndex(a => a.id === id);
+      if (index !== -1) {
+        atendentes[index].isAdmin = false;
+        salvarAtendentes();
+        const usuarioSalvo = localStorage.getItem('usuarioLogado');
+        if (usuarioSalvo) {
+          try {
+            const user = JSON.parse(usuarioSalvo);
+            if (user.nome === atendentes[index].nome) {
+              localStorage.setItem('usuarioLogado', JSON.stringify({...user, isAdmin: false}));
+            }
+          } catch(e) {}
+        }
+        toggleAccessButtons();
+      }
+    }
+    
+    function sincronizarAtendenteAtual() {
+      const usuarioSalvo = localStorage.getItem('usuarioLogado');
+      if (usuarioSalvo && atendenteSelect) {
+        try {
+          const user = JSON.parse(usuarioSalvo);
+          const optionExists = Array.from(atendenteSelect.options).some(opt => opt.value === user.nome);
+          if (optionExists && atendenteSelect.value !== user.nome) {
+            atendenteSelect.value = user.nome;
+            const changeEvent = new Event('change', { bubbles: true });
+            atendenteSelect.dispatchEvent(changeEvent);
+          }
+        } catch(e) {}
+      }
+    }
+    
     function isAtendenteAdmin(nomeAtendente) {
       const atendente = atendentes.find(a => a.nome === nomeAtendente && a.ativo === true);
       return atendente ? atendente.isAdmin === true : false;
@@ -561,8 +661,8 @@
     let currentOrcamentoId = '';
     
     carregarAtendentes();
+    sincronizarAtendenteAtual();
     
-    // Offline sync functions
     function updateOfflineIndicator() {
       const indicator = document.getElementById('offlineIndicator');
       const statusSpan = document.getElementById('offlineStatus');
@@ -611,7 +711,6 @@
             }, { onConflict: 'id' });
           
           if (!error) successCount++;
-          else console.error('Erro ao sincronizar:', error);
         } catch(e) {
           console.error('Erro ao sincronizar:', e);
         }
@@ -627,27 +726,25 @@
     async function salvarComFallback(orcamentoData) {
       if (navigator.onLine) {
         try {
-          const dadosParaSalvar = {
-            id: orcamentoData.id,
-            cliente: orcamentoData.cliente,
-            idade: orcamentoData.idade || '',
-            telefone: orcamentoData.telefone,
-            atendente: orcamentoData.atendente,
-            origem: orcamentoData.origem,
-            concorrente: orcamentoData.concorrente || '',
-            itens: JSON.stringify(orcamentoData.itens),
-            subtotal: orcamentoData.subtotal,
-            desconto_geral: orcamentoData.descontoGeral,
-            total_final: orcamentoData.totalFinal,
-            status: orcamentoData.status,
-            justificativa: orcamentoData.justificativa || '',
-            data_raw: orcamentoData.dataRaw,
-            created_at: orcamentoData.dataRaw
-          };
-          
           const { error } = await supabase
             .from('orcamentos')
-            .upsert(dadosParaSalvar, { onConflict: 'id' });
+            .upsert({
+              id: orcamentoData.id,
+              cliente: orcamentoData.cliente,
+              idade: orcamentoData.idade,
+              telefone: orcamentoData.telefone,
+              atendente: orcamentoData.atendente,
+              origem: orcamentoData.origem,
+              concorrente: orcamentoData.concorrente || '',
+              itens: JSON.stringify(orcamentoData.itens),
+              subtotal: orcamentoData.subtotal,
+              desconto_geral: orcamentoData.descontoGeral,
+              total_final: orcamentoData.totalFinal,
+              status: orcamentoData.status,
+              justificativa: orcamentoData.justificativa || '',
+              data_raw: orcamentoData.dataRaw,
+              created_at: orcamentoData.dataRaw
+            }, { onConflict: 'id' });
           
           if (!error) {
             await carregarHistoricoDoSupabase();
@@ -848,12 +945,21 @@
       const nameValid = clientName.value.trim() !== '';
       const sourceValid = clientSource.value !== '';
       
-      if (!phoneValid) clientPhone.classList.add('required-error');
-      else clientPhone.classList.remove('required-error');
-      if (!nameValid) clientName.classList.add('required-error');
-      else clientName.classList.remove('required-error');
-      if (!sourceValid) clientSource.classList.add('required-error');
-      else clientSource.classList.remove('required-error');
+      if (!phoneValid) {
+        clientPhone.classList.add('required-error');
+      } else {
+        clientPhone.classList.remove('required-error');
+      }
+      if (!nameValid) {
+        clientName.classList.add('required-error');
+      } else {
+        clientName.classList.remove('required-error');
+      }
+      if (!sourceValid) {
+        clientSource.classList.add('required-error');
+      } else {
+        clientSource.classList.remove('required-error');
+      }
       
       return nameValid && phoneValid && sourceValid;
     }
@@ -1641,21 +1747,327 @@ ${dataAtual}
     currentOrcamentoId = generateOrcamentoId();
     updateOrcamentoIdDisplay();
     
-    // ========== INICIALIZAÇÃO PRINCIPAL ==========
-    async function inicializar() {
-      await carregarHistoricoDoSupabase();
-      
+    carregarHistoricoDoSupabase().then(() => {
       const usuarioFoiPreenchido = verificarUsuarioLogado();
       if (!usuarioFoiPreenchido) {
         goToStep(1);
       } else {
         toggleAccessButtons();
       }
+    });
+    
+    // ========== FUNÇÕES DE APOIO ==========
+    
+    function renderizarGestaoAtendentes(container) {
+      if (!container) return;
+      
+      const ativos = atendentes.filter(a => a.ativo === true);
+      const ocultos = atendentes.filter(a => a.ativo === false);
+      
+      let html = `
+        <div class="section-title" style="margin-top: 0;">
+          <i class="fas fa-users"></i> Gerenciar Atendentes
+          <button id="btnNovoAtendente" class="btn btn-success btn-sm" style="margin-left: auto; padding: 8px 16px;"><i class="fas fa-plus"></i> Novo Atendente</button>
+        </div>
+        
+        <div style="margin-bottom: 30px;">
+          <h4 style="margin-bottom: 15px; color: #1e293b;">📋 Atendentes Ativos</h4>
+          <table class="atendentes-table">
+            <thead>
+              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Status</th><th>Acesso</th><th>Ações</th></tr>
+            </thead>
+            <tbody>
+      `;
+      
+      ativos.forEach(a => {
+        const adminBadge = a.isAdmin ? '<span class="admin-badge">Admin</span>' : '';
+        html += `
+          <tr data-id="${a.id}">
+            <td><strong>${escapeHtml(a.nome)}</strong> ${adminBadge}</td>
+            <td>${escapeHtml(a.email)}</td>
+            <td>${escapeHtml(a.login || '')}</td>
+            <td><span class="status-ativo">● Ativo</span></td>
+            <td>${a.isAdmin ? '<span style="color:#fc5404; font-weight:600;">Dashboard Avançado</span>' : '<span style="color:#3498db;">Pesquisa de Orçamentos</span>'}</td>
+            <td>
+              ${!a.isAdmin ? `<button class="btn-evoluir-admin btn btn-success btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" style="padding: 4px 10px; margin-right: 5px; background:#fc5404; border-color:#fc5404;"><i class="fas fa-crown"></i> Evoluir para Admin</button>` : `<button class="btn-remover-admin btn btn-warning btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" style="padding: 4px 10px; margin-right: 5px; background:#e67e22; border-color:#e67e22;"><i class="fas fa-user-minus"></i> Remover Acesso Admin</button>`}
+              <button class="btn-edit-atendente btn btn-edit btn-sm" data-id="${a.id}" data-nome="${escapeHtml(a.nome)}" data-email="${escapeHtml(a.email)}" data-login="${escapeHtml(a.login || '')}" data-senha="${escapeHtml(a.senha)}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-edit"></i> Editar</button>
+              <button class="btn-ocultar-atendente btn btn-warning btn-sm" data-id="${a.id}" style="padding: 4px 10px; background: #f39c12; border-color: #f39c12;"><i class="fas fa-eye-slash"></i> Ocultar</button>
+              <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
+              </td>
+            </tr>
+        `;
+      });
+      
+      if (ocultos.length > 0) {
+        html += `
+            </tbody>
+          </table>
+          
+          <h4 style="margin: 25px 0 15px 0; color: #1e293b;">🔒 Atendentes Ocultos</h4>
+          <table class="atendentes-table">
+            <thead>
+              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Status</th><th>Ações</th></tr>
+            </thead>
+            <tbody>
+        `;
+        
+        ocultos.forEach(a => {
+          html += `
+            <tr data-id="${a.id}">
+              <td><strong>${escapeHtml(a.nome)}</strong></td>
+              <td>${escapeHtml(a.email)}</td>
+              <td>${escapeHtml(a.login || '')}</td>
+              <td><span class="status-oculto">● Oculto</span></td>
+              <td>
+                <button class="btn-reativar-atendente btn btn-success btn-sm" data-id="${a.id}" style="padding: 4px 10px; margin-right: 5px;"><i class="fas fa-eye"></i> Reativar</button>
+                <button class="btn-deletar-atendente btn btn-danger btn-sm" data-id="${a.id}" style="padding: 4px 10px;"><i class="fas fa-trash"></i> Excluir</button>
+                </td>
+              </tr>
+          `;
+        });
+      }
+      
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+      
+      container.innerHTML = html;
+      
+      document.getElementById('btnNovoAtendente')?.addEventListener('click', () => {
+        const modal = document.createElement('div'); modal.className = 'modal-overlay';
+        modal.innerHTML = `
+          <div class="modal-content" style="max-width:450px;">
+            <h3><i class="fas fa-user-plus"></i> Novo Atendente</h3>
+            <div class="input-group"><label>Nome completo *</label><input type="text" id="novoNomeAtendente" placeholder="Ex: Maria Silva"></div>
+            <div class="input-group"><label>E-mail *</label><input type="email" id="novoEmailAtendente" placeholder="exemplo@email.com"></div>
+            <div class="input-group"><label>Login *</label><input type="text" id="novoLoginAtendente" placeholder="usuário para login"></div>
+            <div class="input-group"><label>Senha *</label><input type="password" id="novaSenhaAtendente" placeholder="Digite uma senha"></div>
+            <div class="modal-buttons-row">
+              <button id="confirmarNovoAtendente" class="btn btn-primary">Adicionar</button>
+              <button id="cancelarNovoAtendente" class="btn btn-outline">Cancelar</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        
+        modal.querySelector('#confirmarNovoAtendente').onclick = () => {
+          const nome = modal.querySelector('#novoNomeAtendente').value.trim();
+          const email = modal.querySelector('#novoEmailAtendente').value.trim();
+          const login = modal.querySelector('#novoLoginAtendente').value.trim();
+          const senha = modal.querySelector('#novaSenhaAtendente').value.trim();
+          if (!nome || !email || !login || !senha) {
+            alert('Preencha todos os campos!');
+            return;
+          }
+          if (atendentes.some(a => a.login === login)) {
+            alert('Este login já existe! Escolha outro.');
+            return;
+          }
+          adicionarAtendenteComLogin(nome, email, login, senha);
+          modal.remove();
+          renderizarGestaoAtendentes(container);
+        };
+        modal.querySelector('#cancelarNovoAtendente').onclick = () => modal.remove();
+      });
+      
+      document.querySelectorAll('.btn-evoluir-admin').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const nome = btn.dataset.nome;
+          if (confirm(`Deseja evoluir "${nome}" para ADMINISTRADOR? Ela terá acesso ao Dashboard Avançado e perderá o acesso à Pesquisa de Orçamentos.`)) {
+            evoluirParaAdmin(id);
+            renderizarGestaoAtendentes(container);
+            toggleAccessButtons();
+          }
+        });
+      });
+      
+      document.querySelectorAll('.btn-remover-admin').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const nome = btn.dataset.nome;
+          if (confirm(`Deseja remover o acesso ADMIN de "${nome}"? Ela terá apenas acesso à Pesquisa de Orçamentos e perderá o Dashboard Avançado.`)) {
+            removerAcessoAdmin(id);
+            renderizarGestaoAtendentes(container);
+            toggleAccessButtons();
+          }
+        });
+      });
+      
+      document.querySelectorAll('.btn-edit-atendente').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const nomeAtual = btn.dataset.nome;
+          const emailAtual = btn.dataset.email;
+          const loginAtual = btn.dataset.login;
+          const modal = document.createElement('div'); modal.className = 'modal-overlay';
+          modal.innerHTML = `
+            <div class="modal-content" style="max-width:450px;">
+              <h3><i class="fas fa-edit"></i> Editar Atendente</h3>
+              <div class="input-group"><label>Nome completo *</label><input type="text" id="editarNomeAtendente" value="${escapeHtml(nomeAtual)}"></div>
+              <div class="input-group"><label>E-mail *</label><input type="email" id="editarEmailAtendente" value="${escapeHtml(emailAtual)}"></div>
+              <div class="input-group"><label>Login *</label><input type="text" id="editarLoginAtendente" value="${escapeHtml(loginAtual)}"></div>
+              <div class="input-group"><label>Nova Senha (deixe em branco para manter a atual)</label><input type="password" id="editarSenhaAtendente" placeholder="Digite uma nova senha"></div>
+              <div class="modal-buttons-row">
+                <button id="confirmarEditarAtendente" class="btn btn-primary">Salvar</button>
+                <button id="cancelarEditarAtendente" class="btn btn-outline">Cancelar</button>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(modal);
+          
+          modal.querySelector('#confirmarEditarAtendente').onclick = () => {
+            const nome = modal.querySelector('#editarNomeAtendente').value.trim();
+            const email = modal.querySelector('#editarEmailAtendente').value.trim();
+            const login = modal.querySelector('#editarLoginAtendente').value.trim();
+            const novaSenha = modal.querySelector('#editarSenhaAtendente').value.trim();
+            if (!nome || !email || !login) {
+              alert('Preencha os campos obrigatórios!');
+              return;
+            }
+            if (atendentes.some(a => a.id !== id && a.login === login)) {
+              alert('Este login já existe em outro atendente!');
+              return;
+            }
+            editarAtendenteComLogin(id, nome, email, login, novaSenha);
+            modal.remove();
+            renderizarGestaoAtendentes(container);
+          };
+          modal.querySelector('#cancelarEditarAtendente').onclick = () => modal.remove();
+        });
+      });
+      
+      document.querySelectorAll('.btn-ocultar-atendente').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const atendente = atendentes.find(a => a.id === id);
+          if (confirm(`Deseja ocultar o atendente "${atendente?.nome}"? Ele não aparecerá mais na lista de seleção.`)) {
+            ocultarAtendente(id);
+            renderizarGestaoAtendentes(container);
+          }
+        });
+      });
+      
+      document.querySelectorAll('.btn-reativar-atendente').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const atendente = atendentes.find(a => a.id === id);
+          if (confirm(`Deseja reativar o atendente "${atendente?.nome}"?`)) {
+            reativarAtendente(id);
+            renderizarGestaoAtendentes(container);
+          }
+        });
+      });
+      
+      document.querySelectorAll('.btn-deletar-atendente').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = parseInt(btn.dataset.id);
+          const atendente = atendentes.find(a => a.id === id);
+          if (confirm(`⚠️ ATENÇÃO: Excluir o atendente "${atendente?.nome}" removerá permanentemente este registro. Deseja continuar?`)) {
+            deletarAtendente(id);
+            renderizarGestaoAtendentes(container);
+          }
+        });
+      });
     }
     
-    inicializar();
+    function createSuggestionsDropdown(inputId, getSuggestionsFn, onSelectFn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      
+      const wrapper = input.parentElement;
+      let dropdown = wrapper.querySelector('.suggestions-dropdown');
+      if (!dropdown) {
+        dropdown = document.createElement('div');
+        dropdown.className = 'suggestions-dropdown';
+        wrapper.appendChild(dropdown);
+      }
+      
+      input.addEventListener('input', function() {
+        const value = this.value.toLowerCase();
+        if (value.length === 0 || !getSuggestionsFn) {
+          dropdown.classList.remove('show');
+          return;
+        }
+        
+        const suggestions = getSuggestionsFn(value);
+        if (suggestions.length === 0) {
+          dropdown.classList.remove('show');
+          return;
+        }
+        
+        dropdown.innerHTML = suggestions.map(s => `<div class="suggestion-item" data-value="${escapeHtml(s)}">${escapeHtml(s)}</div>`).join('');
+        dropdown.classList.add('show');
+        
+        dropdown.querySelectorAll('.suggestion-item').forEach(item => {
+          item.addEventListener('click', function() {
+            input.value = this.dataset.value;
+            dropdown.classList.remove('show');
+            if (onSelectFn) onSelectFn(this.dataset.value);
+          });
+        });
+      });
+      
+      document.addEventListener('click', function(e) {
+        if (!wrapper.contains(e.target)) {
+          dropdown.classList.remove('show');
+        }
+      });
+    }
     
-    // ========== FUNÇÕES DE PESQUISA E DASHBOARD ==========
+    window.deletarOrcamento = async function(id, nomeCliente) {
+      if (confirm(`⚠️ Confirmar exclusão do orçamento de "${nomeCliente}"?\n\nID: ${id}\n\nEsta ação não pode ser desfeita.`)) {
+        showLoading();
+        const sucesso = await deletarOrcamentoDoSupabase(id);
+        hideLoading();
+        if (sucesso) {
+          alert(`✅ Orçamento de "${nomeCliente}" excluído com sucesso!`);
+          await carregarHistoricoDoSupabase();
+          
+          if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#dashboardContent')) {
+            if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
+          } else if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#pesquisaContent')) {
+            renderizarPesquisaOrcamentos();
+          } else {
+            if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
+          }
+        } else {
+          alert(`❌ Erro ao excluir o orçamento. Tente novamente.`);
+        }
+      }
+    };
+    
+    window.marcarComoVendaRealizada = async function(id, nomeCliente) {
+      const index = historicoOrcamentosGlobal.findIndex(item => item.id === id);
+      if (index !== -1 && historicoOrcamentosGlobal[index].status !== 'fechado') {
+        const orcamentoData = historicoOrcamentosGlobal[index];
+        orcamentoData.status = 'fechado';
+        orcamentoData.justificativa = 'Convertido para venda via dashboard';
+        const atualizado = await salvarComFallback(orcamentoData);
+        if(atualizado) {
+          alert(`✅ Orçamento de ${nomeCliente} marcado como VENDA REALIZADA!`);
+          await carregarHistoricoDoSupabase();
+          if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#dashboardContent')) {
+            if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
+          } else if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#pesquisaContent')) {
+            renderizarPesquisaOrcamentos();
+          }
+        }
+      } else if (index !== -1 && historicoOrcamentosGlobal[index].status === 'fechado') {
+        alert(`ℹ️ Este orçamento já está marcado como VENDA REALIZADA.`);
+      } else {
+        alert(`❌ Orçamento não encontrado.`);
+      }
+    };
+    
+    window.editarOrcamento = function(orcamento) {
+      const adminModal = document.querySelector('.modal-overlay');
+      if (adminModal) adminModal.remove();
+      carregarOrcamentoParaEdicao(orcamento);
+    };
+    
     function renderizarPesquisaOrcamentos() {
       const container = document.getElementById('pesquisaContent');
       if (!container) return;
@@ -1741,74 +2153,7 @@ ${dataAtual}
       container.innerHTML = html;
     }
     
-    function renderizarGestaoAtendentes(container) {
-      if (!container) return;
-      
-      const ativos = atendentes.filter(a => a.ativo === true);
-      const ocultos = atendentes.filter(a => a.ativo === false);
-      
-      let html = `
-        <div class="section-title" style="margin-top: 0;">
-          <i class="fas fa-users"></i> Gerenciar Atendentes
-        </div>
-        
-        <div style="margin-bottom: 30px;">
-          <h4 style="margin-bottom: 15px; color: #1e293b;">📋 Atendentes Ativos</h4>
-          <table class="atendentes-table">
-            <thead>
-              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Acesso</th></tr>
-            </thead>
-            <tbody>
-      `;
-      
-      ativos.forEach(a => {
-        const adminBadge = a.isAdmin ? '<span class="admin-badge">Admin</span>' : '';
-        html += `
-          <tr data-id="${a.id}">
-            <td><strong>${escapeHtml(a.nome)}</strong> ${adminBadge}</td>
-            <td>${escapeHtml(a.email)}</td>
-            <td>${escapeHtml(a.login || '')}</td>
-            <td>${a.isAdmin ? '<span style="color:#fc5404; font-weight:600;">Dashboard Avançado</span>' : '<span style="color:#3498db;">Pesquisa de Orçamentos</span>'}</td>
-          </tr>
-        `;
-      });
-      
-      if (ocultos.length > 0) {
-        html += `
-            </tbody>
-          </table>
-          
-          <h4 style="margin: 25px 0 15px 0; color: #1e293b;">🔒 Atendentes Ocultos</h4>
-          <table class="atendentes-table">
-            <thead>
-              <tr><th>Nome</th><th>E-mail</th><th>Login</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-        `;
-        
-        ocultos.forEach(a => {
-          html += `
-            <tr data-id="${a.id}">
-              <td><strong>${escapeHtml(a.nome)}</strong></td>
-              <td>${escapeHtml(a.email)}</td>
-              <td>${escapeHtml(a.login || '')}</td>
-              <td><span class="status-oculto">● Oculto</span></td>
-            </tr>
-          `;
-        });
-      }
-      
-      html += `
-            </tbody>
-          </table>
-        </div>
-      `;
-      
-      container.innerHTML = html;
-    }
-    
-    // Dashboard Admin
-    window.renderizarDashboardAdmin = async function() {
+    window.renderizarDashboardAdmin = function() {
       let atendenteAtual = atendenteSelect?.value;
       if (!atendenteAtual || atendenteAtual === '') {
         const usuarioSalvo = localStorage.getItem('usuarioLogado');
@@ -1819,7 +2164,6 @@ ${dataAtual}
           } catch(e) {}
         }
       }
-      
       if (!isAtendenteAdmin(atendenteAtual)) {
         alert('⚠️ Seu acesso de administrador foi removido. O dashboard será fechado.');
         const modal = document.querySelector('.modal-overlay');
@@ -2069,102 +2413,6 @@ ${dataAtual}
       }
     }
     
-    function createSuggestionsDropdown(inputId, getSuggestionsFn, onSelectFn) {
-      const input = document.getElementById(inputId);
-      if (!input) return;
-      
-      const wrapper = input.parentElement;
-      let dropdown = wrapper.querySelector('.suggestions-dropdown');
-      if (!dropdown) {
-        dropdown = document.createElement('div');
-        dropdown.className = 'suggestions-dropdown';
-        wrapper.appendChild(dropdown);
-      }
-      
-      input.addEventListener('input', function() {
-        const value = this.value.toLowerCase();
-        if (value.length === 0 || !getSuggestionsFn) {
-          dropdown.classList.remove('show');
-          return;
-        }
-        
-        const suggestions = getSuggestionsFn(value);
-        if (suggestions.length === 0) {
-          dropdown.classList.remove('show');
-          return;
-        }
-        
-        dropdown.innerHTML = suggestions.map(s => `<div class="suggestion-item" data-value="${escapeHtml(s)}">${escapeHtml(s)}</div>`).join('');
-        dropdown.classList.add('show');
-        
-        dropdown.querySelectorAll('.suggestion-item').forEach(item => {
-          item.addEventListener('click', function() {
-            input.value = this.dataset.value;
-            dropdown.classList.remove('show');
-            if (onSelectFn) onSelectFn(this.dataset.value);
-          });
-        });
-      });
-      
-      document.addEventListener('click', function(e) {
-        if (!wrapper.contains(e.target)) {
-          dropdown.classList.remove('show');
-        }
-      });
-    }
-    
-    window.deletarOrcamento = async function(id, nomeCliente) {
-      if (confirm(`⚠️ Confirmar exclusão do orçamento de "${nomeCliente}"?\n\nID: ${id}\n\nEsta ação não pode ser desfeita.`)) {
-        showLoading();
-        const sucesso = await deletarOrcamentoDoSupabase(id);
-        hideLoading();
-        if (sucesso) {
-          alert(`✅ Orçamento de "${nomeCliente}" excluído com sucesso!`);
-          await carregarHistoricoDoSupabase();
-          
-          if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#dashboardContent')) {
-            if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
-          } else if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#pesquisaContent')) {
-            renderizarPesquisaOrcamentos();
-          } else {
-            if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
-          }
-        } else {
-          alert(`❌ Erro ao excluir o orçamento. Tente novamente.`);
-        }
-      }
-    };
-    
-    window.marcarComoVendaRealizada = async function(id, nomeCliente) {
-      const index = historicoOrcamentosGlobal.findIndex(item => item.id === id);
-      if (index !== -1 && historicoOrcamentosGlobal[index].status !== 'fechado') {
-        const orcamentoData = historicoOrcamentosGlobal[index];
-        orcamentoData.status = 'fechado';
-        orcamentoData.justificativa = 'Convertido para venda via dashboard';
-        const atualizado = await salvarComFallback(orcamentoData);
-        if(atualizado) {
-          alert(`✅ Orçamento de ${nomeCliente} marcado como VENDA REALIZADA!`);
-          await carregarHistoricoDoSupabase();
-          if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#dashboardContent')) {
-            if (window.renderizarDashboardAdmin) window.renderizarDashboardAdmin();
-          } else if (document.querySelector('.modal-overlay') && document.querySelector('.modal-overlay').querySelector('#pesquisaContent')) {
-            renderizarPesquisaOrcamentos();
-          }
-        }
-      } else if (index !== -1 && historicoOrcamentosGlobal[index].status === 'fechado') {
-        alert(`ℹ️ Este orçamento já está marcado como VENDA REALIZADA.`);
-      } else {
-        alert(`❌ Orçamento não encontrado.`);
-      }
-    };
-    
-    window.editarOrcamento = function(orcamento) {
-      const adminModal = document.querySelector('.modal-overlay');
-      if (adminModal) adminModal.remove();
-      carregarOrcamentoParaEdicao(orcamento);
-    };
-    
-    // Botão ADMIN
     document.getElementById('adminAccessBtn').addEventListener('click', async () => {
       let atendenteAtual = atendenteSelect?.value;
       
@@ -2393,7 +2641,6 @@ ${dataAtual}
       adminModal.querySelector('#closeAdminBtn').onclick = () => adminModal.remove();
     });
     
-    // Botão PESQUISA
     document.getElementById('pesquisaAccessBtn').addEventListener('click', async () => {
       let atendenteAtual = atendenteSelect?.value;
       
