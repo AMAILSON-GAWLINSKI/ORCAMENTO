@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Adicionando Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * {
       margin: 0;
@@ -139,6 +141,12 @@
       box-shadow: 0 8px 20px rgba(252, 84, 4, 0.3);
     }
 
+    .btn-login:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     .alert-error {
       background: #fee2e2;
       border-left: 4px solid #e74c3c;
@@ -155,6 +163,20 @@
 
     .alert-error i {
       font-size: 1.2rem;
+    }
+
+    .alert-info {
+      background: #e0f2fe;
+      border-left: 4px solid #0284c7;
+      padding: 12px 16px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.85rem;
+      color: #0369a1;
+      font-weight: 500;
     }
 
     .user-session {
@@ -266,6 +288,20 @@
     .shake-animation {
       animation: shake 0.3s ease-in-out;
     }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -296,6 +332,11 @@
       <div id="errorMessage" style="display: none;" class="alert-error">
         <i class="fas fa-exclamation-triangle"></i>
         <span id="errorText">Usuário ou senha incorretos!</span>
+      </div>
+
+      <div id="infoMessage" style="display: none;" class="alert-info">
+        <i class="fas fa-info-circle"></i>
+        <span id="infoText">Conectando ao servidor...</span>
       </div>
 
       <div class="input-group">
@@ -332,6 +373,29 @@
 </div>
 
 <script>
+  // ==================== CONFIGURAÇÃO DO SUPABASE ====================
+  // Substitua pelos seus valores do Supabase
+  const SUPABASE_URL = 'https://seu-projeto.supabase.co';  // ALTERE AQUI
+  const SUPABASE_ANON_KEY = 'sua-anon-key-aqui';          // ALTERE AQUI
+
+  let supabaseClient = null;
+
+  // Inicializar Supabase
+  function initSupabase() {
+    if (typeof supabase !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== 'https://seu-projeto.supabase.co') {
+      try {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('Supabase inicializado com sucesso');
+        return true;
+      } catch(e) {
+        console.error('Erro ao inicializar Supabase:', e);
+        return false;
+      }
+    }
+    console.warn('Supabase não configurado, usando apenas fallback local');
+    return false;
+  }
+
   // ==================== ATENDENTES PADRÃO ====================
   const DEFAULT_ATENDENTES = [
     { id: 1, nome: "Jaúna Constante", login: "jauna", senha: "176320", email: "jauna@oticagraudivino.com", ativo: true, criado_em: new Date().toISOString() },
@@ -370,9 +434,9 @@
     document.getElementById('syncStatus').innerHTML = '<i class="fas fa-info-circle"></i> Configuração inicial carregada';
   }
 
-  // Função para validar login
+  // Função para validar login (fallback local)
   function validarLogin(login, senha) {
-    console.log('Tentando login:', login);
+    console.log('Tentando login local:', login);
     console.log('Atendentes disponíveis:', atendentes.map(a => ({ login: a.login, nome: a.nome, ativo: a.ativo })));
     
     const userFound = atendentes.find(atendente => 
@@ -383,16 +447,29 @@
     );
     
     if (userFound) {
-      console.log('Usuário encontrado:', userFound.nome);
+      console.log('Usuário encontrado localmente:', userFound.nome);
       return {
         nomeExibicao: userFound.nome,
         login: userFound.login,
         isAdmin: userFound.nome === 'Jaúna Constante' || userFound.nome === 'Jaciara Constante',
-        id: userFound.id
+        id: userFound.id,
+        email: userFound.email
       };
     }
-    console.log('Usuário não encontrado ou credenciais inválidas');
+    console.log('Usuário não encontrado localmente');
     return null;
+  }
+
+  // Função para mostrar mensagem de informação
+  function showInfo(message) {
+    const infoDiv = document.getElementById('infoMessage');
+    const infoText = document.getElementById('infoText');
+    infoText.textContent = message;
+    infoDiv.style.display = 'flex';
+    
+    setTimeout(() => {
+      if (infoDiv) infoDiv.style.display = 'none';
+    }, 4000);
   }
 
   function showError(message) {
@@ -415,6 +492,19 @@
   function clearError() {
     const errorDiv = document.getElementById('errorMessage');
     if (errorDiv) errorDiv.style.display = 'none';
+    const infoDiv = document.getElementById('infoMessage');
+    if (infoDiv) infoDiv.style.display = 'none';
+  }
+
+  function setLoading(loading) {
+    const loginBtn = document.getElementById('loginBtn');
+    if (loading) {
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<span class="spinner"></span> Autenticando...';
+    } else {
+      loginBtn.disabled = false;
+      loginBtn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Entrar no Sistema';
+    }
   }
 
   function removeContinueButton() {
@@ -493,6 +583,11 @@
   }
 
   function logout() {
+    // Se estiver logado no Supabase, fazer logout também
+    if (supabaseClient) {
+      supabaseClient.auth.signOut().catch(console.error);
+    }
+    
     localStorage.removeItem('usuarioLogado');
     sessionStorage.removeItem('auth');
     localStorage.removeItem('orcamentosTemp');
@@ -517,7 +612,8 @@
     }, 500);
   }
 
-  function handleLogin() {
+  // ==================== FUNÇÃO DE LOGIN MODIFICADA COM SUPABASE ====================
+  async function handleLogin() {
     const loginInput = document.getElementById('loginUser');
     const passwordInput = document.getElementById('loginPassword');
     
@@ -529,27 +625,103 @@
       return;
     }
     
-    const user = validarLogin(login, password);
+    setLoading(true);
+    clearError();
     
-    if (!user) {
+    let authSuccess = false;
+    let userData = null;
+    
+    // Verificar se Supabase está configurado
+    const supabaseConfigured = supabaseClient !== null && 
+                               SUPABASE_URL !== 'https://seu-projeto.supabase.co' && 
+                               SUPABASE_ANON_KEY !== 'sua-anon-key-aqui';
+    
+    if (supabaseConfigured) {
+      try {
+        showInfo('Conectando ao servidor...');
+        
+        // Tentar autenticar no Supabase
+        const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
+          email: `${login}@oticagraudivino.com`,
+          password: password
+        });
+        
+        if (authError) {
+          console.log('Falha autenticação Supabase:', authError.message);
+          showInfo('Tentando autenticação local...');
+        } else {
+          // Autenticado com sucesso no Supabase
+          console.log('Autenticado no Supabase:', authData.user.email);
+          
+          // Buscar dados do atendente na tabela
+          const { data: atendenteData, error: atendenteError } = await supabaseClient
+            .from('atendentes')
+            .select('*')
+            .eq('email', authData.user.email)
+            .single();
+          
+          if (atendenteError) {
+            console.error('Erro ao buscar dados do atendente:', atendenteError);
+            showInfo('Usuário autenticado, mas dados não encontrados. Usando fallback.');
+          } else if (atendenteData) {
+            userData = {
+              nomeExibicao: atendenteData.nome,
+              login: atendenteData.login,
+              isAdmin: atendenteData.is_admin || false,
+              id: atendenteData.id,
+              email: atendenteData.email
+            };
+            authSuccess = true;
+          }
+        }
+      } catch (err) {
+        console.error('Erro na autenticação Supabase:', err);
+      }
+    }
+    
+    // Fallback: se Supabase falhou ou não está configurado, tentar autenticação local
+    if (!authSuccess) {
+      console.log('Usando fallback de autenticação local');
+      const localUser = validarLogin(login, password);
+      
+      if (localUser) {
+        userData = localUser;
+        authSuccess = true;
+      }
+    }
+    
+    setLoading(false);
+    
+    if (!authSuccess || !userData) {
       showError('❌ Login ou senha incorretos! Tente novamente.');
-      passwordInput.value = '';
-      passwordInput.focus();
+      const passInput = document.getElementById('loginPassword');
+      if (passInput) passInput.value = '';
+      passInput.focus();
       return;
     }
     
+    // Salvar sessão
     localStorage.setItem('usuarioLogado', JSON.stringify({
-      nome: user.nomeExibicao,
-      login: user.login,
-      isAdmin: user.isAdmin,
-      loginTimestamp: new Date().toISOString()
+      nome: userData.nomeExibicao,
+      login: userData.login,
+      isAdmin: userData.isAdmin,
+      loginTimestamp: new Date().toISOString(),
+      supabaseAuth: supabaseConfigured && authSuccess && !validarLogin(login, password)
     }));
     sessionStorage.setItem('auth', 'true');
     
-    updateUIBasedOnSession();
-    
     // Redirecionar diretamente para o orcamento.html
     window.location.href = 'orcamento.html';
+  }
+
+  // Verificar sessão ativa do Supabase ao carregar
+  async function checkSupabaseSession() {
+    if (supabaseClient && SUPABASE_URL !== 'https://seu-projeto.supabase.co') {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) {
+        console.log('Sessão Supabase ativa:', session.user.email);
+      }
+    }
   }
 
   // Escutar mudanças no localStorage
@@ -575,9 +747,21 @@
 
   // Inicialização
   function init() {
+    initSupabase();
     carregarAtendentes();
     escutarMudancasAtendentes();
     updateUIBasedOnSession();
+    checkSupabaseSession();
+    
+    // Verificar configuração do Supabase
+    if (SUPABASE_URL === 'https://ywzjyoqqnweinrwbbnza.supabase.co/rest/v1/' || SUPABASE_ANON_KEY === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODA5ODcsImV4cCI6MjA5MjQ1Njk4N30.6Rf26bE_yeE2NwJgggyGa-GrgM4bpMgaTvwQ_QiyPs0') {
+      console.warn('⚠️ Supabase não configurado. Configure SUPABASE_URL e SUPABASE_ANON_KEY.');
+      const statusDiv = document.getElementById('syncStatus');
+      if (statusDiv) {
+        statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Modo offline - Supabase não configurado';
+        statusDiv.style.color = '#e67e22';
+      }
+    }
     
     const logoImg = document.querySelector('.logo-image');
     if (logoImg) {
