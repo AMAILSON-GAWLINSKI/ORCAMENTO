@@ -430,7 +430,9 @@
     // ========== SUPABASE CONFIG COM SERVICE KEY (ACESSO TOTAL) ==========
     const SUPABASE_URL = 'https://ywzjyoqqnweinrwbbnza.supabase.co';
     const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Njg4MDk4NywiZXhwIjoyMDkyNDU2OTg3fQ.rPdvH1TskJDMecMFtXakop8JR9AaRkT5zsn3KIdY7MY';
-    
+      // Cliente anônimo para autenticação (usado para signIn)
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODA5ODcsImV4cCI6MjA5MjQ1Njk4N30.6Rf26bE_yeE2NwJgggyGa-GrgM4bpMgaTvwQ_QiyPs0';
+  
     // Usando a chave de serviço para bypass RLS e garantir sincronização total
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
     
