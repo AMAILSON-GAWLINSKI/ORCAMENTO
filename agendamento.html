@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Agendamento · Ótica Grau Divino</title>
+  
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/AMAILSON-GAWLINSKI/ORCAMENTO/refs/heads/main/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="https://raw.githubusercontent.com/AMAILSON-GAWLINSKI/ORCAMENTO/refs/heads/main/favicon.svg" />
+  <link rel="shortcut icon" href="https://raw.githubusercontent.com/AMAILSON-GAWLINSKI/ORCAMENTO/refs/heads/main/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/AMAILSON-GAWLINSKI/ORCAMENTO/refs/heads/main/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Agendamento" />
+  <link rel="manifest" href="https://raw.githubusercontent.com/AMAILSON-GAWLINSKI/ORCAMENTO/refs/heads/main/site.webmanifest" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f6fb;
+      padding: 16px 12px 32px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      color: #1e1f2a;
+    }
+    .app-container { max-width: 1100px; width: 100%; margin: 0 auto; }
+    .stepper {
+      display: flex; justify-content: space-between; margin-bottom: 24px;
+      background: white; padding: 16px 12px; border-radius: 40px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.02); border: 1px solid #e9ecf3;
+    }
+    .step-item {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      flex: 1; opacity: 0.5; transition: opacity 0.2s; cursor: pointer;
+    }
+    .step-item.active { opacity: 1; }
+    .step-circle {
+      width: 36px; height: 36px; border-radius: 36px; background: #e4e7f0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: #5f647e;
+    }
+    .step-item.active .step-circle { background: #fc5404; color: white; }
+    .step-label { font-size: 0.75rem; font-weight: 600; color: #2f3547; }
+    .module-card {
+      background: #ffffff; border-radius: 28px; padding: 22px 20px;
+      margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+      border: 1px solid #f0f2f7; display: none;
+    }
+    .module-card.active-step { display: block; }
+    .module-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+      border-bottom: 2px solid #edeef3; padding-bottom: 12px;
+    }
+    .module-header i { font-size: 1.6rem; color: #fc5404; background: #fef3e8; padding: 8px; border-radius: 16px; }
+    .module-header h2 { font-size: 1.5rem; font-weight: 600; color: #1e1f2a; }
+    .input-group { margin-bottom: 18px; }
+    label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; color: #2f3547; }
+    input, select, textarea {
+      width: 100%; padding: 14px 16px; font-size: 1rem; font-family: 'Inter', sans-serif;
+      border: 1.5px solid #e2e6ee; border-radius: 20px; background: #fafbfc;
+      transition: all 0.15s; outline: none; color: #1e1f2a; font-weight: 500;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #fc5404; background: white; box-shadow: 0 0 0 3px rgba(252,84,4,0.1); }
+    .required-error { border-color: #e74c3c !important; background: #fff5f5 !important; }
+    .double-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .triple-col { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+    
+    .radio-card-group {
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .radio-card {
+      flex: 1;
+      background: #f8fafc;
+      border: 2px solid #e2e6ee;
+      border-radius: 20px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-weight: 600;
+      color: #334155;
+    }
+    .radio-card i { font-size: 1.3rem; }
+    .radio-card.selected {
+      background: #fef3e8;
+      border-color: #fc5404;
+      color: #fc5404;
+    }
+    .radio-card.selected i { color: #fc5404; }
+    .radio-card input { display: none; }
+    
+    .custom-date-wrapper { position: relative; width: 100%; }
+    .date-input-group { display: flex; gap: 10px; align-items: center; }
+    .date-input-group input { flex: 1; cursor: pointer; }
+    .calendar-panel {
+      position: absolute; top: 70px; left: 0; z-index: 200;
+      background: white; border-radius: 28px; box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+      width: 100%; max-width: 340px; padding: 16px; border: 1px solid #eef2f8;
+    }
+    .calendar-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px; font-weight: 700;
+    }
+    .calendar-header button {
+      background: none; border: none; font-size: 1.4rem; cursor: pointer;
+      width: 32px; height: 32px; border-radius: 40px; color: #fc5404;
+    }
+    .calendar-header button:hover { background: #fef3e8; }
+    .calendar-weekdays {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      text-align: center; margin-bottom: 10px; font-weight: 600;
+      font-size: 0.75rem; color: #4b5565;
+    }
+    .calendar-days {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+    }
+    .calendar-day {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 500; border-radius: 40px;
+      cursor: pointer; background: #ffffff;
+    }
+    .calendar-day.other-month { color: #b9c1d0; background: #fafafc; cursor: default; }
+    .calendar-day.disabled-date {
+      background: #fff0f0; color: #e34d4d; text-decoration: line-through;
+      cursor: not-allowed;
+    }
+    .calendar-day.available-date { background: #ffffff; color: #1e2a3a; }
+    .calendar-day.available-date:hover { background: #fc5404; color: white; }
+    .calendar-day.selected { background: #fc5404; color: white; font-weight: bold; }
+    .custom-date-display {
+      font-size: 0.7rem; margin-top: 6px; color: #475569;
+      display: flex; gap: 6px; align-items: center;
+    }
+    input[type="time"] { cursor: pointer; }
+    
+    .summary-container {
+      background: #ffffff;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+    }
+    .summary-hero {
+      background: linear-gradient(135deg, #fc5404 0%, #e64800 100%);
+      padding: 24px 24px 20px 24px;
+      color: white;
+    }
+    .summary-hero h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .summary-hero h1 i { background: rgba(255,255,255,0.2); padding: 8px; border-radius: 60px; }
+    .datetime-info {
+      font-size: 0.8rem;
+      opacity: 0.9;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.15);
+      padding: 5px 12px;
+      border-radius: 40px;
+      margin-top: 8px;
+    }
+    .patient-badge {
+      background: rgba(0,0,0,0.1);
+      backdrop-filter: blur(4px);
+      border-radius: 60px;
+      padding: 6px 16px 6px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      font-weight: 600;
+    }
+    .sync-badge {
+      background: #e6f7ec;
+      padding: 4px 10px;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      color: #2e7d32;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+    }
+    .summary-grid-modern { padding: 20px 24px; background: #ffffff; }
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      padding: 16px 0;
+      border-bottom: 1px solid #f0f2f8;
+      gap: 16px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-icon {
+      width: 44px;
+      height: 44px;
+      background: #fef3e8;
+      border-radius: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fc5404;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .info-content { flex: 1; }
+    .info-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      color: #6b7280;
+      margin-bottom: 6px;
+    }
+    .info-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+      word-break: break-word;
+    }
+    .glasses-tag {
+      background: #fff7ed;
+      color: #fc5404;
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .total-box {
+      background: #fefbf7;
+      border-radius: 24px;
+      padding: 16px 24px;
+      margin: 0 24px 24px 24px;
+      border: 1px solid #fae6d8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .id-code {
+      font-family: monospace;
+      background: #eef2ff;
+      padding: 6px 12px;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 12px 24px 24px 24px;
+    }
+    .btn {
+      padding: 14px 24px;
+      border-radius: 60px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      flex: 1;
+      background: white;
+      border: 1.5px solid #e2e6ee;
+      font-size: 0.9rem;
+    }
+    .btn-primary { background: #fc5404; border-color: #fc5404; color: white; }
+    .btn-success { background: #25d366; border-color: #25d366; color: white; }
+    .btn-warning { background: #fc5404; border-color: #fc5404; color: white; }
+    .nav-buttons { display: flex; gap: 12px; margin-top: 28px; }
+    .historico-btn {
+      position: fixed; bottom: 20px; right: 20px;
+      background: #2c3e50; color: white; border: none; border-radius: 50px;
+      padding: 12px 20px; cursor: pointer; font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 99;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+      z-index: 1000; backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      background: white; border-radius: 32px; padding: 24px;
+      max-width: 1000px; width: 95%; max-height: 85vh; overflow-y: auto;
+    }
+    .history-header {
+      display: flex; flex-wrap: wrap; justify-content: space-between;
+      gap: 16px; margin-bottom: 24px; border-bottom: 2px solid #f0f2f7; padding-bottom: 16px;
+    }
+    .history-search {
+      display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+    }
+    .history-search input { padding: 10px 14px; border-radius: 40px; width: 220px; }
+    .history-stats {
+      background: #fef3e8; padding: 6px 14px; border-radius: 60px;
+      color: #fc5404; font-weight: 600; font-size: 0.85rem;
+    }
+    .history-grid { display: flex; flex-direction: column; gap: 14px; margin: 20px 0; }
+    .history-card {
+      background: #fefefe; border: 1px solid #eef0f5; border-radius: 24px;
+      padding: 18px; transition: 0.2s;
+    }
+    .history-card:hover { background: #fef9f5; border-color: #fc5404; }
+    .history-card-header {
+      display: flex; justify-content: space-between; flex-wrap: wrap;
+      gap: 12px; margin-bottom: 12px;
+    }
+    .history-patient { font-weight: 800; font-size: 1.2rem; }
+    .history-date-badge {
+      background: #eef2ff; padding: 4px 12px; border-radius: 40px;
+      font-size: 0.75rem; font-weight: 600; color: #1e40af;
+    }
+    .history-details {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(210px,1fr));
+      gap: 10px; margin: 12px 0; font-size: 0.85rem;
+    }
+    .history-detail-item i { width: 20px; color: #fc5404; }
+    .history-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 12px; }
+    .btn-sm { padding: 8px 16px; font-size: 0.8rem; flex: none; }
+    
+    @media print {
+      body { background: white; padding: 0; }
+      .stepper, .nav-buttons, .action-buttons, .historico-btn, .btn, .module-header, .calendar-panel { display: none !important; }
+      .module-card { display: block !important; box-shadow: none; padding: 0; }
+      .module-card.active-step { display: block !important; }
+      .summary-hero { background: #fc5404 !important; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <div class="stepper">
+    <div class="step-item" data-step="1"><div class="step-circle">1</div><span class="step-label">Dados</span></div>
+    <div class="step-item" data-step="2"><div class="step-circle">2</div><span class="step-label">Agendamento</span></div>
+    <div class="step-item" data-step="3"><div class="step-circle">3</div><span class="step-label">Resumo</span></div>
+  </div>
+
+  <!-- ETAPA 1 -->
+  <div class="module-card" id="step1">
+    <div class="module-header"><i class="fas fa-user"></i><h2>Dados Pessoais</h2></div>
+    <div class="input-group"><label>Nome *</label><input type="text" id="pacienteNome" placeholder="Nome completo"></div>
+    <div class="double-col">
+      <div class="input-group"><label>Idade</label><input type="text" id="pacienteIdade" placeholder="anos"></div>
+      <div class="input-group"><label>Telefone (WhatsApp) *</label><input type="tel" id="pacienteTelefone" placeholder="(11) 91234-5678" maxlength="15"></div>
+    </div>
+    <div class="triple-col">
+      <div class="input-group"><label>📍 Endereço</label><input type="text" id="pacienteEndereco" placeholder="Rua, número, bairro"></div>
+      <div class="input-group"><label>🏙️ Cidade</label><input type="text" id="pacienteCidade" placeholder="Cidade - UF"></div>
+    </div>
+    <div class="input-group"><label>📌 Queixa principal</label><textarea id="queixaPrincipal" rows="2" placeholder="Ex: Dificuldade para enxergar de longe..."></textarea></div>
+    <div class="nav-buttons"><button class="btn btn-primary" id="nextToStep2"><i class="fas fa-calendar-check"></i> Agendar consulta</button></div>
+  </div>
+
+  <!-- ETAPA 2 -->
+  <div class="module-card" id="step2">
+    <div class="module-header"><i class="fas fa-calendar-alt"></i><h2>Agendamento</h2></div>
+    <div class="input-group"><label>Local da consulta *</label><input type="text" id="localConsulta" value="Ótica Grau Divino"></div>
+    <div class="double-col">
+      <div class="input-group">
+        <label>📅 Data da consulta *</label>
+        <div class="custom-date-wrapper">
+          <div class="date-input-group">
+            <input type="text" id="dataDisplayFake" placeholder="Selecione uma data" readonly style="cursor:pointer;">
+          </div>
+          <input type="hidden" id="dataConsulta" value="">
+          <div id="calendarPanel" class="calendar-panel" style="display: none;"></div>
+          <div class="custom-date-display"><i class="fas fa-info-circle"></i> Dias disponíveis (inclui hoje)</div>
+        </div>
+      </div>
+      <div class="input-group">
+        <label>⏰ Hora *</label>
+        <input type="time" id="horaConsulta" step="3600" min="08:00" max="19:00">
+        <div class="custom-date-display"><i class="fas fa-clock"></i> 08:00 às 19:00</div>
+      </div>
+    </div>
+    <div class="input-group">
+      <label>👓 Uso de óculos?</label>
+      <div class="radio-card-group" id="radioOculosGroup">
+        <div class="radio-card" data-value="Sim"><i class=""></i> Sim<input type="radio" name="precisaOculos" value="Sim"></div>
+        <div class="radio-card" data-value="Não"><i class=""></i> Não<input type="radio" name="precisaOculos" value="Não" checked></div>
+      </div>
+    </div>
+    <div class="input-group"><label>Observações</label><textarea id="observacoesAgendamento" rows="3" placeholder="Informações adicionais..."></textarea></div>
+    <div class="nav-buttons">
+      <button class="btn" id="backToStep1"><i class="fas fa-arrow-left"></i> Voltar</button>
+      <button class="btn btn-primary" id="nextToStep3"><i class="fas fa-envelope"></i> Continuar</button>
+    </div>
+  </div>
+
+  <!-- ETAPA 3 -->
+  <div class="module-card" id="step3">
+    <div class="summary-container">
+      <div class="summary-hero">
+        <h1><i class="fas fa-calendar-check"></i> Resumo do Agendamento</h1>
+        <div class="datetime-info"><i class="far fa-calendar-alt"></i> <span id="currentDateTime"></span></div>
+        <div class="patient-badge"><i class="fas fa-user-circle"></i> <span id="displayPacienteNome">—</span>
+          <span id="syncStatusBadge" class="sync-badge"><i class="fas fa-cloud-upload-alt"></i> Sincronizado</span>
+        </div>
+      </div>
+      <div class="summary-grid-modern" id="resumoModernoContainer"></div>
+      <div class="total-box"><div class="label"><i class="fas fa-qrcode"></i> ID do protocolo</div><div class="id-code"><strong id="uniqueTesteId">---</strong></div></div>
+      <div class="action-buttons">
+        <button class="btn btn-primary" id="pdfBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+        <button class="btn btn-success" id="whatsBtn"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+        <button class="btn btn-warning" id="salvarTesteBtn"><i class="fas fa-save"></i> Salvar</button>
+        <button class="btn btn-outline" id="backToStep2Edit"><i class="fas fa-edit"></i> Editar</button>
+        <button class="btn btn-outline" id="novoTesteBtn"><i class="fas fa-plus-circle"></i> Novo</button>
+      </div>
+    </div>
+  </div>
+</div>
+<button class="historico-btn" id="historicoBtn"><i class="fas fa-history"></i> Histórico</button>
+
+<script>
+  (function() {
+    // SUPABASE
+    const SUPABASE_URL = 'https://ywzjyoqqnweinrwbbnza.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3emp5b3FxbndlaW5yd2JibnphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODA5ODcsImV4cCI6MjA5MjQ1Njk4N30.6Rf26bE_yeE2NwJgggyGa-GrgM4bpMgaTvwQ_QiyPs0';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // ELEMENTOS
+    const pacienteNome = document.getElementById('pacienteNome');
+    const pacienteIdade = document.getElementById('pacienteIdade');
+    const pacienteTelefone = document.getElementById('pacienteTelefone');
+    const pacienteEndereco = document.getElementById('pacienteEndereco');
+    const pacienteCidade = document.getElementById('pacienteCidade');
+    const queixaPrincipal = document.getElementById('queixaPrincipal');
+    const localConsulta = document.getElementById('localConsulta');
+    const dataHidden = document.getElementById('dataConsulta');
+    const displayFake = document.getElementById('dataDisplayFake');
+    const horaConsulta = document.getElementById('horaConsulta');
+    const observacoesAgendamento = document.getElementById('observacoesAgendamento');
+    const radioSim = document.querySelector('.radio-card[data-value="Sim"] input');
+    const radioNao = document.querySelector('.radio-card[data-value="Não"] input');
+    function getPrecisaOculos() { return document.querySelector('input[name="precisaOculos"]:checked')?.value || 'Não'; }
+    
+    let historicoAgendamentos = [];
+    let currentTesteId = 'AGENDA-' + Date.now() + '-' + Math.random().toString(36).substr(2,8).toUpperCase();
+    let savedStateHash = '';
+    
+    function salvarStorage() { localStorage.setItem('agendamentosConsulta_v2', JSON.stringify(historicoAgendamentos)); }
+    function carregarStorage() { 
+      const stored = localStorage.getItem('agendamentosConsulta_v2');
+      if(stored) historicoAgendamentos = JSON.parse(stored);
+      else historicoAgendamentos = [];
+    }
+    
+    // FERIADOS + DIAS
+    function getPascha(year) {
+      const a = year % 19, b = Math.floor(year / 100), c = year % 100;
+      const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+      const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+      const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+      const m = Math.floor((a + 11 * h + 22 * l) / 451);
+      const month = Math.floor((h + l - 7 * m + 114) / 31);
+      const day = ((h + l - 7 * m + 114) % 31) + 1;
+      return new Date(year, month-1, day);
+    }
+    function getMovableHolidays(year) {
+      const pascha = getPascha(year);
+      const carnival = new Date(pascha); carnival.setDate(pascha.getDate() - 47);
+      const goodFriday = new Date(pascha); goodFriday.setDate(pascha.getDate() - 2);
+      const corpusChristi = new Date(pascha); corpusChristi.setDate(pascha.getDate() + 60);
+      return {
+        [`${year}-${String(carnival.getMonth()+1).padStart(2,'0')}-${String(carnival.getDate()).padStart(2,'0')}`]: "Carnaval",
+        [`${year}-${String(goodFriday.getMonth()+1).padStart(2,'0')}-${String(goodFriday.getDate()).padStart(2,'0')}`]: "Sexta-Feira Santa",
+        [`${year}-${String(corpusChristi.getMonth()+1).padStart(2,'0')}-${String(corpusChristi.getDate()).padStart(2,'0')}`]: "Corpus Christi"
+      };
+    }
+    const feriadosFixos = [{ dia: 1, mes: 1 }, { dia: 21, mes: 4 }, { dia: 1, mes: 5 }, { dia: 7, mes: 9 }, { dia: 12, mes: 10 }, { dia: 2, mes: 11 }, { dia: 15, mes: 11 }, { dia: 25, mes: 12 }];
+    function isFeriado(dataStr) {
+      if (!dataStr) return false;
+      const [ano, mes, dia] = dataStr.split('-').map(Number);
+      if (feriadosFixos.some(f => f.dia === dia && f.mes === mes)) return true;
+      const moveis = getMovableHolidays(ano);
+      return moveis.hasOwnProperty(dataStr);
+    }
+    function isDataInvalida(dataStr) {
+      if (!dataStr) return true;
+      const hoje = new Date(); hoje.setHours(0,0,0,0);
+      const dataObj = new Date(dataStr);
+      if (dataObj < hoje) return true;
+      if (dataObj.getDay() === 0) return true;
+      if (isFeriado(dataStr)) return true;
+      return false;
+    }
+    // Permite hoje: ajuste para não bloquear hoje
+    function isDataDisponivel(dataStr) {
+      if (!dataStr) return false;
+      const hoje = new Date(); hoje.setHours(0,0,0,0);
+      const dataObj = new Date(dataStr);
+      if (dataObj < hoje) return false;
+      if (dataObj.getDay() === 0) return false;
+      if (isFeriado(dataStr)) return false;
+      return true;
+    }
+    
+    function formatDateBr(dateStr) { if(!dateStr) return ""; const [y,m,d]=dateStr.split('-'); return `${d}/${m}/${y}`; }
+    function formatDateToYMD(date) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
+    function updateDisplayFromHidden() { displayFake.value = dataHidden.value ? formatDateBr(dataHidden.value) : ""; }
+    
+    // CALENDÁRIO com hoje disponível
+    let currentCalendarYear = new Date().getFullYear(), currentCalendarMonth = new Date().getMonth(), calendarVisible=false, calendarPanel=document.getElementById('calendarPanel');
+    function renderCalendar() {
+      const firstDay = new Date(currentCalendarYear, currentCalendarMonth, 1);
+      const startWeekday = firstDay.getDay();
+      const daysInMonth = new Date(currentCalendarYear, currentCalendarMonth+1, 0).getDate();
+      const prevMonthDays = new Date(currentCalendarYear, currentCalendarMonth, 0).getDate();
+      let daysArray=[];
+      for(let i=0;i<startWeekday;i++) daysArray.push({date:prevMonthDays-startWeekday+i+1, type:'prev'});
+      for(let d=1;d<=daysInMonth;d++) daysArray.push({date:d, type:'current'});
+      let remaining=42-daysArray.length;
+      for(let i=1;i<=remaining;i++) daysArray.push({date:i, type:'next'});
+      let html=`<div class="calendar-header"><button id="prevMonthBtn"><i class="fas fa-chevron-left"></i></button><span>${firstDay.toLocaleString('pt-BR',{month:'long',year:'numeric'})}</span><button id="nextMonthBtn"><i class="fas fa-chevron-right"></i></button></div><div class="calendar-weekdays"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div><div class="calendar-days">`;
+      for(const day of daysArray){
+        let year=currentCalendarYear, month=currentCalendarMonth, dateNum=day.date;
+        if(day.type==='prev'){ month--; if(month<0){month=11;year--;} }
+        else if(day.type==='next'){ month++; if(month>11){month=0;year++;} }
+        const dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(dateNum).padStart(2,'0')}`;
+        const disabled = (day.type==='current' && !isDataDisponivel(dateStr));
+        let addClass="available-date", clickable=true;
+        if(day.type!=='current'){ addClass="other-month"; clickable=false; }
+        else if(disabled){ addClass="disabled-date"; clickable=false; }
+        if(dataHidden.value===dateStr && day.type==='current') addClass+=" selected";
+        const onclick=clickable ? `onclick="window.selectCustomDate('${dateStr}')"` : "";
+        html+=`<div class="calendar-day ${addClass}" ${onclick}>${dateNum}</div>`;
+      }
+      html+=`</div>`;
+      calendarPanel.innerHTML=html;
+      document.getElementById('prevMonthBtn')?.addEventListener('click',(e)=>{e.stopPropagation(); currentCalendarMonth--; if(currentCalendarMonth<0){currentCalendarMonth=11;currentCalendarYear--;} renderCalendar();});
+      document.getElementById('nextMonthBtn')?.addEventListener('click',(e)=>{e.stopPropagation(); currentCalendarMonth++; if(currentCalendarMonth>11){currentCalendarMonth=0;currentCalendarYear++;} renderCalendar();});
+    }
+    window.selectCustomDate = function(dateStr){
+      if(!isDataDisponivel(dateStr)){ alert("Data indisponível (domingo, feriado ou passado)."); return; }
+      dataHidden.value=dateStr; updateDisplayFromHidden(); closeCalendar();
+    };
+    function closeCalendar(){ calendarPanel.style.display='none'; calendarVisible=false; }
+    function initPicker(){ 
+      updateDisplayFromHidden();
+      displayFake.addEventListener('click',()=>{ if(calendarVisible)closeCalendar(); else{ if(dataHidden.value){ let [y,m]=dataHidden.value.split('-'); currentCalendarYear=parseInt(y); currentCalendarMonth=parseInt(m)-1; } renderCalendar(); calendarPanel.style.display='block'; calendarVisible=true; } });
+      document.addEventListener('click',(e)=>{ if(calendarVisible && !calendarPanel.contains(e.target) && e.target!==displayFake) closeCalendar(); });
+    }
+    
+    // HELPERS
+    function applyPhoneMask(phone) { let value = phone.replace(/\D/g, ''); if (value.length <= 10) value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3'); else value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3'); return value.substring(0, 15); }
+    pacienteTelefone.addEventListener('input', function(e) { let raw = e.target.value.replace(/\D/g, ''); if (raw.length > 11) raw = raw.slice(0,11); e.target.value = applyPhoneMask(raw); });
+    
+    function getDadosCompletos(){ 
+      return { 
+        id: currentTesteId, 
+        timestamp: Date.now(),
+        dataISO: new Date().toISOString(), 
+        paciente: { 
+          nome: pacienteNome.value.trim(), 
+          idade: pacienteIdade.value.trim(), 
+          telefone: pacienteTelefone.value.trim(), 
+          endereco: pacienteEndereco.value.trim(),
+          cidade: pacienteCidade.value.trim(),
+          queixa: queixaPrincipal.value.trim() 
+        }, 
+        agendamento: { 
+          local: localConsulta.value.trim(), 
+          data: dataHidden.value, 
+          hora: horaConsulta.value, 
+          precisaOculos: getPrecisaOculos(), 
+          observacoes: observacoesAgendamento.value.trim() 
+        } 
+      }; 
+    }
+    
+    // SUPABASE SYNC
+    async function syncAllFromSupabase() {
+      try {
+        const { data, error } = await supabaseClient.from('agendamentos').select('*').order('timestamp', { ascending: false });
+        if (error) throw error;
+        if (data) {
+          historicoAgendamentos = data.map(row => ({
+            id: row.id, timestamp: row.timestamp,
+            paciente: { nome: row.paciente_nome, idade: row.paciente_idade || '', telefone: row.paciente_telefone || '', endereco: row.paciente_endereco || '', cidade: row.paciente_cidade || '', queixa: row.queixa_principal || '' },
+            agendamento: { local: row.local_consulta, data: row.data_consulta, hora: row.hora_consulta, precisaOculos: row.precisa_oculos, observacoes: row.observacoes || '' }
+          }));
+          salvarStorage();
+        }
+      } catch (err) { console.warn(err); carregarStorage(); }
+    }
+    async function upsertToSupabase(dados) {
+      const row = { id: dados.id, paciente_nome: dados.paciente.nome, paciente_idade: dados.paciente.idade, paciente_telefone: dados.paciente.telefone, paciente_endereco: dados.paciente.endereco, paciente_cidade: dados.paciente.cidade, queixa_principal: dados.paciente.queixa, local_consulta: dados.agendamento.local, data_consulta: dados.agendamento.data, hora_consulta: dados.agendamento.hora, precisa_oculos: dados.agendamento.precisaOculos, observacoes: dados.agendamento.observacoes, timestamp: dados.timestamp };
+      const { error } = await supabaseClient.from('agendamentos').upsert(row, { onConflict: 'id' });
+      if (error) throw error;
+    }
+    async function deleteFromSupabase(id) { await supabaseClient.from('agendamentos').delete().eq('id', id); }
+    
+    async function salvarAgendamentoHistorico() {
+      const dados = getDadosCompletos();
+      if (!dados.paciente.nome) { alert('Preencha o nome'); return false; }
+      if (dados.paciente.telefone.replace(/\D/g,'').length < 10) { alert('Telefone inválido (mínimo 10 dígitos)'); return false; }
+      const idx = historicoAgendamentos.findIndex(t=>t.id===currentTesteId);
+      const novoObj = { ...dados, timestamp: Date.now() };
+      if (idx !== -1) historicoAgendamentos[idx] = novoObj;
+      else historicoAgendamentos.unshift(novoObj);
+      salvarStorage();
+      try { 
+        await upsertToSupabase(novoObj); 
+        document.getElementById('syncStatusBadge').innerHTML = '<i class="fas fa-check-circle"></i> Supabase ✓';
+        setTimeout(() => { document.getElementById('syncStatusBadge').innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Sincronizado'; }, 2000);
+      } catch(e) { console.error(e); alert('Erro ao sincronizar com Supabase, mas salvo localmente.'); }
+      savedStateHash = JSON.stringify(dados);
+      alert('✅ Agendamento salvo com sucesso!');
+      return true;
+    }
+    
+    // RENDER RESUMO MODERNO
+    function renderResumoModerno() {
+      const d = getDadosCompletos();
+      document.getElementById('displayPacienteNome').innerHTML = `${escapeHtml(d.paciente.nome || 'Paciente')} ${d.paciente.idade ? `(${d.paciente.idade} anos)` : ''}`;
+      const container = document.getElementById('resumoModernoContainer');
+      const dataFormatada = d.agendamento.data ? formatDateBr(d.agendamento.data) : '—';
+      const precisaHtml = d.agendamento.precisaOculos === 'Sim' ? '<span class="glasses-tag"><i class="fas fa-glasses"></i> Sim, uso óculos</span>' : '<span class="glasses-tag" style="background:#eef2ff; color:#2563eb;"><i class="fas fa-eye"></i> Não uso óculos</span>';
+      const enderecoCompleto = [d.paciente.endereco, d.paciente.cidade].filter(Boolean).join(', ') || 'Não informado';
+      container.innerHTML = `
+        <div class="info-row"><div class="info-icon"><i class="fas fa-phone-alt"></i></div><div class="info-content"><div class="info-label">CONTATO</div><div class="info-value">${escapeHtml(d.paciente.telefone || 'Não informado')}</div></div></div>
+        <div class="info-row"><div class="info-icon"><i class="fas fa-map-marker-alt"></i></div><div class="info-content"><div class="info-label">ENDEREÇO</div><div class="info-value">${escapeHtml(enderecoCompleto)}</div></div></div>
+        <div class="info-row"><div class="info-icon"><i class="fas fa-stethoscope"></i></div><div class="info-content"><div class="info-label">QUEIXA</div><div class="info-value">${escapeHtml(d.paciente.queixa || 'Nenhuma')}</div></div></div>
+        <div class="info-row"><div class="info-icon"><i class="fas fa-building"></i></div><div class="info-content"><div class="info-label">LOCAL</div><div class="info-value">${escapeHtml(d.agendamento.local)}</div></div></div>
+        <div class="info-row"><div class="info-icon"><i class="fas fa-calendar-day"></i></div><div class="info-content"><div class="info-label">DATA E HORA</div><div class="info-value"><strong>${dataFormatada}</strong> às <strong>${escapeHtml(d.agendamento.hora || '—')}</strong></div></div></div>
+        <div class="info-row"><div class="info-icon"><i class="fas fa-glasses"></i></div><div class="info-content"><div class="info-label">USO DE ÓCULOS</div><div class="info-value">${precisaHtml}</div></div></div>
+        <div class="info-row"><div class="info-icon"><i class="fas fa-comment-dots"></i></div><div class="info-content"><div class="info-label">OBSERVAÇÕES</div><div class="info-value">${escapeHtml(d.agendamento.observacoes || 'Nenhuma')}</div></div></div>
+      `;
+      document.getElementById('uniqueTesteId').textContent = currentTesteId;
+      savedStateHash = JSON.stringify(d);
+    }
+    
+    // PDF BONITO
+    async function gerarPDF() {
+      const { jsPDF } = window.jspdf;
+      const d = getDadosCompletos();
+      const doc = new jsPDF();
+      // Header
+      doc.setFillColor(252, 84, 4);
+      doc.rect(0, 0, 210, 45, 'F');
+      doc.setTextColor(255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.text('Ótica Grau Divino', 20, 18);
+      doc.setFontSize(12);
+      doc.text('COMPROVANTE DE AGENDAMENTO', 20, 30);
+      doc.setFontSize(8);
+      doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 20, 40);
+      doc.setTextColor(0);
+      doc.setFontSize(10);
+      let y = 60;
+      doc.setFont('helvetica', 'bold');
+      doc.text('DADOS DO PACIENTE', 20, y); y += 8;
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Nome: ${d.paciente.nome}`, 20, y); y += 6;
+      doc.text(`Idade: ${d.paciente.idade || '—'}   Telefone: ${d.paciente.telefone}`, 20, y); y += 6;
+      doc.text(`Endereço: ${d.paciente.endereco || ''} ${d.paciente.cidade || ''}`, 20, y); y += 6;
+      doc.text(`Queixa: ${d.paciente.queixa || 'Não informada'}`, 20, y); y += 10;
+      doc.setFont('helvetica', 'bold');
+      doc.text('DETALHES DA CONSULTA', 20, y); y += 8;
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Local: ${d.agendamento.local}`, 20, y); y += 6;
+      doc.text(`Data: ${formatDateBr(d.agendamento.data)}  Hora: ${d.agendamento.hora}`, 20, y); y += 6;
+      doc.text(`Uso de óculos: ${d.agendamento.precisaOculos === 'Sim' ? 'Sim, utiliza óculos' : 'Não utiliza óculos'}`, 20, y); y += 6;
+      doc.text(`Observações: ${d.agendamento.observacoes || 'Nenhuma'}`, 20, y); y += 12;
+      doc.setDrawColor(252,84,4);
+      doc.line(20, y, 190, y); y+=6;
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(9);
+      doc.text(`Protocolo: ${currentTesteId}`, 20, y);
+      doc.save(`agendamento_${d.paciente.nome.replace(/\s/g,'_')}.pdf`);
+    }
+    
+    function enviarWhatsApp(){ const d=getDadosCompletos(); if(!d.paciente.telefone){alert('Telefone necessário');return;} let phone=d.paciente.telefone.replace(/\D/g,''); if(phone.length===10) phone='55'+phone; else if(phone.length===11) phone='55'+phone; const msg=`🏥 *AGENDAMENTO - Ótica Grau Divino*%0A%0A*Paciente:* ${encodeURIComponent(d.paciente.nome)}%0A*Telefone:* ${d.paciente.telefone}%0A*Data:* ${formatDateBr(d.agendamento.data)} ${d.agendamento.hora}%0A*Local:* ${encodeURIComponent(d.agendamento.local)}%0A*Óculos:* ${d.agendamento.precisaOculos === 'Sim' ? 'Sim, usa óculos' : 'Não usa óculos'}%0A*ID:* ${d.id}`; window.open(`https://wa.me/${phone}?text=${msg}`,'_blank'); }
+    
+    function resetarNovoAgendamento(confirmar=true){ if(confirmar && savedStateHash !== JSON.stringify(getDadosCompletos()) && !confirm('Alterações não salvas. Recomeçar?')) return; currentTesteId='AGENDA-'+Date.now()+'-'+Math.random().toString(36).substr(2,8).toUpperCase(); pacienteNome.value=''; pacienteIdade.value=''; pacienteTelefone.value=''; pacienteEndereco.value=''; pacienteCidade.value=''; queixaPrincipal.value=''; localConsulta.value='Ótica Grau Divino'; dataHidden.value=''; updateDisplayFromHidden(); horaConsulta.value=''; observacoesAgendamento.value=''; radioNao.checked=true; document.querySelectorAll('.radio-card').forEach(c=>c.classList.remove('selected')); document.querySelector('.radio-card[data-value="Não"]').classList.add('selected'); savedStateHash = JSON.stringify(getDadosCompletos()); goToStep(1); }
+    
+    // HISTÓRICO COMPLETO
+    async function excluirAgendamentoGlobal(id, modalRef) {
+      if (!confirm('Excluir permanentemente?')) return;
+      try { await deleteFromSupabase(id); historicoAgendamentos = historicoAgendamentos.filter(t => t.id !== id); salvarStorage(); if (currentTesteId === id && document.querySelector('.module-card.active-step') === document.getElementById('step3')) resetarNovoAgendamento(false); if (modalRef) renderHistoryList(modalRef.querySelector('#historyListContainer'), modalRef); else abrirHistorico(); } catch(e) { alert('Falha ao excluir'); }
+    }
+    function carregarAgendamentoParaEdicao(id, modalRef) {
+      const agend = historicoAgendamentos.find(t => t.id === id);
+      if (agend) {
+        currentTesteId = agend.id;
+        pacienteNome.value = agend.paciente.nome;
+        pacienteIdade.value = agend.paciente.idade;
+        pacienteTelefone.value = agend.paciente.telefone;
+        pacienteEndereco.value = agend.paciente.endereco||'';
+        pacienteCidade.value = agend.paciente.cidade||'';
+        queixaPrincipal.value = agend.paciente.queixa||'';
+        localConsulta.value = agend.agendamento.local;
+        dataHidden.value = agend.agendamento.data||''; updateDisplayFromHidden();
+        horaConsulta.value = agend.agendamento.hora||'';
+        observacoesAgendamento.value = agend.agendamento.observacoes||'';
+        if(agend.agendamento.precisaOculos === 'Sim') radioSim.checked = true; else radioNao.checked = true;
+        document.querySelectorAll('.radio-card').forEach(c=>c.classList.remove('selected'));
+        document.querySelector(`.radio-card[data-value="${agend.agendamento.precisaOculos}"]`).classList.add('selected');
+        goToStep(2);
+        if(modalRef) modalRef.remove();
+      }
+    }
+    function renderHistoryList(container, modalRef) {
+      const searchTerm = modalRef.querySelector('#historySearchInput')?.value.toLowerCase() || '';
+      const sortVal = modalRef.querySelector('#historySortSelect')?.value || 'date_desc';
+      let filtered = [...historicoAgendamentos];
+      if(searchTerm) filtered = filtered.filter(item => item.paciente.nome.toLowerCase().includes(searchTerm) || item.paciente.telefone.includes(searchTerm));
+      if(sortVal === 'date_desc') filtered.sort((a,b)=>b.timestamp - a.timestamp);
+      else if(sortVal === 'date_asc') filtered.sort((a,b)=>a.timestamp - b.timestamp);
+      modalRef.querySelector('#historyStats').innerText = `${filtered.length} registro(s)`;
+      if(filtered.length === 0) { container.innerHTML = '<div class="empty-history">Nenhum agendamento</div>'; return; }
+      container.innerHTML = filtered.map(item => {
+        const dataFormatada = item.agendamento.data ? formatDateBr(item.agendamento.data) : '---';
+        return `<div class="history-card"><div class="history-card-header"><div class="history-patient">${escapeHtml(item.paciente.nome)}</div><div class="history-date-badge"><i class="far fa-calendar"></i> ${dataFormatada} ${item.agendamento.hora || ''}</div></div><div class="history-details"><div class="history-detail-item"><i class="fas fa-phone"></i> ${escapeHtml(item.paciente.telefone)}</div><div class="history-detail-item"><i class="fas fa-glasses"></i> ${item.agendamento.precisaOculos === 'Sim' ? 'Usa óculos' : 'Não usa óculos'}</div></div><div class="history-actions"><button class="btn btn-sm edit-history-item" data-id="${item.id}"><i class="fas fa-edit"></i> Editar</button><button class="btn btn-sm delete-history-item" data-id="${item.id}" style="background:#fee2e2;color:#b91c1c;"><i class="fas fa-trash"></i> Excluir</button></div></div>`;
+      }).join('');
+      container.querySelectorAll('.edit-history-item').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); carregarAgendamentoParaEdicao(btn.dataset.id, modalRef); }));
+      container.querySelectorAll('.delete-history-item').forEach(btn => btn.addEventListener('click', async (e) => { e.stopPropagation(); await excluirAgendamentoGlobal(btn.dataset.id, modalRef); }));
+    }
+    async function abrirHistorico() { await syncAllFromSupabase(); const modalDiv = document.createElement('div'); modalDiv.className = 'modal-overlay'; modalDiv.innerHTML = `<div class="modal-content"><div class="history-header"><h2><i class="fas fa-archive"></i> Histórico</h2><div class="history-stats" id="historyStats">0</div></div><div class="history-search"><input type="text" id="historySearchInput" placeholder="🔍 Buscar..."><select id="historySortSelect"><option value="date_desc">Mais recentes</option><option value="date_asc">Mais antigos</option></select></div><div id="historyListContainer" class="history-grid"></div><div style="display:flex; justify-content:flex-end;"><button class="btn" id="closeHistoryModal">Fechar</button></div></div>`; document.body.appendChild(modalDiv); const container = modalDiv.querySelector('#historyListContainer'); const refresh = () => renderHistoryList(container, modalDiv); modalDiv.querySelector('#historySearchInput').addEventListener('input', refresh); modalDiv.querySelector('#historySortSelect').addEventListener('change', refresh); modalDiv.querySelector('#closeHistoryModal').onclick = () => modalDiv.remove(); refresh(); }
+    
+    function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    
+    // NAVEGAÇÃO
+    let currentStep=1;
+    const stepCards=[document.getElementById('step1'),document.getElementById('step2'),document.getElementById('step3')];
+    const stepItems=document.querySelectorAll('.step-item');
+    function goToStep(step){ if(step<1||step>3)return; currentStep=step; stepCards.forEach((c,i)=>c.classList.toggle('active-step',i+1===step)); stepItems.forEach((item,i)=>item.classList.toggle('active',i+1===step)); if(step===3) renderResumoModerno(); }
+    function validateStep1(){ let nomeOk=!!pacienteNome.value.trim(), telOk=!!pacienteTelefone.value.trim() && pacienteTelefone.value.replace(/\D/g,'').length >= 10; pacienteNome.classList.toggle('required-error',!nomeOk); pacienteTelefone.classList.toggle('required-error',!telOk); return nomeOk && telOk; }
+    function validateAgendamento(){ if(!localConsulta.value.trim()){alert('Local obrigatório');return false;} if(!dataHidden.value){alert('Selecione data');return false;} if(!horaConsulta.value){alert('Informe hora');return false;} const hora = horaConsulta.value; if(hora < "08:00" || hora > "19:00"){ alert("Horário 08:00 às 19:00"); return false; } return true; }
+    
+    document.getElementById('nextToStep2')?.addEventListener('click',()=>{ if(validateStep1()) goToStep(2); else alert('Nome e telefone (10 dígitos) obrigatórios.'); });
+    document.getElementById('backToStep1')?.addEventListener('click',()=>goToStep(1));
+    document.getElementById('nextToStep3')?.addEventListener('click',()=>{ if(validateAgendamento()) goToStep(3); });
+    document.getElementById('backToStep2Edit')?.addEventListener('click',()=>goToStep(2));
+    document.getElementById('salvarTesteBtn')?.addEventListener('click',salvarAgendamentoHistorico);
+    document.getElementById('pdfBtn')?.addEventListener('click',gerarPDF);
+    document.getElementById('whatsBtn')?.addEventListener('click',enviarWhatsApp);
+    document.getElementById('novoTesteBtn')?.addEventListener('click',()=>resetarNovoAgendamento(true));
+    document.getElementById('historicoBtn')?.addEventListener('click',abrirHistorico);
+    document.querySelectorAll('.radio-card').forEach(card=>{ const radio=card.querySelector('input'); card.addEventListener('click',()=>{ radio.checked=true; document.querySelectorAll('.radio-card').forEach(c=>c.classList.remove('selected')); card.classList.add('selected'); }); });
+    function updateDateTimeDisplay() { const el = document.getElementById('currentDateTime'); if(el) el.textContent = new Date().toLocaleString('pt-BR'); }
+    updateDateTimeDisplay(); setInterval(updateDateTimeDisplay, 1000);
+    initPicker(); 
+    syncAllFromSupabase().then(()=>{ savedStateHash = JSON.stringify(getDadosCompletos()); resetarNovoAgendamento(false); });
+  })();
+</script>
+</body>
+</html>
