@@ -451,9 +451,9 @@
     </div>
     <div class="triple-col">
       <div class="input-group"><label>Local do teste</label><input type="text" id="pacienteEndereco" placeholder="Sulmel, Farmacia"></div>
-      <div class="input-group"><label>🏙️ Cidade</label><input type="text" id="pacienteCidade" placeholder="Cidade - UF"></div>
+      <div class="input-group"><label>Cidade</label><input type="text" id="pacienteCidade" placeholder="Cidade - UF"></div>
     </div>
-    <div class="input-group"><label>📌 Queixa principal</label><textarea id="queixaPrincipal" rows="2" placeholder="Ex: Dificuldade para enxergar de longe..."></textarea></div>
+    <div class="input-group"><label>Queixa principal</label><textarea id="queixaPrincipal" rows="2" placeholder="Ex: Dificuldade para enxergar de longe..."></textarea></div>
     <div class="nav-buttons"><button class="btn btn-primary" id="nextToStep2"><i class="fas fa-calendar-check"></i> Agendar consulta</button></div>
   </div>
 
@@ -479,7 +479,7 @@
       </div>
     </div>
     <div class="input-group">
-      <label>👓 Uso de óculos?</label>
+      <label>Uso de óculos?</label>
       <div class="radio-card-group" id="radioOculosGroup">
         <div class="radio-card" data-value="Sim"><i class="fas fa-glasses"></i> Sim, usa óculos<input type="radio" name="precisaOculos" value="Sim"></div>
         <div class="radio-card" data-value="Não"><i class="fas fa-eye-low-vision"></i> Não usa óculos<input type="radio" name="precisaOculos" value="Não" checked></div>
@@ -1178,7 +1178,7 @@
       if(!d.paciente.telefone){alert('Telefone necessário');return;} 
       let phone = d.paciente.telefone.replace(/\D/g,''); 
       if(phone.length===10) phone='55'+phone; else if(phone.length===11) phone='55'+phone; 
-      const msg = `🏥 *AGENDAMENTO - Ótica Grau Divino*%0A%0A*Paciente:* ${encodeURIComponent(d.paciente.nome)}%0A*Telefone:* ${d.paciente.telefone}%0A*Data:* ${formatDateBr(d.agendamento.data)} ${d.agendamento.hora}%0A*Local do teste:* ${encodeURIComponent([d.paciente.endereco, d.paciente.cidade].filter(Boolean).join(', ') || 'Não informado')}%0A*Óculos:* ${d.agendamento.precisaOculos === 'Sim' ? 'Sim, usa óculos' : 'Não usa óculos'}%0A*ID:* ${d.id}`; 
+      const msg = `*AGENDAMENTO - Ótica Grau Divino*%0A%0A*Paciente:* ${encodeURIComponent(d.paciente.nome)}%0A*Telefone:* ${d.paciente.telefone}%0A*Data:* ${formatDateBr(d.agendamento.data)} ${d.agendamento.hora}%0A*Local do teste:* ${encodeURIComponent([d.paciente.endereco, d.paciente.cidade].filter(Boolean).join(', ') || 'Não informado')}%0A*Óculos:* ${d.agendamento.precisaOculos === 'Sim' ? 'Sim, usa óculos' : 'Não usa óculos'}%0A*ID:* ${d.id}`; 
       window.open(`https://wa.me/${phone}?text=${msg}`,'_blank'); 
     }
     
